@@ -1,0 +1,78 @@
+http://onlinelibrary.wiley.com/doi/10.1002/jae.2330/pdf
+http://onlinelibrary.wiley.com/doi/10.1002/jae.2340/pdf
+http://www.emeraldinsight.com/books.htm?issn=0731-9053&volume=32&chapterid=17103151&show=abstract
+
+
+Eichenbaum, M. & Evans, C. (1995). Some empirical evidence on the effects of
+shocks to monetary policy on exchange rates,Quarterly Journal of Economics
+110: 975–1009.
+
+Christiano, L. J., Eichenbaum, M. & Evans, C. (1996). The effects of monetary policy
+shocks: Evidence from the flow of funds, Review of Economics and Statistics
+78: 16–34.
+
+Gal??, J. (1992). How well does the IS-LM model fit postwar U.S. data?, Quarterly
+Journal of Economics107: 709–738.
+
+Pagan, A. (1995). Three econometric methodologies: An update,in L. Oxley,
+D. A. R. George, C. J. Roberts & S. Sayer (eds),Surveys in Econometrics,
+Blackwell, Oxford.
+
+
+Jacobson, T., Vredin, A. & Warne, A. (1997). Common trends and hysteresis in
+Scandinavian unemployment,European Economic Review41: 1781–1816.
+
+Br?uggemann, R. (2004). Model Reduction Methods for Vector Autoregressive Processes, Springer, Berlin.
+
+
+Breitung, J. (2001). A convenient representation for structural vector autoregressions,
+Empirical Economics26: 447–459.
+
+Uhlig, H. (1994). What are the effects of monetary policy on output? Results from an
+agnostic identification procedure, mimeo. Department of Economics, Humboldt
+University Berlin.
+
+Pesaran, M. H. & Shin, Y. (1996). Cointegration and speed of convergence to
+equilibrium,Journal of Econometrics71: 117–143.
+
+Lee, K. C., Pesaran, M. H. & Pierse, R. G. (1992). Persistence of shocks and
+its sources in a multisectoral model of UK output growth, Economic Journal
+102: 342–356.
+
+Kilian, L. (1998a). Accounting for lag order uncertainty in autoregressions: The endogenous
+lag order bootstrap algorithm, Journal of Time Series Analysis 19(5): 531–548.
+
+Kilian, L. (1998b). Confidence intervals for impulse responses under departures from normality,
+Econometric Reviews 17(1): 1–29.
+
+Kilian, L. (1998c). Small sample confidence intervals for impulse response functions, Review
+of Economics and Statistics 80(2): 218–230.
+
+Kilian, L. (2001). Impulse response analysis in vector autoregressions with unknown lag order,
+Journal of Forecasting 20: 161–179.
+
+Kilian, L. & Chang, P.-L. (2000). How accurate are confidence intervals for impulse responses
+in large VAR models?, Economics Letters 69: 299–307.
+
+Benkwitz, A., L ? utkepohl, H. & Wolters, J. (2001). Comparison of bootstrap confidence intervals
+for impulse responses of German monetary systems, Macroeconomic Dynamics 5: 81–
+100.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
