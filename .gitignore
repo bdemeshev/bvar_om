@@ -41,3 +41,8 @@ articles/SVAR/svar.log
 *.gz
 
 *.toc
+.Rproj.user
+
+.Rhistory
+
+data/~$data_bvar_2015.xlsx
