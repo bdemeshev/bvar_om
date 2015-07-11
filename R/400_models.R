@@ -1,8 +1,12 @@
 library("foreach")
 
 parallel <- "off" # "windows"/"unix"/"off"
+ncpu <- 30
 
 source("400_model_funs.R")
+
+df_sa <- read_csv("../data/df_2015_sa.csv")
+
 
 # create model list
 mlist <- create_model_list()
@@ -10,7 +14,7 @@ write_csv(mlist, path = "../estimation/mlist_A.csv")
 
 # estimate models from list
 mlist <- read_csv("../estimation/mlist_A.csv")
-mlist <- estimate_models(mlist, parallel = parallel) # status and filename are updated
+mlist <- estimate_models(mlist, parallel = parallel, ncpu=ncpu) # status and filename are updated
 write_csv(mlist, path = "../estimation/mlist_A.csv")
 
 # create prediction list

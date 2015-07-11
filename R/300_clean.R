@@ -62,13 +62,16 @@ xyplot(df_ts)
 to_adjust <- c("employment", "ind_prod", "cpi", "ib_rate", "lend_rate", "real_income", 
                "unemp_rate", "oil_price", "ppi", "construction", "real_investment", 
                "wage", "m2", "reer", 
-               #"gas_price", # ERROR adjusting gas_price
+               # "gas_price", # ERROR adjusting gas_price
                "nfa_cb", "ner", "labor_request", 
                "agriculture", "retail", "gov_balance", "export", "import"
 ) 
+
+#to_adjust <- "gas_price"
 df_sa <- seas_adjust(df_ts, to_adjust, method="X13")
 
 xyplot(df_sa)
 
+write_csv(as.data.frame(df_sa),"../data/df_2015_sa.csv")
 
 
