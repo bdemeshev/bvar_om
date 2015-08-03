@@ -36,7 +36,7 @@ create_model_list <- function() {
   df <- expand.grid(type="conjugate", 
                     T_start=1, 
                     T_in=100,
-                    var_set=c("set_3","set_6","set_24"),
+                    var_set=c("set_3","set_6","set_23"),
                     n_lag=10,
                     l0=c(0.01,0.1,1,2,5,10),
                     l1=1,
