@@ -3,10 +3,14 @@ library("foreach")
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30
 
+# input: "../data/df_2015_final.csv", "../data/var_set_info.csv"
+# output: 
+
+
 source("400_model_funs.R")
 
-df_sa <- read_csv("../data/df_2015_sa.csv")
-
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
 
 # create model list
 mlist <- create_model_list()

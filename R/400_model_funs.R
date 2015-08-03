@@ -32,10 +32,12 @@ source("400_one_model.R")
 
 
 create_model_list <- function() {
+  # в столбце value получаем тип character
   df <- expand.grid(type="conjugate", 
                     T_start=1, 
                     T_in=100,
                     var_set=c("set_3","set_6","set_24"),
+                    n_lag=10,
                     l0=c(0.01,0.1,1,2,5,10),
                     l1=1,
                     l3=1,
@@ -44,10 +46,13 @@ create_model_list <- function() {
                     status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",var_set,"_",
+  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+                                  var_set,"_",n_lag,"_lams_",
                                   round(100*l0),"_",round(100*l1),"_",
                                   round(100*l3),"_",round(100*l4),
                                   ".Rds") ) 
+  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  
   df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
   
   return(df)

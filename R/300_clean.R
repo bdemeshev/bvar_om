@@ -3,6 +3,9 @@ library(stringr)
 library(readr)
 library(lattice)
 
+# input: "../data/data_2015.csv"
+# output: "../data/df_2015_sa.csv", "../data/df_2015_final.csv"
+
 user_name <- Sys.info()[7]
 
 if (user_name=="boris") {
@@ -59,12 +62,16 @@ df_ts <- ts(df_notime, start=c(1995,1), frequency = 12)
 xyplot(df_ts)
 # dput(colnames(df_ts))
 # list of series to seasonally adjust
-to_adjust <- c("employment", "ind_prod", "cpi", "ib_rate", "lend_rate", "real_income", 
-               "unemp_rate", "oil_price", "ppi", "construction", "real_investment", 
-               "wage", "m2", "reer", 
+to_adjust <- c("employment", "ind_prod", "cpi", "real_income", 
+               "unemp_rate", 
+               "oil_price",  # maybe no?
+               "ppi", "construction", "real_investment", 
+               "wage", 
+               "reer", # maybe no?
                # "gas_price", # ERROR adjusting gas_price
-               "nfa_cb", "ner", "labor_request", 
-               "agriculture", "retail", "gov_balance", "export", "import"
+              "labor_request", 
+               "agriculture", "retail", 
+              "gov_balance", "export", "import"
 ) 
 
 #to_adjust <- "gas_price"
@@ -73,5 +80,23 @@ df_sa <- seas_adjust(df_ts, to_adjust, method="X13")
 xyplot(df_sa)
 
 write_csv(as.data.frame(df_sa),"../data/df_2015_sa.csv")
+
+
+
+## take logs
+
+df_sa <- read_csv("../data/df_2015_sa.csv")
+colnames(df_sa)
+
+df_final <- mutate_each(df_sa, "log", -ib_rate, -lend_rate, -unemp_rate, -gov_balance, -time_y)
+head(df_final)
+head(df_sa)
+
+write_csv(df_final, "../data/df_2015_final.csv")
+
+
+
+
+
 
 
