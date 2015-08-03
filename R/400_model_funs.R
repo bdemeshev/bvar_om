@@ -37,7 +37,7 @@ create_model_list <- function() {
                     T_start=1, 
                     T_in=100,
                     var_set=c("set_3","set_6","set_23"),
-                    n_lag=10,
+                    n_lag=12,
                     l0=c(0.01,0.1,1,2,5,10),
                     l1=1,
                     l3=1,
@@ -47,7 +47,7 @@ create_model_list <- function() {
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
   df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
-                                  var_set,"_",n_lag,"_lams_",
+                                  var_set,"_lags_",n_lag,"_lams_",
                                   round(100*l0),"_",round(100*l1),"_",
                                   round(100*l3),"_",round(100*l4),
                                   ".Rds") ) 

@@ -34,11 +34,13 @@ estimate_model <- function(model_info,
     l4 <- as.numeric(minfo$l4)
     n_lag <- as.numeric(minfo$n_lag)
     
-    priors <- Carriero_priors( D, p=n_lag, 
+    priors <- Carriero_priors( D, p=n_lag,    # p=n_lag, for 23 only 5 
                 lambdas=c(l0,l1,l3,l4) )
     
+    # priors$X_dummy <- NULL
+    # priors$Y_dummy <- NULL
     # estimate model
-    model <- bvar_conjugate0(priors = priors)
+    model <- bvar_conjugate0(priors = priors, keep=100) # keep убрать
   }
   
   

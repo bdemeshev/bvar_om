@@ -6,6 +6,6 @@ df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
 
 mlist <- read_csv("../estimation/mlist_A.csv")
-model_info <- mlist %>% filter(id==3)
-
+model_info <- mlist %>% filter(id==17)
+model_info
 estimate_model(model_info)
