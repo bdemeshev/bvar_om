@@ -40,7 +40,7 @@ estimate_model <- function(model_info,
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
     # estimate model
-    model <- bvar_conjugate0(priors = priors, keep=100) # keep убрать
+    model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100) # keep убрать
   }
   
   
