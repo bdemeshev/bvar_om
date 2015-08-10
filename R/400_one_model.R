@@ -2,7 +2,7 @@
 # возможно функции надо передавать df
 # параллельные вычисления?
 estimate_model <- function(model_info, 
-                           log=FALSE ) {
+                           log=FALSE, test=FALSE ) {
   minfo <- reshape2::dcast(model_info, id~variable)
   model_full_path <- paste0("../estimation/models/",minfo$file)
   
@@ -40,7 +40,8 @@ estimate_model <- function(model_info,
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
     # estimate model
-    model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100) # keep убрать
+    if (test) model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100) 
+    if (!test) model <- bvar_conjugate0(priors = priors)
   }
   
   

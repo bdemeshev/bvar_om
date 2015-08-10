@@ -1,5 +1,7 @@
 # read data from Carriero
 
+# не рабочий скрипт
+
 library("R.matlab")
 library("bvarr")
 all <- readMat("../data/usa_data.mat")
