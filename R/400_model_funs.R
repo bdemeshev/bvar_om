@@ -59,8 +59,38 @@ create_model_list <- function() {
 }
 
 
+
+create_model_list_banbura <- function() {
+  # в столбце value получаем тип character
+  df <- expand.grid(type="conjugate", 
+                    T_start=1, 
+                    T_in=100,
+                    var_set=c("set_3","set_6","set_23"),
+                    n_lag=12,
+                    l0=c(0.01,0.1,1,2,5,10),
+                    l1=1,
+                    l3=1,
+                    l4=1,
+                    seed=13, # good luck, mcmc
+                    status="not estimated")
+  df <- df %>% mutate_each("as.character",type, status, var_set) 
+  df <- df %>% mutate(id=row_number())
+  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+                                  var_set,"_lags_",n_lag,"_lams_",
+                                  round(100*l0),"_",round(100*l1),"_",
+                                  round(100*l3),"_",round(100*l4),
+                                  ".Rds") ) 
+  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  
+  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
+  
+  return(df)
+}
+
+
+
 estimate_models <- function(mlist, parallel = parallel, 
-                            no_reestimation=TRUE, ncpu=4) {
+                            no_reestimation=TRUE, ncpu=4, test=FALSE) {
   mlist_todo <- mlist
   model_ids <- unique(mlist$id)
 
@@ -80,7 +110,7 @@ estimate_models <- function(mlist, parallel = parallel,
     
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, log=TRUE)
+      status <- estimate_model(model_info, log=TRUE, test=test)
       mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
     }
     stopCluster(cl)
@@ -92,7 +122,7 @@ estimate_models <- function(mlist, parallel = parallel,
 
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, log=TRUE)
+      status <- estimate_model(model_info, log=TRUE, test=test)
       mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
     }
   }
@@ -100,7 +130,7 @@ estimate_models <- function(mlist, parallel = parallel,
   if (parallel=="off") {
     for (i in model_ids)  {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, log=TRUE)
+      status <- estimate_model(model_info, log=TRUE, test=test)
       mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
     }
   }
