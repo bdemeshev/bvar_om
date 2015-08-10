@@ -62,3 +62,7 @@ text/mal_art/text_BVAR4.bcf
 text/mal_art/text_BVAR4.aux
 
 text/mal_art/text_BVAR4.log
+
+estimation/*.csv
+
+estimation/models/*.Rds
