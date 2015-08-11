@@ -61,22 +61,6 @@ delta_i_from_ar1 <- function(df_ts, varset=colnames(df_ts), remove_vars=NULL, re
 }
 
 
-create_rwwn_list <- function() {
-  # в столбце value получаем тип character
-  df <- data_frame(type=c("rw","wn"),
-                    var_set="set_23",
-                    T_start=1, T_in=120,
-                    status="not estimated")
-  df <- df %>% mutate_each("as.character",type, status, var_set) 
-  df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
-                                  var_set,
-                                  ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
-  
-  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
-  
-  return(df)
-}
+
 
 
