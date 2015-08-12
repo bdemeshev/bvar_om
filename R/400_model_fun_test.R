@@ -41,7 +41,13 @@ for (j in 10:31) {
 
 mlist <- create_rwwn_list()
 plist <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
+mlist
 
 pred_info <- plist[1,]
 pred_info
 forecast_model(pred_info, mlist, parallel = "off")
+
+pred_info <- plist[2,]
+pred_info
+forecast_model(pred_info, mlist, parallel = "off")
+

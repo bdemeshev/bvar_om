@@ -30,6 +30,8 @@ rwwn_list <- create_rwwn_list()
 rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
 
 # forecast all RW and WN models
+rwwn_forecast_list <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
+rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 
 # calculate all MSFE-0
 

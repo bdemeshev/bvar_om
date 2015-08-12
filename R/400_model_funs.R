@@ -2,6 +2,7 @@ library("readr")
 library("MHadaptive")
 library("MCMCpack")
 library("mvtnorm")
+library("data.table")
 library("dplyr")
 library("bvarr")
 
@@ -105,8 +106,11 @@ estimate_model <- function(model_info,
 
 
 
-estimate_models <- function(mlist, parallel = parallel, 
+estimate_models <- function(mlist, parallel = c("off","windows","unix"), 
                             no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE) {
+  
+  parallel <- match.arg(parallel)
+  
   mlist_todo <- mlist
   model_ids <- unique(mlist$id)
 
@@ -228,13 +232,20 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
 
 
 # function to make forecasts of many model for many datasets
-forecast_models <- function(plist, mlist, parallel = parallel, 
+forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
                             ncpu=4, test=FALSE, do_log=FALSE) {
   
+  parallel <- match.arg(parallel)
   
-  
-  
-  return(plist) # ???
+  answer <- NULL
+  if (parallel=="off") {
+    # fast version using rbindlist from data.table
+    answer <- data.frame(rbindlist(lapply(1:nrow(plist),
+                function(x) forecast_model(plist[x,],mlist=mlist, parallel = parallel,
+                                           ncpu=ncpu, test=test, do_log=do_log)
+                                          )))
+  }
+  return(answer) 
 }
 
 
