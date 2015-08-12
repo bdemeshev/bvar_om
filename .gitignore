@@ -66,3 +66,13 @@ text/mal_art/text_BVAR4.log
 estimation/*.csv
 
 estimation/models/*.Rds
+
+*.aux
+
+*.bcf
+
+text/mal_art/text_BVAR.log
+
+*.out
+
+text/mal_art/text_BVAR.run.xml
