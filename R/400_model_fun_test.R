@@ -37,7 +37,13 @@ for (j in 10:31) {
   }
 }
 
+# восстановили нормальный список переменных для каждого набора 
+var_set_info <- read_csv("../data/var_set_info.csv")
+
 #### test 3: RW and WN prediction test
+
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
 
 mlist <- create_rwwn_list()
 plist <- data.frame(model_id=c(1,2), h=NA, type="in-sample")

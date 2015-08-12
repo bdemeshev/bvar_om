@@ -64,17 +64,18 @@ estimate_model <- function(model_info,
     # priors$Y_dummy <- NULL
     # estimate model
     
+    
+    verbose <- FALSE
+    keep <- 10000
+    
     if (test) { # testing mode
       verbose <- TRUE
       keep <- 100
-    } else { # normal mode
-      verbose <- FALSE
-      keep <- 10000
-    }
+    } 
     
     model <- bvar_conjugate0(priors = priors, 
                              verbose=verbose, keep=keep, 
-                             fast_forecast = fast_forecast) 
+                             fast_forecast = TRUE) 
   }
   
   
