@@ -53,14 +53,16 @@ estimate_model <- function(model_info,
     l_exo <- 1 # does not matter as we don't have exo variables
     n_lag <- as.numeric(minfo$n_lag)
     
+    fast_forecast <- TRUE # later we may add as option
+    
     priors <- Carriero_priors( D, p=n_lag,    # p=n_lag, for 23 only 5 
                                lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
     
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
     # estimate model
-    if (test) model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100) 
-    if (!test) model <- bvar_conjugate0(priors = priors)
+    if (test) model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100, fast_forecast = fast_forecast) 
+    if (!test) model <- bvar_conjugate0(priors = priors, fast_forecast = fast_forecast)
   }
   
   
