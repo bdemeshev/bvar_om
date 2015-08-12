@@ -26,6 +26,7 @@ estimate_model <- function(model_info,
   }
   
   # select observations
+  # as.numeric is needed because in mlist all values have the same type (most general, character)
   T_start <- as.numeric(minfo$T_start)
   T_in <- as.numeric(minfo$T_in) # number of supplied observations
   T_end <- T_start+T_in-1
@@ -61,8 +62,18 @@ estimate_model <- function(model_info,
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
     # estimate model
-    if (test) model <- bvar_conjugate0(priors = priors, verbose =TRUE, keep=100, fast_forecast = fast_forecast) 
-    if (!test) model <- bvar_conjugate0(priors = priors, fast_forecast = fast_forecast)
+    
+    if (test) { # testing mode
+      verbose <- TRUE
+      keep <- 100
+    } else { # normal mode
+      verbose <- FALSE
+      keep <- 10000
+    }
+    
+    model <- bvar_conjugate0(priors = priors, 
+                             verbose=verbose, keep=keep, 
+                             fast_forecast = fast_forecast) 
   }
   
   
@@ -162,45 +173,51 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   model_full_path <- paste0("../estimation/models/",minfo$file)
   model <- readRDS(model_full_path)
   
+  T_start <- as.numeric(minfo$T_start) # starting observation for model estimation 
+  T_in <- as.numeric(minfo$T_in) # number of observation supplied for model estimation
+  
   # select variables
   v_set <- minfo$var_set
   variables <- filter(var_set_info, var_set==v_set) $ variable
   n_vars <- length(variables)
+  D <- df[,variables]
   
   answer <- NULL
   
   if (minfo$type=="wn") {
     if (pred_info$type=="in-sample") {
-      Tf_start <- minfo$T_start
-      Tf_length <- minfo$T_in
+      Tf_start <- T_start
+      Tf_length <- T_in
       h <- Tf_length
-      Tf_end <- T_start + Tf_length - 1
+      Tf_end <- Tf_start + Tf_length - 1
       
-      answer <- model[rep(1:n_vars,Tf_length),]
-      answer$t <- rep(Tf_start:Tf_end, each=n_vars)
+      value <- model$coef[rep(1:n_vars,Tf_length)]
+      t <- rep(Tf_start:Tf_end, each=n_vars)
+      answer <- data.frame(value=value, t=t, variable = rep(model$variables, Tf_length), h=NA)
     }
   }
 
-  if (model_info$type=="rw") {
-    Tf_start <- minfo$T_start + 1 # is not possible to forecast first observation
-    Tf_length <- minfo$T_in - 1
+  if (minfo$type=="rw") {
+    Tf_start <- T_start + 1 # is not possible to forecast first observation
+    Tf_length <- T_in - 1
     h <- Tf_length
-    Tf_end <- T_start + Tf_length - 1
+    Tf_end <- Tf_start + Tf_length - 1
     
     ## multivariate analog of simple idea: y_first + (1:h)*Delta_y
-    y_first <- attr(model,"data")$Y_in[1,]
-    answer <- y_first + rep(1:Tf_length, each=n_vars) * model[rep(1:n_vars,Tf_length),] 
-    answer$t <- rep(Tf_start:Tf_end, each=n_vars)
+    y_first <- c(t(D[1,])) # c(t()) is a transformation of data.frame row into a vector
+    value <- y_first + rep(1:Tf_length, each=n_vars) * model$coef[rep(1:n_vars,Tf_length)] 
+    t <- rep(Tf_start:Tf_end, each=n_vars)
+    answer <- data.frame(value=value, t=t, variable = rep(model$variables, Tf_length), h=NA)
   }
   
-  if (model_info$type=="conjugate") {
+  if (minfo$type=="conjugate") {
     
     
   }
   
   
   answer$model_id <- model_id
-  answer$h <- pred_info$h
+  # answer$h <- pred_info$h # WRONG! max_h is requested, but all h will be computed!!!!
   answer$type <- pred_info$type
   
   return(answer) 
