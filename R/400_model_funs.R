@@ -194,37 +194,63 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   
   answer <- NULL
   
-  if (minfo$type=="wn") {
-    if (pred_info$type=="in-sample") {
+  ###### in-sample forecasts
+  
+  if ((minfo$type=="wn") & (pred_info$type=="in-sample")) {
       Tf_start <- T_start
       Tf_length <- T_in
-      h <- Tf_length
       Tf_end <- Tf_start + Tf_length - 1
       
       value <- model$coef[rep(1:n_vars,Tf_length)]
       t <- rep(Tf_start:Tf_end, each=n_vars)
-      answer <- data.frame(value=value, t=t, variable = rep(model$variables, Tf_length), h=NA)
-    }
+      answer <- data.frame(value=value, t=t, 
+                           variable = rep(variables, Tf_length), h=NA)
   }
 
-  if (minfo$type=="rw") {
+  if ((minfo$type=="rw") & (pred_info$type=="in-sample")) {
     Tf_start <- T_start + 1 # is not possible to forecast first observation
     Tf_length <- T_in - 1
-    h <- Tf_length
     Tf_end <- Tf_start + Tf_length - 1
     
     ## multivariate analog of simple idea: y_first + (1:h)*Delta_y
     y_first <- c(t(D[1,])) # c(t()) is a transformation of data.frame row into a vector
     value <- y_first + rep(1:Tf_length, each=n_vars) * model$coef[rep(1:n_vars,Tf_length)] 
     t <- rep(Tf_start:Tf_end, each=n_vars)
-    answer <- data.frame(value=value, t=t, variable = rep(model$variables, Tf_length), h=NA)
+    answer <- data.frame(value=value, t=t, 
+                         variable = rep(variables, Tf_length), h=NA)
   }
   
-  if (minfo$type=="conjugate") {
+  if ((minfo$type=="conjugate") & (pred_info$type=="in-sample")) {
+    n_lag <- as.numeric(minfo$n_lag)
+    Tf_start <- T_start + n_lag # is not possible to forecast first n_lag observation
+    Tf_length <- T_in - n_lag
+    Tf_end <- Tf_start + Tf_length - 1
     
+    predictions <- forecast_conjugate(model, fast_forecast = TRUE)
+    t <- rep(Tf_start:Tf_end, each=n_vars)
+    answer <- data.frame(value=value, t=t, 
+                         variable = rep(variables, Tf_length), h=NA)
     
   }
   
+  if ((minfo$type=="var") & (pred_info$type=="in-sample")) {
+    n_lag <- as.numeric(minfo$n_lag)
+    Tf_start <- T_start + n_lag # is not possible to forecast first n_lag observation
+    Tf_length <- T_in - n_lag
+    Tf_end <- Tf_start + Tf_length - 1
+    
+    predictions <- data.frame(fitted(model))
+    predictions$t <- Tf_start:Tf_end
+    answer <- melt(predictions, id.vars = "t")
+    answer$h <- NA
+  }
+  
+  ###### out-of-sample forecasts
+  
+  
+  # ...
+  # ...
+  # ...
   
   answer$model_id <- model_id
   # answer$h <- pred_info$h # WRONG! max_h is requested, but all h will be computed!!!!

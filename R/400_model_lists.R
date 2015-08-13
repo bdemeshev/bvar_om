@@ -6,6 +6,10 @@ T_common <- 120 # число наблюдений для которых стро
 # RW модель будет оцениваться по T_in <- T_common + 1 наблюдению, чтобы 
 # получить ровно T_common прогнозов
 # VAR(p), BVAR(p) будут оцениваться по T_in <- T_common + p наблюдениям
+p_max <- 12 # для выравнивания первого внутривыборочного прогноза
+# T_start <- p_max + 1 - n_lag
+# при p_max=n_lag на вход модели будут подаваться наблюдения начиная с первого 
+
 
 # id variable value
 # 1 type "conjugate"/"minnesota"/"independent"/"var"/"theta"/"rw"/"wn" (или не все?)
@@ -35,15 +39,9 @@ T_common <- 120 # число наблюдений для которых стро
 # 
 
 
-
-
-
-
-
 create_model_list <- function() {
   # в столбце value получаем тип character
   df <- expand.grid(type="conjugate", 
-                    T_start=1, 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=12,
                     l_1=c(0.01,0.1,1,2,5,10),
@@ -55,7 +53,7 @@ create_model_list <- function() {
                     status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(T_in = T_common + n_lag)
+  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
   df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
@@ -77,7 +75,7 @@ create_rwwn_list <- function() {
   # в столбце value получаем тип character
   df <- data_frame(type=c("rw","wn"),
                    var_set="set_23",
-                   T_start=1, T_in=c(T_common + 1, T_common),
+                   T_start=c(p_max,p_max+1), T_in=c(T_common + 1, T_common),
                    status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
@@ -96,13 +94,12 @@ create_rwwn_list <- function() {
 create_var_list <- function() {
   # в столбце value получаем тип character
   df <- expand.grid(type="var", 
-                    T_start=1, 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=c(1,6,12),
                     status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(T_in = T_common + n_lag)
+  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
   df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   ".Rds") ) 

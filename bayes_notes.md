@@ -97,7 +97,8 @@ Brandt, Patrick T. and John R. Freeman. 2006. "Advances in Bayesian Time Series 
 
 мелочи:
 - у банбуры пока идет речь о подборе лямбды все MSFE --- in-sample
-
+- почему условие существования дисперсии прогнозов v_prior >= max(m+2,m+2h-T).
+Вроде бы прогноз на 1 шаг эквивалентен оценке коэффициентов?
 
 
 
