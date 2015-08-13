@@ -226,11 +226,9 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- T_in - n_lag
     Tf_end <- Tf_start + Tf_length - 1
     
-    predictions <- forecast_conjugate(model, fast_forecast = TRUE)
-    t <- rep(Tf_start:Tf_end, each=n_vars)
-    answer <- data.frame(value=value, t=t, 
-                         variable = rep(variables, Tf_length), h=NA)
-    
+    predictions <- forecast_conjugate(model, 
+                  fast_forecast = TRUE, out_of_sample = FALSE)
+    answer <- mutate(predictions, t=h+Tf_start-1, h=NA) %>% select(-what) 
   }
   
   if ((minfo$type=="var") & (pred_info$type=="in-sample")) {
