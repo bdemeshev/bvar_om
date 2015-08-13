@@ -109,4 +109,33 @@ create_var_list <- function() {
   return(df)
 }
 
+create_bvar_banbura_list <- function() {
+  # в столбце value получаем тип character
+  df <- expand.grid(type="conjugate", 
+                    var_set=c("set_3","set_6","set_23"),
+                    n_lag=c(1,6,12),
+                    l_1=c(0.01,0.1,1,2,5,10),
+                    l_power=1,
+                    l_const=1,
+                    l_sc=1,
+                    l_io=1,
+                    seed=13, # good luck, mcmc
+                    status="not estimated")
+  df <- df %>% mutate_each("as.character",type, status, var_set) 
+  df <- df %>% mutate(id=row_number())
+  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
+  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+                                  var_set,"_lags_",n_lag,
+                                  "_lams_",round(100*l_1),
+                                  "_sc_",round(100*l_sc),
+                                  "_io_",round(100*l_io),
+                                  "_pow_",round(100*l_power),
+                                  "_cst_",round(100*l_const),
+                                  ".Rds") ) 
+  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  
+  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
+  
+  return(df)
+}
 

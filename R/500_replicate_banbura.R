@@ -90,7 +90,7 @@ head(var_obs)
 
 # calculate msfe-inf
 
-msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(sq_error))
+msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe_Inf=mean(sq_error))
 msfe_Inf
 
 # join model info
@@ -104,8 +104,9 @@ msfe_Inf_info
 fit_set_info <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind_prod+cpi")
 fit_set_info
 
-msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
-msfe_0_Inf <- left_join(msfe_0_Inf,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
+# msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
+# join msfe0
+msfe_0_Inf <- left_join(msfe_Inf_info,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
 
 msfe_0_Inf <- msfe_0_Inf %>% select(-model_id,-type) %>% 
   mutate(msfe_ratio=msfe_Inf/msfe0)
@@ -113,31 +114,80 @@ msfe_0_Inf
 
 
 # create empty table
-fit_table <- NULL
+fit_inf_table <- NULL
 
 # cycle all fit_sets:
 for (current_fit_set in unique(fit_set_info$fit_set)) {
   fit_variables <- filter(fit_set_info, fit_set==current_fit_set)$variable
   block <- filter(msfe_0_Inf, variable %in% fit_variables) %>% group_by(var_set,n_lag) %>%
-    summarise(fit=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
-  fit_table <- rbind(fit_table,block)
+    summarise(fit_inf=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
+  fit_inf_table <- rbind(fit_inf_table,block)
 }
+
+fit_inf_table
 
 ##### banbura step 3
 # goal: calculate fit-lam
 
 # create model list to find optimal lambda 
-mlist <- create_model_list_banbura()
-write_csv(mlist, path = "../estimation/mlist_optimise_banbura.csv")
+bvar_list <- create_bvar_banbura_list()
+write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # estimate models from list
-mlist <- read_csv("../estimation/mlist_optimise_banbura.csv")
-mlist <- estimate_models(mlist, parallel = parallel, ncpu=ncpu) # status and filename are updated
-write_csv(mlist, path = "../estimation/mlist_optimise_banbura.csv")
+bvar_list <- read_csv("../estimation/bvar_list.csv")
+bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu) # status and filename are updated
+write_csv(bvar_list, path = "../estimation/bvar_list.csv")
+
+# forecast VAR
+bvar_forecast_list <- data.frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
+bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
+
+# joining actual observations
+df <- mutate(df, t=row_number()) 
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+
+bvar_forecasts <- rename(bvar_forecasts, forecast=value)
+bvar_obs <- left_join(bvar_forecasts, actual_obs, by=c("t","variable"))
+
+bvar_obs <- mutate(bvar_obs, sq_error=(forecast-actual)^2)
+head(var_obs)
 
 # calculate msfe-lam
 
+msfe_lam <- bvar_obs %>% group_by(variable, model_id) %>% summarise(msfe_lam=mean(sq_error))
+msfe_lam
+
+# join model info
+bvar_wlist <- dcast(bvar_list, id~variable)
+bvar_wlist %>% select(-file,-type)
+
+msfe_lam_info <- left_join(msfe_lam, 
+            select(bvar_wlist, id, type, var_set, n_lag,
+                   l_1, l_const, l_io, l_power, l_sc, n_lag),
+                           by=c("model_id"="id"))
+msfe_lam_info 
+
+# join msfe0
+msfe_0_lam <- left_join(msfe_lam_info,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
+
+msfe_0_lam <- msfe_0_lam %>% select(-model_id,-type) %>% 
+  mutate(msfe_ratio=msfe_lam/msfe0)
+msfe_0_lam
+
 # calculate fit-lam
+# create empty table
+fit_lam_table <- NULL
+
+# cycle all fit_sets:
+for (current_fit_set in unique(fit_set_info$fit_set)) {
+  fit_variables <- filter(fit_set_info, fit_set==current_fit_set)$variable
+  block <- filter(msfe_0_lam, variable %in% fit_variables) %>% 
+    group_by(var_set,n_lag,l_1,l_const,l_io,l_power,l_sc) %>%
+    summarise(fit_lam=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
+  fit_lam_table <- rbind(fit_lam_table,block)
+}
+
+fit_lam_table
 
 ##### banbura step 4
 # find optimal lambda
