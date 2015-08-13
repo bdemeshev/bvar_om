@@ -17,7 +17,7 @@ df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
 
 ##### banbura step 1
-# calculate MSFE-0. Estimate RWWN (random walk OR white noise model)
+# calculate msfe-0. Estimate RWWN (random walk OR white noise model)
 
 # classify variables into RW and WN
 deltas <- delta_i_prior(df, remove_vars = "time_y")
@@ -34,8 +34,8 @@ rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
 rwwn_forecast_list <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
 rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 
-# calculate all MSFE-0
-# two ways to calculate MSFE
+# calculate all msfe-0
+# two ways to calculate msfe
 # a) use all available predictions for each model
 # b) use only common available predictions for all models
 
@@ -46,7 +46,7 @@ rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t
 # rwwn_forecasts <- filter(rwwn_forecasts, t >= Tf_common_start)
 ####
 
-# build table with corresponding MSFE-0 (RW or WN)
+# build table with corresponding msfe-0 (RW or WN)
 
 # joining actual observations
 df <- mutate(df, t=row_number()) 
@@ -58,16 +58,16 @@ rwwn_obs <- left_join(rwwn_forecasts, actual_obs, by=c("t","variable"))
 rwwn_obs <- mutate(rwwn_obs, sq_error=(forecast-actual)^2)
 head(rwwn_obs)
 
-MSFE0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(MSFE=mean(sq_error))
-MSFE0_all
+msfe0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(sq_error))
+msfe0_all
 
-# add rw/wn label to MSFE0
+# add rw/wn label to msfe0
 rwwn_wlist <- dcast(rwwn_list, id~variable) # wlist = wide list
-MSFE0_all <- left_join(MSFE0_all, select(rwwn_wlist, id, type), by=c("model_id"="id") )
+msfe0_all <- left_join(msfe0_all, select(rwwn_wlist, id, type), by=c("model_id"="id") )
 
-MSFE0 <- left_join(deltas, MSFE0_all, by= c("variable"="variable","rw_wn"="type") )
+msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
 
-MSFE0
+msfe0
 
 ##### banbura step 2
 # estimate VAR
@@ -88,27 +88,43 @@ var_obs <- left_join(var_forecasts, actual_obs, by=c("t","variable"))
 var_obs <- mutate(var_obs, sq_error=(forecast-actual)^2)
 head(var_obs)
 
-# calculate MSFE-inf
+# calculate msfe-inf
 
-MSFE_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(MSFE=mean(sq_error))
-MSFE_Inf
+msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(sq_error))
+msfe_Inf
 
 # join model info
 var_wlist <- dcast(var_list, id~variable)
 var_wlist
-MSFE_Inf_info <- left_join(MSFE_Inf, select(var_wlist, id, type, var_set, n_lag),
+msfe_Inf_info <- left_join(msfe_Inf, select(var_wlist, id, type, var_set, n_lag),
                            by=c("model_id"="id"))
-MSFE_Inf_info
-# calculate FIT-Inf
+msfe_Inf_info
+# calculate fit-Inf
 
 fit_set_info <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind_prod+cpi")
 fit_set_info
 
+msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
+msfe_0_Inf <- left_join(msfe_0_Inf,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
+
+msfe_0_Inf <- msfe_0_Inf %>% select(-model_id,-type) %>% 
+  mutate(msfe_ratio=msfe_Inf/msfe0)
+msfe_0_Inf
 
 
+# create empty table
+fit_table <- NULL
+
+# cycle all fit_sets:
+for (current_fit_set in unique(fit_set_info$fit_set)) {
+  fit_variables <- filter(fit_set_info, fit_set==current_fit_set)$variable
+  block <- filter(msfe_0_Inf, variable %in% fit_variables) %>% group_by(var_set,n_lag) %>%
+    summarise(fit=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
+  fit_table <- rbind(fit_table,block)
+}
 
 ##### banbura step 3
-# goal: calculate FIT-lam
+# goal: calculate fit-lam
 
 # create model list to find optimal lambda 
 mlist <- create_model_list_banbura()
@@ -119,9 +135,9 @@ mlist <- read_csv("../estimation/mlist_optimise_banbura.csv")
 mlist <- estimate_models(mlist, parallel = parallel, ncpu=ncpu) # status and filename are updated
 write_csv(mlist, path = "../estimation/mlist_optimise_banbura.csv")
 
-# calculate MSFE-lam
+# calculate msfe-lam
 
-# calculate FIT-lam
+# calculate fit-lam
 
 ##### banbura step 4
 # find optimal lambda
