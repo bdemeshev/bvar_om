@@ -46,6 +46,7 @@ df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
 
 mlist <- create_rwwn_list()
+mlist <- estimate_models(mlist,parallel = parallel)
 plist <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
 mlist
 
@@ -57,3 +58,17 @@ pred_info <- plist[2,]
 pred_info
 forecast_model(pred_info, mlist, parallel = "off")
 
+#### test 3: VAR prediction test
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
+
+# estimate VAR
+var_list <- create_var_list()
+var_list <- estimate_models(var_list,parallel = parallel)
+
+# forecast VAR
+var_forecast_list <- data.frame(model_id=unique(var_list$id), h=NA, type="in-sample")
+
+pred_info <- var_forecast_list[1,]
+pred_info
+forecast_model(pred_info, mlist, parallel = "off")

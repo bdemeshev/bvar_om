@@ -74,7 +74,37 @@ MSFE0
 var_list <- create_var_list()
 var_list <- estimate_models(var_list,parallel = parallel)
 
-# calculate MSFE-inf, FIT-inf
+# forecast VAR
+var_forecast_list <- data.frame(model_id=unique(var_list$id), h=NA, type="in-sample")
+var_forecasts <- forecast_models(var_forecast_list, var_list)
+
+# joining actual observations
+df <- mutate(df, t=row_number()) 
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+
+var_forecasts <- rename(var_forecasts, forecast=value)
+var_obs <- left_join(var_forecasts, actual_obs, by=c("t","variable"))
+
+var_obs <- mutate(var_obs, sq_error=(forecast-actual)^2)
+head(var_obs)
+
+# calculate MSFE-inf
+
+MSFE_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(MSFE=mean(sq_error))
+MSFE_Inf
+
+# join model info
+var_wlist <- dcast(var_list, id~variable)
+var_wlist
+MSFE_Inf_info <- left_join(MSFE_Inf, select(var_wlist, id, type, var_set, n_lag),
+                           by=c("model_id"="id"))
+MSFE_Inf_info
+# calculate FIT-Inf
+
+fit_set_info <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind_prod+cpi")
+fit_set_info
+
+
 
 
 ##### banbura step 3
