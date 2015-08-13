@@ -1037,9 +1037,18 @@ A^{-1}=U^{-1}U^{-1\prime}
 \multicolumn{7}{c}{Коды в среде Матлаб}\\
 \midrule
 % тут базовые %
-Carriero\footnote{\url{http://cremfi.econ.qmul.ac.uk/efp/info.php} }&-&?&-&+&+&Дамми-наблюдения вводятся как для conj NIW, при этом делает Gibbs sampling, при этом $\post\Phi$ одно и то же, а $\Sigma$ пересчитывается на каждом шаге в зависимости от предыдущего $\Phi$ \\
+Carriero\footnote{\url{http://cremfi.econ.qmul.ac.uk/efp/info.php} }&-&?&-&+&+&Дамми-наблюдения вводятся как для conj NIW, при этом делает Gibbs sampling, при этом $\post\Phi$ одно и то же, а $\Sigma$ пересчитывается на каждом шаге в зависимости от предыдущего $\Phi$. При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Имеется странный хак, повторно генерирующий VAR коэффициенты, если собственные числа за пределами единичного круга. \\
 Blake Mumtaz\footnote{\url{http://www.bankofengland.co.uk/education/Pages/ccbs/technical_handbooks/techbook4.aspx}}&-&+&+&+&+& Называет Миннесотой Ind NIW.  Код для conj NIW построен так же, как у Carriero через Gibbs Sampling: разница - добавляет 2 один. строки для дамми при опредеделеннии коэффициента при константе\\
+Koop Korobilis & + & +  & + & & & Код крайне негибкий. Без правки кода нет возможности прогнозировать больше чем на один шаг, нет возможности задать свои гиперпараметры априорного распределения. \\
 \midrule
+\multicolumn{7}{c}{Коды в среде R}\\
+\midrule
+BMR \footnote{\url{ http://bayes.squarespace.com/bmr/ }}  & + & - & + & - & - & Симуляции реализованы в C++.  оценивает DSGE.  Реализует TVPBVAR. Отличная документация. \\
+MSBVAR \footnote{\url{https://cran.r-project.org/web/packages/MSBVAR/ }}  & - & + & - & + & + & Симуляции реализованы на фортране и C++. Реализует также марковские BVAR с переключением.  \\
+bvarr \footnote{\url{https://github.com/bdemeshev/bvarr }} & + & + & + & + & + & Сопряжённое нормальное-Уишарта реализовано максимально гибко.  При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Код для Миннесоты и независимого нормального Уишарта является переводом кода Koops-Korobilis и потому крайне негибкий. 
+ \\
+\midrule
+Eviews & + & + & + & & & «EViews just ignores the fact that the coefficients were estimated using Bayesian methods, and forecasts the same way as it would a classical model»\\
 \bottomrule
 \end{tabular}
 \end{center}
