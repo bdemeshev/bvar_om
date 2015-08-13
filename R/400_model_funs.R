@@ -3,6 +3,7 @@ library("MHadaptive")
 library("MCMCpack")
 library("mvtnorm")
 library("data.table")
+library("reshape2")
 library("dplyr")
 library("bvarr")
 

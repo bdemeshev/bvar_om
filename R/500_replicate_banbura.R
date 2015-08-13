@@ -67,6 +67,8 @@ MSFE0_all <- left_join(MSFE0_all, select(rwwn_wlist, id, type), by=c("model_id"=
 
 MSFE0 <- left_join(deltas, MSFE0_all, by= c("variable"="variable","rw_wn"="type") )
 
+MSFE0
+
 ##### banbura step 2
 # estimate VAR
 # calculate MSFE-inf, FIT-inf
