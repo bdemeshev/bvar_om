@@ -4,6 +4,7 @@ library("MCMCpack")
 library("mvtnorm")
 library("data.table")
 library("reshape2")
+library("vars")
 library("dplyr")
 library("bvarr")
 
@@ -44,8 +45,6 @@ estimate_model <- function(model_info,
     seed <- as.numeric(minfo$seed)
     set.seed(seed)  # wish your good luck, MCMC
     
-    
-    
     # create priors
     l_1 <- as.numeric(minfo$l_1)
     l_power <- as.numeric(minfo$l_power)
@@ -79,6 +78,11 @@ estimate_model <- function(model_info,
                              fast_forecast = TRUE) 
   }
   
+  
+  if (minfo$type=="var") {
+    n_lag <- as.numeric(minfo$n_lag)
+    model <- VAR(D, p=n_lag, type="const") 
+  }
   
   if (minfo$type=="wn") {
     model_vector <- c(t(apply(D, MARGIN=2, mean))) # just sample means of variables

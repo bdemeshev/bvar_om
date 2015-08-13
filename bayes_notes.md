@@ -95,6 +95,8 @@ Brandt, Patrick T. and John R. Freeman. 2006. "Advances in Bayesian Time Series 
 - при каких априорных параметрах апостериорное среднее совпадёт с ML VAR?
 будет ли это неинформативное-Джеффри?
 
+мелочи:
+- у банбуры пока идет речь о подборе лямбды все MSFE --- in-sample
 
 
 

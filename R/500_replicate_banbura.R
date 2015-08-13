@@ -71,7 +71,11 @@ MSFE0
 
 ##### banbura step 2
 # estimate VAR
+var_list <- create_var_list()
+var_list <- estimate_models(var_list,parallel = parallel)
+
 # calculate MSFE-inf, FIT-inf
+
 
 ##### banbura step 3
 # goal: calculate FIT-lam
