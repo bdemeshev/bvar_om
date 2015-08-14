@@ -70,6 +70,17 @@ msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type"
 msfe0
 
 ##### banbura step 2
+
+# describe which msfe ratios are averaged in fit
+
+  
+fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
+fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
+
+fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
+fit_set_info
+
+
 # estimate VAR
 var_list <- create_var_list()
 var_list <- estimate_models(var_list,parallel = parallel)
@@ -100,9 +111,6 @@ msfe_Inf_info <- left_join(msfe_Inf, select(var_wlist, id, type, var_set, n_lag)
                            by=c("model_id"="id"))
 msfe_Inf_info
 # calculate fit-Inf
-
-fit_set_info <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind_prod+cpi")
-fit_set_info
 
 # msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
 # join msfe0
@@ -191,7 +199,20 @@ fit_lam_table
 
 ##### banbura step 4
 # find optimal lambda
+# group_by is needed! otherwise cannot remove var_set (active group on var_set)
+fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_3") %>% group_by() %>% dplyr::select(-var_set)
+fit_goal
 
+fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
+fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
+best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
+  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1)
+
+# check whether best lambda is unique
+best_lambda %>% summarise(num_of_best_lambdas=n())
+# num of best lambdas should be always one
+
+best_lambda %>% group_by() %>% arrange(fit_set, n_lag, var_set)
 ##### banbura step 5
 # forecast and evaluate using optimal lambda

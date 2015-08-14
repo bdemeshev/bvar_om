@@ -2,7 +2,7 @@ library("readr")
 library("MHadaptive")
 library("MCMCpack")
 library("mvtnorm")
-library("data.table")
+#library("data.table")
 library("reshape2")
 library("vars")
 library("dplyr")
@@ -270,7 +270,7 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
   answer <- NULL
   if (parallel=="off") {
     # fast version using rbindlist from data.table
-    answer <- data.frame(rbindlist(lapply(1:nrow(plist),
+    answer <- data.frame(data.table::rbindlist(lapply(1:nrow(plist),
                 function(x) forecast_model(plist[x,],mlist=mlist, parallel = parallel,
                                            ncpu=ncpu, test=test, do_log=do_log)
                                           )))
