@@ -16,6 +16,8 @@ ncpu <- 30
 df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
 
+T_available <- nrow(df)
+
 ##### banbura step 1
 # calculate msfe-0. Estimate RWWN (random walk OR white noise model)
 
@@ -207,12 +209,40 @@ fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
 fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
 best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
-  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1)
+  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% group_by()
 
 # check whether best lambda is unique
-best_lambda %>% summarise(num_of_best_lambdas=n())
+check_uniqueness <- best_lambda %>% summarise(num_of_best_lambdas=n())
 # num of best lambdas should be always one
+if (max(check_uniqueness$num_of_best_lambdas)>1) warning("**** ACHTUNG ****: non unique optimal lambdas")
+check_uniqueness
 
-best_lambda %>% group_by() %>% arrange(fit_set, n_lag, var_set)
+
+best_lambda %>% arrange(fit_set, n_lag, var_set)
 ##### banbura step 5
 # forecast and evaluate using optimal lambda
+
+# create best models lists with correct time spec
+bvar_out_list  <- create_bvar_out_list(best_lambda)
+# best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power, l_sc
+
+bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
+write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
+
+# forecast VAR
+# bvar_out_forecast_list <- data.frame(model_id=unique(var_list$id), h=, type="out-of-sample")
+# .....
+# ....
+
+bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
+
+# joining actual observations
+df <- mutate(df, t=row_number()) 
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+
+bvar_out_forecasts <- rename(bvar_out_forecasts, forecast=value)
+bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
+
+bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
+head(var_obs)
+

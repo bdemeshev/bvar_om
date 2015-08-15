@@ -903,17 +903,17 @@ $\lambda_{io}$ & $\lambda_4$ & NA && \\
 Схема выбора $\lambda$ состоит из следующих этапов:
 \begin{enumerate}
 \item На первом этапе  строятся внутривыборочные однопериодные прогнозы на обучающей выборке и рассчитывается среднеквадратичная ошибка прогноза выпуска $(MSFE_y^{0})$ и инфляции $(MSFE_{\pi}^{0})$.
-\item Оценивается трехмерная VAR для $\lambda\to \infty$ \footnote{При $\lambda\to \infty$ оценки BVAR совпадают с оценками VAR методами OLS или ML, т. к. апостериорное распределение параметров в этом случае совпадает с функцией правдоподобия. Считается, что трехмерная VAR содержит достаточно маленькое число параметров, и байесовская регуляризация не требуется.} и рассчитываются среднеквадратичная ошибка прогноза выпуска $(MSFE_y^{\infty})$ и инфляции $(MSFE_{\pi}^{\infty})$ и показатель $FIT^{\infty}$:
+\item Оценивается трехмерная VAR для $\lambda\to \infty$ \footnote{При $\lambda\to \infty$ оценки BVAR совпадают с оценками VAR методами OLS или ML, т. к. апостериорное распределение параметров в этом случае совпадает с функцией правдоподобия. Считается, что трехмерная VAR содержит достаточно маленькое число параметров, и байесовская регуляризация не требуется.} и рассчитываются среднеквадратичная ошибка прогноза выпуска $(MSFE_y^{\infty})$ и инфляции $(MSFE_{\pi}^{\infty,3})$ и показатель $FIT^{\infty,3}$:
 \begin{equation}
-FIT^{\infty}=\frac{1}{2}\cdot\frac{MSFE_y^{\infty}}{MSFE^0_y} + \frac{1}{2}\cdot\frac{MSFE_{\pi}^{\infty}}{MSFE^0_{\pi}}
+FIT^{\infty,3}=\frac{1}{2}\cdot\frac{MSFE_y^{\infty,3}}{MSFE^0_y} + \frac{1}{2}\cdot\frac{MSFE_{\pi}^{\infty,3},}{MSFE^0_{\pi}}
 \end{equation}
 \item Оцениваются BVAR модели для $m$ переменных и для большого числа различных $\lambda$ рассчитываются среднеквадратичные ошибки прогноза для выпуска $(MSFE_y^{\lambda,m})$ и инфляции $(MSFE_{\pi}^{\lambda,m})$ и показатель $FIT^{{\lambda,m}}$: 
 \begin{equation}
 FIT^{\lambda,m}=\frac{1}{2}\cdot\frac{MSFE_y^{\lambda,m}}{MSFE^0_y} + \frac{1}{2}\cdot\frac{MSFE_{\pi}^{\lambda,m}}{MSFE^0_{\pi}}
 \end{equation}
-\item Оптимальное $\lambda$ рассчитывается как значение, при котором минимизируется отклонение $FIT^{\lambda,m}$ от $FIT^{\infty}$:
+\item Оптимальное $\lambda$ рассчитывается как значение, при котором минимизируется отклонение $FIT^{\lambda,m}$ от $FIT^{\infty,3}$:
 \begin{equation}
-\lambda^*=\argmin |FIT^{\lambda, m}-FIT^{\infty}| 
+\lambda^*_m=\argmin_{\lambda} |FIT^{\lambda, m}-FIT^{\infty,3}| 
 \end{equation}
 \end{enumerate}
 После того как выбрано оптимальное $\lambda$ для каждой модели, происходит построение вневыборочных прогнозов на оценивающей выборке.
@@ -921,14 +921,14 @@ FIT^{\lambda,m}=\frac{1}{2}\cdot\frac{MSFE_y^{\lambda,m}}{MSFE^0_y} + \frac{1}{2
 
 Второй алгоритм предложен в работе (Carriero et al, 2012) и представляет собой выбор такого параметра $\lambda_1$, который бы максимизировал функцию предельной плотности:
 \begin{equation}
-\lambda_{1t}^*=\argmax_{\lambda_1} \ln p(Y)
+\lambda^*=\argmax_{\lambda} \ln p(Y)
 \end{equation}
 
 При этом функция предельной плотности может быть получена путем интегрирования коэффициентов модели: \footnote{Т.к. интегрирование происходит по  всем коэффициентам, но не по гиперпараметрам априорного распределения ($\lambda_1,\lambda_2,\lambda_3$)  и не по числу лагов $p$, то предельная плотность является функцией $\lambda_j,j=1\ldots 3$ и $p$.}
 \begin{equation}
 p(Y)=\int p(Y|\phi)p(\phi) d \phi
 \end{equation}
-Если априорное распределение является нормальным - обратным Уишарта, то предельная плотность $p(Y)$ может быть посчитана аналитически (\cite{zellner_1996_introduction}; Bauwens et al,1999; Carriero et al,2012):
+Если априорное распределение является нормальным "--- обратным Уишарта, то предельная плотность $p(Y)$ может быть посчитана аналитически (\cite{zellner_1996_introduction}; Bauwens et al,1999; Carriero et al,2012):
 %\begin{equation}
 \begin{multline}
 p(Y)=\pi^{-\frac{Tm}{2}}\times +\left |(I+X\prior{\Omega} X')^{-1}\right|^{\frac{N}{2}}\times |\prior{S}|^{\frac{\prior{\nu}}{2}}\times \frac{\Gamma_N(\frac{\prior{\nu}+T}{2})}{\Gamma_N(\frac{\prior{\nu}}{2})}\times \\ \times
@@ -1024,13 +1024,95 @@ A^{-1}=U^{-1}U^{-1\prime}
 \end{tabular}
 \end{table}
 \end{center}
-%\end{landscape}
+\end{landscape}
 %\end{appendices}
+\newpage
 \subsection*{Доступные реализации кода}
 
-%\begin{landscape}
 \begin{center}
-\begin{tabular}{ccccccp{10cm}}
+\begin{tabular}{p{2cm}ccccc}
+\toprule
+Источник&  Min &  Conj N-IW & Ind N-IW & SoC &IO\\
+\midrule
+\multicolumn{6}{c}{Коды в среде Матлаб}\\
+\midrule
+% тут базовые %
+Carrier&-&?&-&+&+ \\
+Blake Mumtaz&-&+&+&+&+ \\
+Koop Korobilis  & + & +  & + & & \\
+Zha&&&&&\\
+Canova&&&&&\\
+\midrule
+\multicolumn{6}{c}{Коды в среде R}\\
+\midrule
+BMR   & + & - & + & - & -  \\
+MSBVAR & - & + & - & + & +  \\
+bvarr  & + & + & + & + & +  \\
+\midrule
+\multicolumn{6}{c}{Встроеные функции в эконометрические пакеты}\\
+\midrule
+Eviews& + & + & + &- &- \\
+Gauss & ? & ?& ?& ?&?  \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item Carriero: Дамми-наблюдения вводятся как для conj NIW, при этом делает Gibbs sampling, при этом $\post\Phi$ одно и то же, а $\Sigma$ пересчитывается на каждом шаге в зависимости от предыдущего $\Phi$. При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Имеется странный хак, повторно генерирующий VAR коэффициенты, если собственные числа за пределами единичного круга. \url{http://cremfi.econ.qmul.ac.uk/efp/info.php} 
+\item Blake Mumtaz: Называет Миннесотой Ind NIW.  Код для conj NIW построен так же, как у Carriero через Gibbs Sampling: разница - добавляет 2 один. строки для дамми при опредеделеннии коэффициента при константе. \url{http://www.bankofengland.co.uk/education/Pages/ccbs/technical_handbooks/techbook4.aspx}
+\item Koop Korobilis: Код крайне негибкий. Без правки кода нет возможности прогнозировать больше чем на один шаг, базовые conj N-IW и ind N-IW априорное распределения не содержит  гиперпараметров и задаются через фиксированные матрицы.\url{https://sites.google.com/site/dimitriskorobilis/matlab}\\
+\item BMR: Симуляции реализованы в C++.  оценивает DSGE.  Реализует TVPBVAR. Отличная документация. \url{ http://bayes.squarespace.com/bmr/} 
+\item MSBVAR: Симуляции реализованы на фортране и C++. Реализует также марковские BVAR с переключением.  \url{https://cran.r-project.org/web/packages/MSBVAR/ }
+\item bvarr: Сопряжённое нормальное-Уишарта реализовано максимально гибко.  При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Код для Миннесоты и независимого нормального Уишарта является переводом кода Koops-Korobilis и потому крайне негибкий. \url{https://github.com/bdemeshev/bvarr }
+\item Eviews: «EViews just ignores the fact that the coefficients were estimated using Bayesian methods, and forecasts the same way as it would a classical model» 
+\item Gauss: 
+\end{enumerate}
+\newpage
+
+
+\newpage
+\subsection*{Доступные реализации кода}
+
+\begin{center}
+\begin{tabular}{p{4cm}cccccc}
+\toprule
+Источник&  Среда&Min &  Conj N-IW & Ind N-IW & SoC &IO\\
+\midrule
+% тут базовые %
+Carriero&Matlab&-&?&-&+&+ \\
+Blake Mumtaz&Matlab&-&+&+&+&+ \\
+Koop Korobilis&Matlab  & + & +  & + &- &- \\
+Zha&Matlab&&?&&+&+\\
+Le Sage&Matlab&&&&&\\
+Sims&Matlab&&&&&\\
+Canova&Matlab&&&&&\\
+BMR&R& + & - & + & - & -  \\
+MSBVAR&R & - & + & - & + & +  \\
+bvarr&R  & + & + & + & + & +  \\
+Встроенная функция&EViews& + & + & - &+ &+ \\
+Встроенная функция&Gauss& ? & ?& ?& ?&?  \\
+Встроенная функция&Dynare& ? & +& ?& +&+  \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item Carriero: Дамми-наблюдения вводятся как для conj NIW, при этом делает Gibbs sampling, при этом $\post\Phi$ одно и то же, а $\Sigma$ пересчитывается на каждом шаге в зависимости от предыдущего $\Phi$. При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Имеется странный хак, повторно генерирующий VAR коэффициенты, если собственные числа за пределами единичного круга. \url{http://cremfi.econ.qmul.ac.uk/efp/info.php} 
+\item Blake Mumtaz: Называет Миннесотой Ind NIW.  Код для conj NIW построен так же, как у Carriero через Gibbs Sampling: разница - добавляет 2 один. строки для дамми при опредеделеннии коэффициента при константе. \url{http://www.bankofengland.co.uk/education/Pages/ccbs/technical_handbooks/techbook4.aspx}
+\item Koop Korobilis: Код крайне негибкий. Без правки кода нет возможности прогнозировать больше чем на один шаг, базовые conj N-IW и ind N-IW априорное распределения не содержит  гиперпараметров и задаются через фиксированные матрицы.\url{https://sites.google.com/site/dimitriskorobilis/matlab}\\
+\item Zha: в соответствии со статьей ограничения накладываются на структурную форму VAR, соответственно дается другая интерпретация для некоторых гиперпараметров
+\item Sims \url{http://sims.princeton.edu/yftp/VARtools/}
+\item BMR: Симуляции реализованы в C++.  оценивает DSGE.  Реализует TVPBVAR. Отличная документация. \url{ http://bayes.squarespace.com/bmr/} 
+\item MSBVAR: Симуляции реализованы на фортране и C++. Реализует также марковские BVAR с переключением.  \url{https://cran.r-project.org/web/packages/MSBVAR/ }
+\item bvarr: Сопряжённое нормальное-Уишарта реализовано максимально гибко.  При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Код для Миннесоты и независимого нормального Уишарта является переводом кода Koops-Korobilis и потому крайне негибкий. \url{https://github.com/bdemeshev/bvarr }
+\item Eviews: «EViews just ignores the fact that the coefficients were estimated using Bayesian methods, and forecasts the same way as it would a classical model» . Коэффициент $\lambda_{kron}$ равен по умолчанию 0,99 и не может быть изменен. Большую свободу представляет прямое задание ковариационной матрицы. Матожидания коэффициентов при первых лагах могут быть заданы только одинаковыми для всех переменных. 
+\item Gauss: 
+\item Dynare: Функция позиционируется как BVAR 'a la Sims. Оценка возможна только "комплектом", но можно поменять априорное распределение для априорного распределения ковариационной матрицы  \url{http://www.dynare.org/}
+\end{enumerate}
+\newpage
+
+\begin{landscape}
+\subsection*{Доступные реализации кода}
+\begin{center}
+\begin{tabular}{p{2cm}cccccp{10cm}}
 \toprule
 Источник&  Min &  Conj N-IW & Ind N-IW & SoC &IO& Comment\\
 \midrule
@@ -1039,7 +1121,9 @@ A^{-1}=U^{-1}U^{-1\prime}
 % тут базовые %
 Carriero\footnote{\url{http://cremfi.econ.qmul.ac.uk/efp/info.php} }&-&?&-&+&+&Дамми-наблюдения вводятся как для conj NIW, при этом делает Gibbs sampling, при этом $\post\Phi$ одно и то же, а $\Sigma$ пересчитывается на каждом шаге в зависимости от предыдущего $\Phi$. При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Имеется странный хак, повторно генерирующий VAR коэффициенты, если собственные числа за пределами единичного круга. \\
 Blake Mumtaz\footnote{\url{http://www.bankofengland.co.uk/education/Pages/ccbs/technical_handbooks/techbook4.aspx}}&-&+&+&+&+& Называет Миннесотой Ind NIW.  Код для conj NIW построен так же, как у Carriero через Gibbs Sampling: разница - добавляет 2 один. строки для дамми при опредеделеннии коэффициента при константе\\
-Koop Korobilis & + & +  & + & & & Код крайне негибкий. Без правки кода нет возможности прогнозировать больше чем на один шаг, нет возможности задать свои гиперпараметры априорного распределения. \\
+Koop Korobilis \footnote{\url{https://sites.google.com/site/dimitriskorobilis/matlab}} & + & +  & + & & & Код крайне негибкий. Без правки кода нет возможности прогнозировать больше чем на один шаг, базовые conj N-IW и ind N-IW априорное распределения не содержит  гиперпараметров и задаются через фиксированные матрицы\\
+Zha&&&&&&\\
+Canova&&&&&&\\
 \midrule
 \multicolumn{7}{c}{Коды в среде R}\\
 \midrule
@@ -1048,12 +1132,15 @@ MSBVAR \footnote{\url{https://cran.r-project.org/web/packages/MSBVAR/ }}  & - & 
 bvarr \footnote{\url{https://github.com/bdemeshev/bvarr }} & + & + & + & + & + & Сопряжённое нормальное-Уишарта реализовано максимально гибко.  При плохо обусловленной матрице $X'X$ используется псевдо-обратная. Код для Миннесоты и независимого нормального Уишарта является переводом кода Koops-Korobilis и потому крайне негибкий. 
  \\
 \midrule
-Eviews & + & + & + & & & «EViews just ignores the fact that the coefficients were estimated using Bayesian methods, and forecasts the same way as it would a classical model»\\
-GAUSS &  & & & & & \\
+\multicolumn{7}{c}{Коды в среде EViews}\\
+\midrule
+Встроенная функция & + & + & + &- &- & «EViews just ignores the fact that the coefficients were estimated using Bayesian methods, and forecasts the same way as it would a classical model» \\
+\midrule
+\multicolumn{7}{c}{Коды в среде GAUSS}\\
+\midrule
+Встроенная функция & ? & ?& ?& ?&? & \\
 \bottomrule
 \end{tabular}
 \end{center}
 \end{landscape}
-
-
 \end{document} 
