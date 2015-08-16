@@ -230,10 +230,15 @@ bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
 # forecast VAR
-# bvar_out_forecast_list <- data.frame(model_id=unique(var_list$id), h=, type="out-of-sample")
-# .....
-# ....
+bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% mutate_each("as.numeric", T_in, T_start)
 
+h_max <- 12
+bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id, 
+                                 h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
+  select(model_id, h) %>% mutate(type="out-of-sample")
+# without rowwise min will be global and always equal to 1
+
+# HERE IS SOME ERROR!!!!!!!!
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
@@ -245,4 +250,7 @@ bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 
 bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
 head(var_obs)
+
+# calculate OMSFE 
+
 
