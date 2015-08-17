@@ -238,7 +238,7 @@ bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id,
   select(model_id, h) %>% mutate(type="out-of-sample")
 # without rowwise min will be global and always equal to 1
 
-# HERE IS SOME ERROR!!!!!!!!
+# a lot of forecasts
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations

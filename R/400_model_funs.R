@@ -245,6 +245,16 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   
   ###### out-of-sample forecasts
   
+  if ((minfo$type=="conjugate") & (pred_info$type=="out-of-sample")) {
+    n_lag <- as.numeric(minfo$n_lag)
+    Tf_start <- T_start + n_lag + T_in # is not possible to forecast first n_lag observation
+    Tf_length <- pred_info$h
+    Tf_end <- Tf_start + Tf_length - 1
+    
+    predictions <- forecast_conjugate(model, h = pred_info$h, include="mean", level=NULL, 
+                                      fast_forecast = TRUE)
+    answer <- mutate(predictions, t=h+Tf_start-1) %>% select(-what) 
+  }
   
   # ...
   # ...
