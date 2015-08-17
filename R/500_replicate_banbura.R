@@ -239,7 +239,7 @@ bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id,
 # without rowwise min will be global and always equal to 1
 
 # a lot of forecasts
-###??? maybe to many observations???
+### WARNING: maybe to many observations!!!
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
@@ -250,14 +250,19 @@ bvar_out_forecasts <- rename(bvar_out_forecasts, forecast=value)
 bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 
 bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
-head(var_obs)
+head(bvar_out_obs)
 
 # join models info 
 bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag),
                           by=c("model_id"="id"))
 bvar_out_obs %>% head()
-# calculate OMSFE 
 
-# HERE IS SOME ERROR
-omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h) %>% summarise(omsfe=mean(sq_error))
+# calculate OMSFE by var_set, h, n_lag, variable
+omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable) %>% 
+  summarise(omsfe=mean(sq_error))
 omsfe_table %>% head()
+
+# нюанс с оптимальным лямбда???? где оно????? в ответе????
+
+bvar_out_wlist %>% head()
+omsfe_table
