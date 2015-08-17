@@ -40,7 +40,7 @@ for (j in 10:31) {
 # восстановили нормальный список переменных для каждого набора 
 var_set_info <- read_csv("../data/var_set_info.csv")
 
-#### test 3: RW and WN prediction test
+#### test 3: RW and WN prediction test in-sample
 
 df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
@@ -58,7 +58,7 @@ pred_info <- plist[2,]
 pred_info
 forecast_model(pred_info, mlist, parallel = "off")
 
-#### test 3: VAR prediction test
+#### test 4: VAR prediction test in-sample
 df <- read_csv("../data/df_2015_final.csv")
 var_set_info <- read_csv("../data/var_set_info.csv")
 
@@ -72,3 +72,40 @@ var_forecast_list <- data.frame(model_id=unique(var_list$id), h=NA, type="in-sam
 pred_info <- var_forecast_list[1,]
 pred_info
 forecast_model(pred_info, mlist, parallel = "off")
+
+#### test 5: RW and WN prediction test out-of-sample
+
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
+
+mlist <- create_rwwn_list()
+mlist <- estimate_models(mlist,parallel = parallel)
+plist <- data.frame(model_id=c(1,2), h=12, type="out-of-sample")
+mlist
+
+pred_info <- plist[1,]
+pred_info
+res <- forecast_model(pred_info, mlist, parallel = "off")
+res
+
+pred_info <- plist[2,]
+pred_info
+res <- forecast_model(pred_info, mlist, parallel = "off")
+res
+
+#### test 6: VAR prediction test out-of-sample
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
+
+# estimate VAR
+var_list <- create_var_list()
+var_list <- estimate_models(var_list,parallel = parallel)
+
+# forecast VAR
+var_forecast_list <- data.frame(model_id=unique(var_list$id), h=12, type="out-of-sample")
+
+pred_info <- var_forecast_list[1,]
+pred_info
+res <- forecast_model(pred_info, mlist, parallel = "off")
+res
+
