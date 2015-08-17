@@ -202,14 +202,14 @@ fit_lam_table
 ##### banbura step 4
 # find optimal lambda
 # group_by is needed! otherwise cannot remove var_set (active group on var_set)
-fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_3") %>% group_by() %>% dplyr::select(-var_set)
+fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_3") %>% ungroup() %>% dplyr::select(-var_set)
 fit_goal
 
 fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
 fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
 best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
-  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% group_by()
+  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% ungroup()
 
 # check whether best lambda is unique
 check_uniqueness <- best_lambda %>% summarise(num_of_best_lambdas=n())
@@ -239,6 +239,7 @@ bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id,
 # without rowwise min will be global and always equal to 1
 
 # a lot of forecasts
+###??? maybe to many observations???
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
@@ -251,6 +252,12 @@ bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
 head(var_obs)
 
+# join models info 
+bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag),
+                          by=c("model_id"="id"))
+bvar_out_obs %>% head()
 # calculate OMSFE 
 
-
+# HERE IS SOME ERROR
+omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h) %>% summarise(omsfe=mean(sq_error))
+omsfe_table %>% head()
