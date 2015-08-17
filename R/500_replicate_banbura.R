@@ -221,7 +221,8 @@ check_uniqueness
 
 
 best_lambda %>% arrange(fit_set, n_lag, var_set)
-##### banbura step 5
+
+##### banbura step 5: calculate omsfe for bvar
 # forecast and evaluate using optimal lambda
 
 # create best models lists with correct time spec
@@ -261,8 +262,22 @@ bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_la
 bvar_out_obs %>% head()
 
 # calculate OMSFE by var_set, h, n_lag, variable
-omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
+omsfe_bvar_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
   summarise(omsfe=mean(sq_error))
-omsfe_table %>% head()
+omsfe_bvar_table %>% head()
+
+##### banbura step 6: calculate omsfe for RW/WN/VAR
+# look at lists:
+var_wlist
+rwwn_wlist
+str(rwwn_wlist)
+rwwn_var_wlist <- rbind_list(var_wlist, rwwn_wlist)
+
+rwwn_var_wlist
+
+##### banbura step 7: calculate relative omsfe 
+
+
+
 
 

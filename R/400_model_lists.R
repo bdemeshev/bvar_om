@@ -75,6 +75,7 @@ create_rwwn_list <- function() {
   # в столбце value получаем тип character
   df <- data_frame(type=c("rw","wn"),
                    var_set="set_23",
+                   n_lag=c(1,0),
                    T_start=c(p_max,p_max+1), T_in=c(T_common + 1, T_common),
                    status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 
