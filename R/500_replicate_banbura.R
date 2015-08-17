@@ -289,7 +289,7 @@ rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=i
 # without rowwise min will be global and always equal to 1
 
 # forecast all rolling models  
-# value for var is CHARACTER error!!!!!
+# value for var is CHARACTER sometimes error!!!!!
 rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list)
 glimpse(rwwn_var_out_forecasts)
 
