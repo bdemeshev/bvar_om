@@ -106,6 +106,5 @@ var_forecast_list <- data.frame(model_id=unique(var_list$id), h=12, type="out-of
 
 pred_info <- var_forecast_list[1,]
 pred_info
-res <- forecast_model(pred_info, mlist, parallel = "off")
+res <- forecast_model(pred_info, var_list, parallel = "off")
 res
-

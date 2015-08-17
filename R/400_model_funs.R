@@ -286,10 +286,18 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- pred_info$h
     Tf_end <- Tf_start + Tf_length - 1
     
-    answer <- predict(model, n.ahead = pred_info$h) %>%
-      filter(Var2=="fcst") %>%
-      select(h=Var1, variable=L1, value) %>%
-      mutate(t=h+Tf_start-1)
+    answer <- predict(model, n.ahead = pred_info$h)$fcst %>% melt() %>%
+      filter(Var2=="fcst")
+    
+    # in cases (h==1) and (h>1) predict+melt returns different Var1
+    if (pred_info$h==1) {
+      answer <- answer %>% select(variable=L1, value) %>%
+         mutate(h=1, t=h+Tf_start-1)
+    } else { # case (h>1)
+      answer <- answer %>% select(h=Var1, variable=L1, value) %>%
+         mutate(t=h+Tf_start-1)
+    }
+    answer <- mutate(answer, value=as.numeric(value))
   }
   
   # ...

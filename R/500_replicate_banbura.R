@@ -288,14 +288,33 @@ rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=i
   select(model_id, h) %>% mutate(type="out-of-sample")
 # without rowwise min will be global and always equal to 1
 
-# ERROR: 
+# forecast all rolling models  
 rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list)
 
-forecast_model(rwwn_var_out_forecast_list[1,],rwwn_var_list)
+
+# joining actual observations
+df <- mutate(df, t=row_number()) 
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+
+rwwn_var_out_forecasts <- rename(rwwn_var_out_forecasts, forecast=value)
+rwwn_var_out_obs <- left_join(rwwn_var_out_forecasts, actual_obs, by=c("t","variable"))
+
+rwwn_var_out_obs <- mutate(rwwn_var_out_obs, sq_error=(forecast-actual)^2)
+head(rwwn_var_out_obs)
+glimpse(rwwn_var_out_obs)
+
+# join models info 
+rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_wlist, id, var_set, n_lag),
+                          by=c("model_id"="id"))
+rwwn_var_out_obs %>% head()
+
+# calculate OMSFE by var_set, h, n_lag, variable
+omsfe_bvar_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
+  summarise(omsfe=mean(sq_error))
+omsfe_bvar_table %>% head()
+
+
 
 ##### banbura step 7: calculate relative omsfe 
-
-
-
 
 
