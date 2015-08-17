@@ -140,6 +140,27 @@ create_bvar_banbura_list <- function() {
   return(df)
 }
 
+# add for each model all possible shifts for T_in
+rolling_model_replicate <- function(df_small) {
+  # we need df_small with n_lag
+  
+  # add starting time:
+  # T_start should vary from (p_max + 1 - n_lag) to (T_available - T_common - n_lag)
+  df <- mutate(df_small, rownum = row_number(), T_start_min = p_max + 1 - n_lag, 
+               T_start_max = T_available - T_common - n_lag,
+               T_start_amount = T_start_max - T_start_min + 1)
+  replicator <- rep(df$rownum, times = df$T_start_amount)
+  df_big <- df[replicator,]
+  df_big <- df_big %>% group_by(rownum) %>% 
+    mutate(T_start = T_start_min + row_number() - 1)
+  
+  # remove auxillary variables, create id
+  df_big <- ungroup(df_big) %>% 
+    select(-T_start_min, -T_start_max, -T_start_amount, -rownum) %>%
+    mutate(status="not estimated", id=row_number())   
+
+  return(df_big)
+}
 
 
 create_bvar_out_list <- function(best_lambda) {
@@ -148,19 +169,10 @@ create_bvar_out_list <- function(best_lambda) {
   df <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
   df <- mutate_each(df, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
   df <- mutate(df, status = "not estimated", type = "conjugate", 
-               seed=13, T_in = n_lag + T_common, rownum = row_number() )
+               seed=13, T_in = n_lag + T_common )
   
-  # add starting time:
-  # T_start should vary from (p_max + 1 - n_lag) to (T_available - T_common - n_lag)
-  df <- mutate(df, T_start_min = p_max + 1 - n_lag, 
-                   T_start_max = T_available - T_common - n_lag,
-                   T_start_amount = T_start_max - T_start_min + 1)
-  replicator <- rep(df$rownum, times = df$T_start_amount)
-  df_big <- df[replicator,]
-  df_big <- df_big %>% group_by(rownum) %>% 
-    mutate(T_start = T_start_min + row_number() - 1)
-
-  df_big <- ungroup(df_big) %>% mutate(id=row_number())
+  df_big <- rolling_model_replicate(df) 
+  
   df_big <- df_big %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
@@ -171,7 +183,7 @@ create_bvar_out_list <- function(best_lambda) {
                                   ".Rds") ) 
   # df <- df %>% mutate_each("as.factor",type, status, var_set) 
   
-  df_big <- df_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
+  # df_big <- df_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
   
   df_melted <- reshape2::melt(df_big, id.vars="id") %>% arrange(id)
   

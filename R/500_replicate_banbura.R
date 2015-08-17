@@ -271,9 +271,27 @@ omsfe_bvar_table %>% head()
 var_wlist
 rwwn_wlist
 str(rwwn_wlist)
-rwwn_var_wlist <- rbind_list(var_wlist, rwwn_wlist)
 
-rwwn_var_wlist
+rwwn_var_unique_wlist <- rbind_list(var_wlist, rwwn_wlist) %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+
+# every model should be rolled
+rwwn_var_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>% 
+  mutate(file=paste0(type,"_",id,
+                     "_T_",T_start,"_",T_in,"_",
+                                var_set,"_lags_",n_lag,".Rds") ) 
+rwwn_var_list <- melt(rwwn_var_wlist, id.vars = "id") %>% arrange(id)
+rwwn_var_list <- estimate_models(rwwn_var_list,parallel = parallel) # takes some minutes
+
+h_max <- 12
+rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=id, 
+  h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
+  select(model_id, h) %>% mutate(type="out-of-sample")
+# without rowwise min will be global and always equal to 1
+
+# ERROR: 
+rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list)
+
+forecast_model(rwwn_var_out_forecast_list[1,],rwwn_var_list)
 
 ##### banbura step 7: calculate relative omsfe 
 
