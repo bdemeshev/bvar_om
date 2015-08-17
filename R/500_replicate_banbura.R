@@ -208,8 +208,10 @@ fit_goal
 fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
 fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
+# for each var_set, n_lag, fit_set the best lambdas are calculated
 best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
   mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% ungroup()
+
 
 # check whether best lambda is unique
 check_uniqueness <- best_lambda %>% summarise(num_of_best_lambdas=n())
@@ -223,8 +225,9 @@ best_lambda %>% arrange(fit_set, n_lag, var_set)
 # forecast and evaluate using optimal lambda
 
 # create best models lists with correct time spec
+# we need to keep fit_set variable for further comparison
 bvar_out_list  <- create_bvar_out_list(best_lambda)
-# best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power, l_sc
+# best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set
 
 bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
@@ -253,16 +256,13 @@ bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
 head(bvar_out_obs)
 
 # join models info 
-bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag),
+bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag, fit_set),
                           by=c("model_id"="id"))
 bvar_out_obs %>% head()
 
 # calculate OMSFE by var_set, h, n_lag, variable
-omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable) %>% 
+omsfe_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
   summarise(omsfe=mean(sq_error))
 omsfe_table %>% head()
 
-# нюанс с оптимальным лямбда???? где оно????? в ответе????
 
-bvar_out_wlist %>% head()
-omsfe_table

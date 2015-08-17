@@ -246,7 +246,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   ###### out-of-sample forecasts
   
   if ((minfo$type=="conjugate") & (pred_info$type=="out-of-sample")) {
-    n_lag <- as.numeric(minfo$n_lag)
+    # n_lag <- as.numeric(minfo$n_lag)
     Tf_start <- T_start + T_in # where forecast starts
     Tf_length <- pred_info$h
     Tf_end <- Tf_start + Tf_length - 1
@@ -256,8 +256,42 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     answer <- mutate(predictions, t=h+Tf_start-1) %>% select(-what) 
   }
   
-  # ...
-  # ...
+  if ((minfo$type=="wn") & (pred_info$type=="out-of-sample")) {
+    Tf_start <- T_start + T_in # where forecast starts
+    Tf_length <- pred_info$h
+    Tf_end <- Tf_start + Tf_length - 1
+    
+    value <- model$coef[rep(1:n_vars,Tf_length)]
+    t <- rep(Tf_start:Tf_end, each=n_vars)
+    answer <- data_frame(value=value, t=t, 
+                         variable = rep(variables, Tf_length), h=t-Tf_start+1)
+  }
+  
+  if ((minfo$type=="rw") & (pred_info$type=="out-of-sample")) {
+    Tf_start <- T_start + T_in # where forecast starts
+    Tf_length <- pred_info$h
+    Tf_end <- Tf_start + Tf_length - 1
+    
+    ## multivariate analog of simple idea: y_last + (1:h)*Delta_y
+    y_last <- c(t(D[Tf_start-1,])) # c(t()) is a transformation of data.frame row into a vector
+    value <- y_last + rep(1:Tf_length, each=n_vars) * model$coef[rep(1:n_vars,Tf_length)] 
+    t <- rep(Tf_start:Tf_end, each=n_vars)
+    answer <- data_frame(value=value, t=t, 
+                         variable = rep(variables, Tf_length), h=t-Tf_start+1)
+  }
+  
+  if ((minfo$type=="var") & (pred_info$type=="out-of-sample")) {
+    n_lag <- as.numeric(minfo$n_lag)
+    Tf_start <- T_start + T_in # where forecast starts
+    Tf_length <- pred_info$h
+    Tf_end <- Tf_start + Tf_length - 1
+    
+    answer <- predict(model, n.ahead = pred_info$h) %>%
+      filter(Var2=="fcst") %>%
+      select(h=Var1, variable=L1, value) %>%
+      mutate(t=h+Tf_start-1)
+  }
+  
   # ...
   
   answer$model_id <- model_id

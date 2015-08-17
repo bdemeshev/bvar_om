@@ -143,7 +143,8 @@ create_bvar_banbura_list <- function() {
 
 create_bvar_out_list <- function(best_lambda) {
   # ungroup and clear junk variables from data.frame:
-  df <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc)
+  # we need to keep fit_set variable for further comparison 
+  df <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
   df <- mutate_each(df, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
   df <- mutate(df, status = "not estimated", type = "conjugate", 
                seed=13, T_in = n_lag + T_common, rownum = row_number() )
