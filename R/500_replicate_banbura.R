@@ -289,8 +289,9 @@ rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=i
 # without rowwise min will be global and always equal to 1
 
 # forecast all rolling models  
+# value for var is CHARACTER error!!!!!
 rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list)
-
+glimpse(rwwn_var_out_forecasts)
 
 # joining actual observations
 df <- mutate(df, t=row_number()) 
@@ -309,11 +310,9 @@ rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_wlist, id, v
 rwwn_var_out_obs %>% head()
 
 # calculate OMSFE by var_set, h, n_lag, variable
-omsfe_bvar_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
+omsfe_rwwn_var_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable) %>% 
   summarise(omsfe=mean(sq_error))
-omsfe_bvar_table %>% head()
-
-
+omsfe_rwwn_var_table %>% head()
 
 ##### banbura step 7: calculate relative omsfe 
 
