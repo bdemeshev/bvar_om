@@ -95,7 +95,7 @@ create_rwwn_list <- function() {
 create_var_list <- function() {
   # в столбце value получаем тип character
   df <- expand.grid(type="var", 
-                    var_set=c("set_3","set_6","set_23"),
+                    var_set=c("set_3","set_6"), # no set 23 in var
                     n_lag=c(1,6,12),
                     status="not estimated")
   df <- df %>% mutate_each("as.character",type, status, var_set) 

@@ -213,8 +213,10 @@ best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>%
   mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% ungroup()
 
 
+
+
 # check whether best lambda is unique
-check_uniqueness <- best_lambda %>% summarise(num_of_best_lambdas=n())
+check_uniqueness <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% summarise(num_of_best_lambdas=n())
 # num of best lambdas should be always one
 if (max(check_uniqueness$num_of_best_lambdas)>1) warning("**** ACHTUNG ****: non unique optimal lambdas")
 check_uniqueness
@@ -276,25 +278,22 @@ str(rwwn_wlist)
 rwwn_var_unique_wlist <- rbind_list(var_wlist, rwwn_wlist) %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
-rwwn_var_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>% 
+rwwn_var_out_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>% 
   mutate(file=paste0(type,"_",id,
                      "_T_",T_start,"_",T_in,"_",
                                 var_set,"_lags_",n_lag,".Rds") ) 
-rwwn_var_list <- melt(rwwn_var_wlist, id.vars = "id") %>% arrange(id)
-rwwn_var_list <- estimate_models(rwwn_var_list,parallel = parallel) # takes some minutes
+rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
+rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
 
 h_max <- 12
-rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=id, 
+rwwn_var_out_forecast_list <- rwwn_var_out_wlist %>% rowwise() %>% mutate(model_id=id, 
   h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
 # without rowwise min will be global and always equal to 1
 
 # forecast all rolling models  
 message("Forecasting rolling rw/wn/var models, out-of-sample")
-rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list, progress_bar=TRUE)
-# model_id 600, NA in value
-
-
+rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, progress_bar=TRUE)
 
 
 # joining actual observations
