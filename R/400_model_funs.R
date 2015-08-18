@@ -76,18 +76,26 @@ estimate_model <- function(model_info,
     model <- bvar_conjugate0(priors = priors, 
                              verbose=verbose, keep=keep, 
                              fast_forecast = TRUE) 
+    status <- "estimated"
   }
   
   
   if (minfo$type=="var") {
     n_lag <- as.numeric(minfo$n_lag)
     model <- VAR(D, p=n_lag, type="const") 
+    status <- "estimated"
+    
+    if (sum(is.na(unlist(coef(model))))>0) {
+      message("Can't estimate VAR model id = ",minfo$id,", file =",minfo$file)
+      status <- "failed"
+    }
   }
   
   if (minfo$type=="wn") {
     model_vector <- c(t(apply(D, MARGIN=2, mean))) # just sample means of variables
     model <- data.frame(variables=variables)
     model$coef <- model_vector
+    status <- "estimated"
   }
   
   if (minfo$type=="rw") {
@@ -95,6 +103,7 @@ estimate_model <- function(model_info,
     model_vector <- c(t((tail(D,1)-head(D,1))/ (nrow(D)-1)))
     model <- data.frame(variables=variables)
     model$coef <- model_vector
+    status <- "estimated"
   }
   
   
@@ -104,7 +113,7 @@ estimate_model <- function(model_info,
     close(log_con)
   }
   
-  status <- "estimated"
+  
   
   return(status)
 }
@@ -113,7 +122,8 @@ estimate_model <- function(model_info,
 
 
 estimate_models <- function(mlist, parallel = c("off","windows","unix"), 
-                            no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE) {
+                            no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE,
+                            progress_bar=TRUE) {
   
   parallel <- match.arg(parallel)
   
@@ -154,10 +164,17 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
   }
   
   if (parallel=="off") {
-    for (i in model_ids)  {
-      model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, do_log=do_log, test=test)
-      mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
+    
+    if (length(model_ids)>0) {
+      if (progress_bar) pb <- txtProgressBar(min = 1, max = length(model_ids), style = 3)
+      for (i in 1:length(model_ids))  {
+        model_info <- mlist_todo %>% dplyr::filter(id==model_ids[i])
+        status <- estimate_model(model_info, do_log=do_log, test=test)
+        mlist$value[(mlist$id==model_ids[i])&(mlist$variable=="status")] <- status
+        
+        if (progress_bar) setTxtProgressBar(pb, i)
+      }
+      if (progress_bar) close(pb)
     }
   }
   
@@ -300,10 +317,9 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     answer <- mutate(answer, value=as.numeric(value))
   }
   
-  # ...
   
   answer$model_id <- model_id
-  # answer$h <- pred_info$h # WRONG! max_h is requested, but all h will be computed!!!!
+  # easy answer$h <- pred_info$h is WRONG! max_h is requested, but all h will be computed!!!!
   answer$type <- pred_info$type
   
   return(answer) 
