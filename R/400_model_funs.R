@@ -315,17 +315,23 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
 
 # function to make forecasts of many model for many datasets
 forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
-                            ncpu=4, test=FALSE, do_log=FALSE) {
+                            ncpu=4, test=FALSE, do_log=FALSE,
+                            progress_bar=TRUE) {
   
   parallel <- match.arg(parallel)
   
   answer <- NULL
   if (parallel=="off") {
     # fast version using rbindlist from data.table
-    answer <- data.frame(data.table::rbindlist(lapply(1:nrow(plist),
-                function(x) forecast_model(plist[x,],mlist=mlist, parallel = parallel,
-                                           ncpu=ncpu, test=test, do_log=do_log)
-                                          )))
+    all_data <- list()
+    if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(plist), style = 3)
+    for (i in 1:nrow(plist)) {
+      all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, parallel = parallel,
+                                      ncpu=ncpu, test=test, do_log=do_log)
+      if (progress_bar) setTxtProgressBar(pb, i)
+    }
+    if (progress_bar) close(pb)
+    answer <- rbind_all(all_data)
   }
   return(answer) 
 }

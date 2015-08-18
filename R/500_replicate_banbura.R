@@ -148,7 +148,7 @@ bvar_list <- read_csv("../estimation/bvar_list.csv")
 bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu) # status and filename are updated
 write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
-# forecast VAR
+# forecast BVAR
 bvar_forecast_list <- data.frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
@@ -244,6 +244,7 @@ bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id,
 
 # a lot of forecasts
 ### WARNING: maybe to many observations!!!
+message("Forecasting rolling bvar models, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
@@ -289,9 +290,12 @@ rwwn_var_out_forecast_list <- rwwn_var_wlist %>% rowwise() %>% mutate(model_id=i
 # without rowwise min will be global and always equal to 1
 
 # forecast all rolling models  
-# value for var is CHARACTER sometimes error!!!!!
-rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list)
-glimpse(rwwn_var_out_forecasts)
+message("Forecasting rolling rw/wn/var models, out-of-sample")
+rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_list, progress_bar=TRUE)
+# model_id 600, NA in value
+
+
+
 
 # joining actual observations
 df <- mutate(df, t=row_number()) 
