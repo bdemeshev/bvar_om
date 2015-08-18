@@ -308,14 +308,14 @@ head(rwwn_var_out_obs)
 glimpse(rwwn_var_out_obs)
 
 # join models info 
-rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_wlist, id, var_set, n_lag),
+rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_wlist, id, var_set, n_lag, model_type=type),
                           by=c("model_id"="id"))
 rwwn_var_out_obs %>% head()
 
-# calculate OMSFE by var_set, h, n_lag, variable
-omsfe_rwwn_var_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable) %>% 
+# calculate OMSFE by var_set, h, n_lag, variable, model_type
+omsfe_rwwn_var_table <- rwwn_var_out_obs %>% group_by(var_set, n_lag, h, variable, model_type) %>% 
   summarise(omsfe=mean(sq_error))
-omsfe_rwwn_var_table %>% head()
+omsfe_rwwn_var_table 
 
 ##### banbura step 7: calculate relative omsfe 
 
