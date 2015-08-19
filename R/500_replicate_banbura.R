@@ -30,10 +30,12 @@ deltas
 
 # estimate all RW and WN models
 rwwn_list <- create_rwwn_list()
+message("Estimate RW and WN")
 rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
 
 # forecast all RW and WN models
 rwwn_forecast_list <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
+message("Forecast RW and WN")
 rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 
 # calculate all msfe-0
@@ -86,10 +88,12 @@ fit_set_info
 
 # estimate VAR
 var_list <- create_var_list()
+message("Estimating VAR")
 var_list <- estimate_models(var_list,parallel = parallel)
 
 # forecast VAR
 var_forecast_list <- data.frame(model_id=unique(var_list$id), h=NA, type="in-sample")
+message("Forecasting VAR")
 var_forecasts <- forecast_models(var_forecast_list, var_list)
 
 # joining actual observations
@@ -149,11 +153,13 @@ write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # estimate models from list
 bvar_list <- read_csv("../estimation/bvar_list.csv")
-bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu) # status and filename are updated
+message("Estimating BVAR")
+bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=TRUE) # status and filename are updated
 write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
 bvar_forecast_list <- data.frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
+message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
 # joining actual observations
@@ -239,6 +245,7 @@ best_lambda %>% arrange(fit_set, n_lag, var_set)
 bvar_out_list  <- create_bvar_out_list(best_lambda)
 # best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set
 
+message("Estimate rolling BVAR")
 bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
@@ -255,7 +262,7 @@ bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id,
 
 # a lot of forecasts
 ### WARNING: maybe to many observations!!!
-message("Forecasting rolling bvar models, out-of-sample")
+message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
@@ -292,6 +299,7 @@ rwwn_var_out_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>%
                      "_T_",T_start,"_",T_in,"_",
                                 var_set,"_lags_",n_lag,".Rds") ) 
 rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
+message("Estimating rolling rw/wn/var models")
 rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
 
 h_max <- 12

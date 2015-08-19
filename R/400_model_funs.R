@@ -22,6 +22,7 @@ estimate_model <- function(model_info,
   model_full_path <- paste0("../estimation/models/",minfo$file)
   
   
+  if (test) message("Estimating model for file ", minfo$file, "...")
   
   if (do_log) {
     log_con <- file(paste0("../estimation/log_model_",minfo$id,".csv"), open="a")

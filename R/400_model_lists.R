@@ -115,13 +115,14 @@ create_bvar_banbura_list <- function() {
   df <- expand.grid(type="conjugate", 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=c(1,6,12),
-                    l_1=c(0.01,0.1,1,2,5,10),
+                    l_1=c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf),
                     l_power=1,
-                    l_const=1,
-                    l_sc=1,
+                    l_const=Inf,
+                    # l_sc=1,
                     l_io=1,
                     seed=13, # good luck, mcmc
                     status="not estimated")
+  df <- df %>% mutate(l_sc=10*l_1)
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
   df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
