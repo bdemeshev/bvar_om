@@ -154,7 +154,7 @@ write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 # estimate models from list
 bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
-bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=TRUE) # status and filename are updated
+bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
 write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
@@ -223,8 +223,8 @@ fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
 # for each var_set, n_lag, fit_set the best lambdas are calculated
 best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
-  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank==1) %>% ungroup()
-
+  mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank == 1) %>% ungroup()
+best_lambda
 
 
 
@@ -232,10 +232,15 @@ best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>%
 check_uniqueness <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% summarise(num_of_best_lambdas=n())
 # num of best lambdas should be always one
 if (max(check_uniqueness$num_of_best_lambdas)>1) warning("**** ACHTUNG ****: non unique optimal lambdas")
-check_uniqueness
+check_uniqueness %>% filter(num_of_best_lambdas>1)
 
+# choose best_lambda in tie case --- with no sc if possible
+best_lambda <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% 
+  mutate(sc_na_bonus=is.na(l_sc)) %>% arrange(desc(sc_na_bonus)) %>% 
+  mutate(fit_tie_rank=row_number()) %>% 
+  filter(fit_tie_rank == 1) %>% ungroup()
+best_lambda
 
-best_lambda %>% arrange(fit_set, n_lag, var_set)
 
 ##### banbura step 5: calculate omsfe for bvar
 # forecast and evaluate using optimal lambda
@@ -386,4 +391,4 @@ test_3vs3 <- test_3vs3 %>%
   mutate(diff=abs(rmsfe_bvar-rmsfe_var_3)) %>% 
   arrange(diff)
 
-
+# FUCK! h>1, n_lag=1 ===> omsfe(bvar_3) <> omsfe(var_3)

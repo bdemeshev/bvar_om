@@ -112,6 +112,8 @@ forecast(model, out-of-sample=FALSE)
 потестить:
 - bvar optimal и var-3
 - без fast_forecast
+- при добавлении искуственных наблюдений (просто, а также sc, io) какое T брать при 
+преобразовании v_post=v_prior + T
 
 
 
