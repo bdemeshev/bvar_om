@@ -109,6 +109,9 @@ forecast(model, h=)
 forecast(model, out-of-sample=FALSE)
 
 
+потестить:
+- bvar optimal и var-3
+- без fast_forecast
 
 
 

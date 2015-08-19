@@ -369,3 +369,6 @@ rwwn_rel_msfe <- rwwn_rel_msfe %>% mutate(rmsfe_bvar=omsfe_bvar/omsfe_rwwn,
                                           rmsfe_var_3=omsfe_var_3/omsfe_rwwn,
                                           rmsfe_var_6=omsfe_var_6/omsfe_rwwn)
 rwwn_rel_msfe
+
+# test bvar set_3 against var_3
+test_3vs3 <- rwwn_rel_msfe %>% filter(var_set=="set_3") %>% na.omit()
