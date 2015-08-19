@@ -108,3 +108,15 @@ pred_info <- var_forecast_list[1,]
 pred_info
 res <- forecast_model(pred_info, var_list, parallel = "off")
 res
+
+#### test 7: BVAR estimation error
+df <- read_csv("../data/df_2015_final.csv")
+var_set_info <- read_csv("../data/var_set_info.csv")
+
+bvar_list <- create_bvar_banbura_list()
+
+
+model_info <- bvar_list %>% filter(id==9)
+model_info
+estimate_model(model_info, test=TRUE)
+estimate_model(model_info)
