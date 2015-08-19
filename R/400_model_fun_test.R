@@ -116,7 +116,7 @@ var_set_info <- read_csv("../data/var_set_info.csv")
 bvar_list <- create_bvar_banbura_list()
 
 
-model_info <- bvar_list %>% filter(id==9)
+model_info <- bvar_list %>% filter(id==154)
 model_info
 estimate_model(model_info, test=TRUE)
 estimate_model(model_info)

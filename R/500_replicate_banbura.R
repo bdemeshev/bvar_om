@@ -385,10 +385,12 @@ rwwn_rel_msfe
 
 # test bvar set_3 against var_3
 test_3vs3 <- rwwn_rel_msfe %>% filter(var_set=="set_3") %>% na.omit()
-best_lambda %>% filter(var_set=="set_3")
+best_lambda %>% filter(var_set=="set_3") 
 
 test_3vs3 <- test_3vs3 %>% 
   mutate(diff=abs(rmsfe_bvar-rmsfe_var_3)) %>% 
-  arrange(diff)
+  arrange(diff) 
 
 # FUCK! h>1, n_lag=1 ===> omsfe(bvar_3) <> omsfe(var_3)
+
+t33 <- test_3vs3 %>% filter(n_lag==1, variable=="ind_prod", fit_set=="ind+cpi", h<5)

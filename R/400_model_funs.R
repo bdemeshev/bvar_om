@@ -58,10 +58,8 @@ estimate_model <- function(model_info,
     
     fast_forecast <- TRUE # later we may add as option
     
-    priors <- Carriero_priors( D, p=n_lag,    # p=n_lag, for 23 only 5 
-                               lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo),
-                               dummy_io=!is.na(l_io),
-                               dummy_sc=!is.na(l_sc))
+    priors <- Carriero_priors( D, p=n_lag,    # p=n_lag
+                               lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
     
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
