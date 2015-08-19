@@ -119,10 +119,15 @@ create_bvar_banbura_list <- function() {
                     l_power=1,
                     l_const=Inf,
                     # l_sc=1,
-                    l_io=1,
+                    l_io=c(1,NA), # NA means no initial observations
                     seed=13, # good luck, mcmc
                     status="not estimated")
-  df <- df %>% mutate(l_sc=10*l_1)
+  
+  # add no sc dummy and l_sc=10*l_1
+  df_sc <- df %>% mutate(l_sc=10*l_1)
+  df_nosc <- df %>% mutate(l_sc=NA)
+  df <- rbind_list(df_sc,df_nosc)
+  
   df <- df %>% mutate_each("as.character",type, status, var_set) 
   df <- df %>% mutate(id=row_number())
   df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
