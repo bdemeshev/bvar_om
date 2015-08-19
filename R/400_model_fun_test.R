@@ -120,3 +120,12 @@ model_info <- bvar_list %>% filter(id==154)
 model_info
 estimate_model(model_info, test=TRUE)
 estimate_model(model_info)
+
+#### test 8: BVAR forecasting error suspected for n_lag=1, h>1
+?forecast_conjugate
+
+data(Yraw)
+priors <- Carriero_priors(Yraw, p = 2)
+model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = TRUE)
+forecast_conjugate(model, h=5, output="wide")
+
