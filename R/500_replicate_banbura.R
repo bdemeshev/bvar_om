@@ -64,7 +64,8 @@ msfe0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(s
 msfe0_all
 
 # add rw/wn label to msfe0
-rwwn_wlist <- dcast(rwwn_list, id~variable) # wlist = wide list
+rwwn_wlist <- dcast(rwwn_list, id~variable) %>% # wlist = wide list
+  mutate_each("as.numeric",n_lag,T_start,T_in) 
 msfe0_all <- left_join(msfe0_all, select(rwwn_wlist, id, type), by=c("model_id"="id") )
 
 msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
@@ -107,8 +108,9 @@ msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe_Inf=mean
 msfe_Inf
 
 # join model info
-var_wlist <- dcast(var_list, id~variable)
-var_wlist
+var_wlist <- dcast(var_list, id~variable) %>%
+  mutate_each("as.numeric",n_lag,T_start,T_in)
+var_wlist %>% glimpse()
 msfe_Inf_info <- left_join(msfe_Inf, select(var_wlist, id, type, var_set, n_lag),
                            by=c("model_id"="id"))
 msfe_Inf_info
@@ -116,7 +118,9 @@ msfe_Inf_info
 
 # msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
 # join msfe0
-msfe_0_Inf <- left_join(msfe_Inf_info,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
+msfe_0_Inf <- left_join(msfe_Inf_info,
+                        msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe),
+                        by="variable")
 
 msfe_0_Inf <- msfe_0_Inf %>% select(-model_id,-type) %>% 
   mutate(msfe_ratio=msfe_Inf/msfe0)
@@ -168,7 +172,8 @@ msfe_lam <- bvar_obs %>% group_by(variable, model_id) %>% summarise(msfe_lam=mea
 msfe_lam
 
 # join model info
-bvar_wlist <- dcast(bvar_list, id~variable)
+bvar_wlist <- dcast(bvar_list, id~variable) %>%
+  mutate_each("as.numeric",n_lag,T_start,T_in)
 bvar_wlist %>% select(-file,-type)
 
 msfe_lam_info <- left_join(msfe_lam, 
@@ -178,7 +183,9 @@ msfe_lam_info <- left_join(msfe_lam,
 msfe_lam_info 
 
 # join msfe0
-msfe_0_lam <- left_join(msfe_lam_info,msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe))
+msfe_0_lam <- left_join(msfe_lam_info,msfe0 
+                        %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe),
+                        by="variable")
 
 msfe_0_lam <- msfe_0_lam %>% select(-model_id,-type) %>% 
   mutate(msfe_ratio=msfe_lam/msfe0)
@@ -236,7 +243,9 @@ bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
 # forecast VAR
-bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% mutate_each("as.numeric", T_in, T_start)
+bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% 
+  mutate_each("as.numeric", n_lag, seed, starts_with("l_"), starts_with("T_") )
+bvar_out_wlist %>% glimpse()
 
 h_max <- 12
 bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id, 
@@ -330,15 +339,33 @@ omsfe_selected_rwwn <- left_join(deltas,
                     filter(omsfe_rwwn_var_table, model_type %in% c("wn","rw")),
                     by=c("rw_wn"="model_type","variable"="variable")) %>% 
          select(-var_set, -n_lag, -delta)
-omsfe_selected_rwwn
-omsfe_bvar_table
+omsfe_selected_rwwn %>% glimpse()
 
-# rwwn-relative-msfe
+
+omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_lag) 
+
+# relative-msfe
 rwwn_rel_msfe <- left_join(omsfe_bvar_table %>% rename(omsfe_bvar=omsfe), 
                            omsfe_selected_rwwn %>% rename(omsfe_rwwn=omsfe), 
-                           by=c("variable","h")) %>%
-                 mutate(rwwn_rmsfe=omsfe_bvar/omsfe_rwwn)
+                           by=c("variable","h")) 
+rwwn_rel_msfe %>% filter(fit_set=="ind+cpi+rate",var_set=="set_23",n_lag==6,h==12)
+
+rwwn_rel_msfe %>% glimpse()
+
+# casting VAR models 
+var_cast <- ungroup(omsfe_rwwn_var_table) %>%
+          filter(model_type=="var") %>% select(-model_type) %>%
+          rename(omsfe_var=omsfe) %>% 
+          mutate(var_set=plyr::revalue(var_set, c("set_3"="omsfe_var_3","set_6"="omsfe_var_6"))) %>%
+  dcast(variable+n_lag+h~var_set, value.var="omsfe_var")
+var_cast
+
+# joining omsfe from VAR
+rwwn_rel_msfe <- left_join(rwwn_rel_msfe, var_cast, by=c("variable","n_lag","h"))
 rwwn_rel_msfe
 
-# var-relative-msfe
-
+# calculate rel-msfe
+rwwn_rel_msfe <- rwwn_rel_msfe %>% mutate(rmsfe_bvar=omsfe_bvar/omsfe_rwwn,
+                                          rmsfe_var_3=omsfe_var_3/omsfe_rwwn,
+                                          rmsfe_var_6=omsfe_var_6/omsfe_rwwn)
+rwwn_rel_msfe
