@@ -319,4 +319,26 @@ omsfe_rwwn_var_table
 
 ##### banbura step 7: calculate relative omsfe 
 
+# we need to join:
+# omsfe_bvar_table, omsfe_rwwn_var_table, deltas
+omsfe_rwwn_var_table
+deltas
+omsfe_bvar_table
+
+# select rw or wn omsfe for each variable, for each h
+omsfe_selected_rwwn <- left_join(deltas, 
+                    filter(omsfe_rwwn_var_table, model_type %in% c("wn","rw")),
+                    by=c("rw_wn"="model_type","variable"="variable")) %>% 
+         select(-var_set, -n_lag, -delta)
+omsfe_selected_rwwn
+omsfe_bvar_table
+
+# rwwn-relative-msfe
+rwwn_rel_msfe <- left_join(omsfe_bvar_table %>% rename(omsfe_bvar=omsfe), 
+                           omsfe_selected_rwwn %>% rename(omsfe_rwwn=omsfe), 
+                           by=c("variable","h")) %>%
+                 mutate(rwwn_rmsfe=omsfe_bvar/omsfe_rwwn)
+rwwn_rel_msfe
+
+# var-relative-msfe
 
