@@ -41,7 +41,7 @@ p_max <- 12 # для выравнивания первого внутривыб�
 
 create_model_list <- function() {
   # в столбце value получаем тип character
-  df <- expand.grid(type="conjugate", 
+  mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=12,
                     l_1=c(0.01,0.1,1,2,5,10),
@@ -51,10 +51,10 @@ create_model_list <- function() {
                     l_io=1,
                     seed=13, # good luck, mcmc
                     status="not estimated")
-  df <- df %>% mutate_each("as.character",type, status, var_set) 
-  df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
                                   "_sc_",round(100*l_sc),
@@ -62,57 +62,92 @@ create_model_list <- function() {
                                   "_pow_",round(100*l_power),
                                   "_cst_",round(100*l_const),
                                   ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
   
-  return(df)
+  return(mlist)
 }
 
 
 
 create_rwwn_list <- function() {
   # в столбце value получаем тип character
-  df <- data_frame(type=c("rw","wn"),
+  mlist <- data_frame(type=c("rw","wn"),
                    var_set="set_23",
                    n_lag=c(1,0),
                    T_start=c(p_max,p_max+1), T_in=c(T_common + 1, T_common),
                    status="not estimated")
-  df <- df %>% mutate_each("as.character",type, status, var_set) 
-  df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,
                                   ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
   
-  return(df)
+  return(mlist)
 }
 
 
 
 create_var_list <- function() {
   # в столбце value получаем тип character
-  df <- expand.grid(type="var", 
+  mlist <- expand.grid(type="var", 
                     var_set=c("set_3","set_6"), # no set 23 in var
                     n_lag=c(1,6,12),
                     status="not estimated")
-  df <- df %>% mutate_each("as.character",type, status, var_set) 
-  df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
-  return(df)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  return(mlist)
 }
+
+create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max = 24) {
+  criterion <- match.arg(criterion)
+  # в столбце value получаем тип character
+  mlist <- expand.grid(type="var", 
+                    var_set=c("set_3","set_6"), # no set 23 in var
+                    n_lag=NA, # will fill them automatically! :)
+                    status="not estimated")
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  
+  # here we compute optimal n_lag for each model
+  
+  for (i in 1:nrow(mlist)) {
+    var_set_i <- mlist$var_set[i]
+    variables <- filter(var_set_info, var_set == var_set_i)$variable
+    D <- df[1:(lag.max+T_common), variables]
+    selection_results <- VARselect(D, lag.max = lag.max, type = "const" )
+    # let's use AIC # let's use Schwartz Criterion:
+    mlist$n_lag[i] <- selection_results$selection[paste0(criterion,"(n)")]
+  }
+  
+  if (max(mlist$n_lag)>p_max) warning("Maximum found lag is greater than global constant p_max!!!")
+  
+  mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = max(mlist$n_lag,p_max) + 1 - n_lag)
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+                                  var_set,"_lags_",n_lag,
+                                  ".Rds") ) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
+  
+  mlist_melted <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  return(mlist_melted)
+}
+
+
 
 create_bvar_banbura_list <- function() {
   # в столбце value получаем тип character
-  df <- expand.grid(type="conjugate", 
+  mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=c(1,6,12),
                     l_1=c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf),
@@ -124,14 +159,14 @@ create_bvar_banbura_list <- function() {
                     status="not estimated")
   
   # add no sc dummy and l_sc=10*l_1
-  df_sc <- df %>% mutate(l_sc=10*l_1)
-  df_nosc <- df %>% mutate(l_sc=NA)
-  df <- rbind_list(df_sc,df_nosc)
+  mlist_sc <- mlist %>% mutate(l_sc=10*l_1)
+  mlist_nosc <- mlist %>% mutate(l_sc=NA)
+  mlist <- rbind_list(mlist_sc,mlist_nosc)
   
-  df <- df %>% mutate_each("as.character",type, status, var_set) 
-  df <- df %>% mutate(id=row_number())
-  df <- df %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
-  df <- df %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
                                   "_sc_",round(100*l_sc),
@@ -139,47 +174,47 @@ create_bvar_banbura_list <- function() {
                                   "_pow_",round(100*l_power),
                                   "_cst_",round(100*l_const),
                                   ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  df <- reshape2::melt(df, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
   
-  return(df)
+  return(mlist)
 }
 
 # add for each model all possible shifts for T_in
-rolling_model_replicate <- function(df_small) {
-  # we need df_small with n_lag
+rolling_model_replicate <- function(mlist_small) {
+  # we need mlist_small with n_lag
   
   # add starting time:
   # T_start should vary from (p_max + 1 - n_lag) to (T_available - T_common - n_lag)
-  df <- mutate(df_small, rownum = row_number(), T_start_min = p_max + 1 - n_lag, 
+  mlist <- mutate(mlist_small, rownum = row_number(), T_start_min = p_max + 1 - n_lag, 
                T_start_max = T_available - T_common - n_lag,
                T_start_amount = T_start_max - T_start_min + 1)
-  replicator <- rep(df$rownum, times = df$T_start_amount)
-  df_big <- df[replicator,]
-  df_big <- df_big %>% group_by(rownum) %>% 
+  replicator <- rep(mlist$rownum, times = mlist$T_start_amount)
+  mlist_big <- mlist[replicator,]
+  mlist_big <- mlist_big %>% group_by(rownum) %>% 
     mutate(T_start = T_start_min + row_number() - 1)
   
   # remove auxillary variables, create id
-  df_big <- ungroup(df_big) %>% 
+  mlist_big <- ungroup(mlist_big) %>% 
     select(-T_start_min, -T_start_max, -T_start_amount, -rownum) %>%
     mutate(status="not estimated", id=row_number())   
 
-  return(df_big)
+  return(mlist_big)
 }
 
 
 create_bvar_out_list <- function(best_lambda) {
   # ungroup and clear junk variables from data.frame:
   # we need to keep fit_set variable for further comparison 
-  df <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
-  df <- mutate_each(df, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
-  df <- mutate(df, status = "not estimated", type = "conjugate", 
+  mlist <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
+  mlist <- mutate_each(mlist, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
+  mlist <- mutate(mlist, status = "not estimated", type = "conjugate", 
                seed=13, T_in = n_lag + T_common )
   
-  df_big <- rolling_model_replicate(df) 
+  mlist_big <- rolling_model_replicate(mlist) 
   
-  df_big <- df_big %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist_big <- mlist_big %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
                                   "_sc_",round(100*l_sc),
@@ -187,11 +222,11 @@ create_bvar_out_list <- function(best_lambda) {
                                   "_pow_",round(100*l_power),
                                   "_cst_",round(100*l_const),
                                   ".Rds") ) 
-  # df <- df %>% mutate_each("as.factor",type, status, var_set) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  # df_big <- df_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
+  # mlist_big <- mlist_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
   
-  df_melted <- reshape2::melt(df_big, id.vars="id") %>% arrange(id)
+  mlist_melted <- reshape2::melt(mlist_big, id.vars="id") %>% arrange(id)
   
-  return(df_melted)
+  return(mlist_melted)
 }

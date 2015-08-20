@@ -419,4 +419,7 @@ all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>
   select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
 some_rmsfe_wide <- all_omsfe_wide %>% filter(h %in% c(1,3,6,12))
 
+# step 10: optimal VAR selection
 
+# if using SC with lag.max=12 then optimal is 1
+create_best_var_list("SC",12)
