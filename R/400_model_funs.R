@@ -235,7 +235,8 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_end <- Tf_start + Tf_length - 1
     
     predictions <- forecast_conjugate(model, 
-                  fast_forecast = fast_forecast, out_of_sample = FALSE)
+                  fast_forecast = TRUE, out_of_sample = FALSE)
+    # in-sample forecasts are one-step predictions, so fast_forecast is TRUE
     answer <- mutate(predictions, t=h+Tf_start-1, h=NA) %>% select(-what) 
   }
   

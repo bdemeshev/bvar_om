@@ -20,12 +20,12 @@ var_set_info <- read_csv("../data/var_set_info.csv")
 
 T_available <- nrow(df)
 
-fast_forecast <- FALSE # TRUE = posterior means of coefficients are used for forecast
 
 keep <- 10 # number of simulations from posterior
 # normally 10000, is ignored if fast forecast is true
-
 verbose <- FALSE # messages from functions 
+way_omega_post_root <- "cholesky" # "cholesky" or "svd"
+fast_forecast <- FALSE # TRUE = posterior means of coefficients are used for forecast
 
 
 # describe which msfe ratios are averaged in fit

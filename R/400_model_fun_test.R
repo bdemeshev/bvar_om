@@ -129,3 +129,20 @@ priors <- Carriero_priors(Yraw, p = 2)
 model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = TRUE)
 forecast_conjugate(model, h=5, output="wide")
 
+#### test 9: BVAR posterior Phi mean: sample vs analytical
+?forecast_conjugate
+
+data(Yraw)
+priors <- Carriero_priors(Yraw, p = 2)
+model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = FALSE)
+summary_conjugate(model)
+forecast_conjugate(model, h=5, output="wide")
+
+#### test 9: BVAR forecast test: fast_forecast TRUE/FALSE
+
+data(Yraw)
+priors <- Carriero_priors(Yraw, p = 2)
+model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = FALSE)
+# summary_conjugate(model)
+forecast_conjugate(model, h=12, include="mean", level=NULL)
+forecast_conjugate(model, h=12,  fast_forecast = TRUE)
