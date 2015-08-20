@@ -383,12 +383,40 @@ rwwn_rel_msfe <- rwwn_rel_msfe %>% mutate(rmsfe_bvar=omsfe_bvar/omsfe_rwwn,
                                           rmsfe_var_6=omsfe_var_6/omsfe_rwwn)
 rwwn_rel_msfe
 
-# test bvar set_3 against var_3
+# step 8: test bvar set_3 against var_3
 test_3vs3 <- rwwn_rel_msfe %>% filter(var_set=="set_3") %>% na.omit()
 best_lambda %>% filter(var_set=="set_3") 
 
 test_3vs3 <- test_3vs3 %>% 
   mutate(diff=abs(rmsfe_bvar-rmsfe_var_3)) %>% 
   arrange(diff) 
+
+# step 9: replicate banbura table from page 79
+omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
+  filter(model_type=="var",n_lag==12, variable %in% c("ind_prod","cpi","ib_rate")) 
+
+omsfe_bvar_banbura <- omsfe_bvar_table %>% 
+  filter(fit_set=="ind+cpi+rate",n_lag==12, variable %in% c("ind_prod","cpi","ib_rate")) %>%
+  select(-fit_set) %>% mutate(model_type="bvar")
+
+omsfe_rwwn_banbura <- omsfe_selected_rwwn %>% 
+  filter(variable %in% c("ind_prod","cpi","ib_rate") ) %>%
+  rename(model_type=rw_wn) 
+
+omsfe_var_banbura 
+omsfe_bvar_banbura
+omsfe_rwwn_banbura 
+
+var_bvar_omsfe_banbura_table <- rbind_list(omsfe_var_banbura,omsfe_bvar_banbura) %>%
+  left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
+  mutate(rmsfe=omsfe/omsfe_rwwn) %>% select(-n_lag)
+
+var_bvar_omsfe_banbura_table
+
+
+all_omsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
+  dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
+  select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) %>%
+  filter(h %in% c(1,3,6,12))
 
 
