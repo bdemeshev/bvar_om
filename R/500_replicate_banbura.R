@@ -20,7 +20,13 @@ var_set_info <- read_csv("../data/var_set_info.csv")
 
 T_available <- nrow(df)
 
-fast_forecast <- TRUE
+fast_forecast <- FALSE # TRUE = posterior means of coefficients are used for forecast
+
+keep <- 10 # number of simulations from posterior
+# normally 10000, is ignored if fast forecast is true
+
+verbose <- FALSE # messages from functions 
+
 
 # describe which msfe ratios are averaged in fit
 fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
