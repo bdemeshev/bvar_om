@@ -3,12 +3,14 @@
 # input: "../data/df_2015_final.csv", "../data/var_set_info.csv"
 # output: 
 
-
-
-library("foreach")
-
 source("400_model_funs.R")
+source("400_model_lists.R")
 source("500_banbura_funs.R")
+
+# run once (commented out for speed)
+# source("200_load_after_eviews.R")
+# source("305_create_varset.R")
+
 
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30
@@ -18,11 +20,25 @@ var_set_info <- read_csv("../data/var_set_info.csv")
 
 T_available <- nrow(df)
 
+fast_forecast <- TRUE
+
+# describe which msfe ratios are averaged in fit
+fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
+fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
+
+fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
+fit_set_info
+
+# melting actual observations
+df <- mutate(df, t=row_number()) 
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+
+
 ##### banbura step 1
 # calculate msfe-0. Estimate RWWN (random walk OR white noise model)
 
 # classify variables into RW and WN
-deltas <- delta_i_prior(df, remove_vars = "time_y")
+deltas <- delta_i_prior(df, remove_vars = c("time_y","t"))
 # delta_i_from_ar1(df, remove_vars = "time_y")
 
 deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"))
@@ -53,9 +69,6 @@ rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t
 # build table with corresponding msfe-0 (RW or WN)
 
 # joining actual observations
-df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
-
 rwwn_forecasts <- rename(rwwn_forecasts, forecast=value)
 rwwn_obs <- left_join(rwwn_forecasts, actual_obs, by=c("t","variable"))
 
@@ -68,23 +81,13 @@ msfe0_all
 # add rw/wn label to msfe0
 rwwn_wlist <- dcast(rwwn_list, id~variable) %>% # wlist = wide list
   mutate_each("as.numeric",n_lag,T_start,T_in) 
-msfe0_all <- left_join(msfe0_all, select(rwwn_wlist, id, type), by=c("model_id"="id") )
+msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_wlist, id, type), by=c("model_id"="id") )
 
 msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
 
 msfe0
 
 ##### banbura step 2
-
-# describe which msfe ratios are averaged in fit
-
-  
-fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
-fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
-
-fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
-fit_set_info
-
 
 # estimate VAR
 var_list <- create_var_list()
@@ -97,9 +100,6 @@ message("Forecasting VAR")
 var_forecasts <- forecast_models(var_forecast_list, var_list)
 
 # joining actual observations
-df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
-
 var_forecasts <- rename(var_forecasts, forecast=value)
 var_obs <- left_join(var_forecasts, actual_obs, by=c("t","variable"))
 
@@ -163,9 +163,6 @@ message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
 # joining actual observations
-df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
-
 bvar_forecasts <- rename(bvar_forecasts, forecast=value)
 bvar_obs <- left_join(bvar_forecasts, actual_obs, by=c("t","variable"))
 
@@ -271,9 +268,6 @@ message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
-df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
-
 bvar_out_forecasts <- rename(bvar_out_forecasts, forecast=value)
 bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 
@@ -319,9 +313,6 @@ rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_o
 
 
 # joining actual observations
-df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
-
 rwwn_var_out_forecasts <- rename(rwwn_var_out_forecasts, forecast=value)
 rwwn_var_out_obs <- left_join(rwwn_var_out_forecasts, actual_obs, by=c("t","variable"))
 
@@ -417,7 +408,7 @@ var_bvar_omsfe_banbura_table
 all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
   dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
   select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
-some_rmsfe_wide <- all_omsfe_wide %>% filter(h %in% c(1,3,6,12))
+some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% c(1,3,6,12))
 
 # step 10: optimal VAR selection
 

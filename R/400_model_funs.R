@@ -1,3 +1,4 @@
+library("foreach")
 library("readr")
 library("MHadaptive")
 library("MCMCpack")
@@ -7,8 +8,6 @@ library("reshape2")
 library("vars")
 library("dplyr")
 library("bvarr")
-
-source("400_model_lists.R")
 
 ########################################################################
 ################ estimating functions
@@ -56,8 +55,7 @@ estimate_model <- function(model_info,
     l_exo <- 1 # does not matter as we don't have exo variables
     n_lag <- as.numeric(minfo$n_lag)
     
-    fast_forecast <- TRUE # later we may add as option
-    
+
     priors <- Carriero_priors( D, p=n_lag,    # p=n_lag
                                lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
     
@@ -76,7 +74,7 @@ estimate_model <- function(model_info,
     
     model <- bvar_conjugate0(priors = priors, 
                              verbose=verbose, keep=keep, 
-                             fast_forecast = TRUE) 
+                             fast_forecast = fast_forecast) 
     status <- "estimated"
   }
   
@@ -245,7 +243,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_end <- Tf_start + Tf_length - 1
     
     predictions <- forecast_conjugate(model, 
-                  fast_forecast = TRUE, out_of_sample = FALSE)
+                  fast_forecast = fast_forecast, out_of_sample = FALSE)
     answer <- mutate(predictions, t=h+Tf_start-1, h=NA) %>% select(-what) 
   }
   
@@ -270,7 +268,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_end <- Tf_start + Tf_length - 1
     
     predictions <- forecast_conjugate(model, h = pred_info$h, include="mean", level=NULL, 
-                                      fast_forecast = TRUE)
+                                      fast_forecast = fast_forecast)
     answer <- mutate(predictions, t=h+Tf_start-1) %>% select(-what) 
   }
   
