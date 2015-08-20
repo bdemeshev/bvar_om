@@ -414,9 +414,9 @@ var_bvar_omsfe_banbura_table <- rbind_list(omsfe_var_banbura,omsfe_bvar_banbura)
 var_bvar_omsfe_banbura_table
 
 
-all_omsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
+all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
   dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
-  select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) %>%
-  filter(h %in% c(1,3,6,12))
+  select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
+some_rmsfe_wide <- all_omsfe_wide %>% filter(h %in% c(1,3,6,12))
 
 
