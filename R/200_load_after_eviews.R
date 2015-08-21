@@ -1,3 +1,5 @@
+# 200_load_after_eviews
+
 # convert excel seasonly adjusted by eviews in R and take logs
 
 # input: "../data/adjusted_data_x.xlsx"
