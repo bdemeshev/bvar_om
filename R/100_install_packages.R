@@ -16,7 +16,9 @@ install.packages("reshape2")
 
 devtools::install_github("bdemeshev/bvarr")
 install.packages("MSBVAR")
-install.packages("kthohr/BMR")
+devtools::install_github("kthohr/BMR")
+# on windows download manually from http://bayes.squarespace.com/bmr/
+# rstudio tools-install package - from "package archive"
 
 # install X13 instructions
 # https://github.com/christophsax/seasonal/wiki/Compiling-X-13ARIMA-SEATS-from-Source-for-OS-X
