@@ -1,22 +1,23 @@
 # 400_model_funs.R
 
-library("foreach")
-library("readr")
-library("MHadaptive")
-library("MCMCpack")
-library("mvtnorm")
-#library("data.table")
+library("foreach") # parallel processing
+library("readr") # reading csv files
+# library("MHadaptive")
+library("MCMCpack") # IW
+# library("mvtnorm") # multivariate normal 
+# library("data.table")
 library("reshape2")
-library("vars")
 library("dplyr")
+
+library("vars")
 library("bvarr")
+
 
 ########################################################################
 ################ estimating functions
 ########################################################################
 
-# возможно функции надо передавать df
-# параллельные вычисления?
+# maybe we need to pass actual df for parallel computing
 estimate_model <- function(model_info, 
                            do_log=FALSE, test=FALSE ) {
   minfo <- reshape2::dcast(model_info, id~variable)

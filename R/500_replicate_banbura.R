@@ -9,7 +9,6 @@ source("500_banbura_funs.R")
 
 # need to run only once 
 source("200_load_after_eviews.R")
-source("305_create_varset.R")
 
 
 parallel <- "off" # "windows"/"unix"/"off"
@@ -27,7 +26,8 @@ verbose <- FALSE # messages from functions
 way_omega_post_root <- "svd" # "cholesky" or "svd"
 fast_forecast <- FALSE # TRUE = posterior means of coefficients are used for forecast
 
-
+################################################
+# create fit_set_info
 # describe which msfe ratios are averaged in fit
 fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
 fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
@@ -35,6 +35,33 @@ fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+
 fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
 fit_set_info
 
+################################################
+# create var_set_info
+# describe which variables are included in each set
+dput(colnames(df))
+
+add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
+add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
+add_23 <- data_frame(var_set="set_23",variable=c("employment", 
+                                                 "ind_prod", 
+                                                 "cpi", 
+                                                 "ib_rate", "lend_rate", "real_income", 
+                                                 "unemp_rate", "oil_price", 
+                                                 "ppi", 
+                                                 "construction", "real_investment", 
+                                                 "wage", 
+                                                 "m2", 
+                                                 "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
+                                                 "agriculture", "retail", "gov_balance", 
+                                                 "export", 
+                                                 "import"
+) )
+
+var_set_info <- rbind(add_3,add_6,add_23)
+
+write_csv(var_set_info,"../data/var_set_info.csv")
+
+####### step 0 (before banbura procedure)
 # melting actual observations
 df <- mutate(df, t=row_number()) 
 actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
