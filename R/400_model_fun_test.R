@@ -138,11 +138,40 @@ model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = FALSE)
 summary_conjugate(model)
 forecast_conjugate(model, h=5, output="wide")
 
-#### test 9: BVAR forecast test: fast_forecast TRUE/FALSE
+#### test 9: BVAR coefficient/forecast test: fast_forecast=TRUE vs way="cholesky"/"svd"
+# everything should be equal in summaries! both mean and sd
 
 data(Yraw)
-priors <- Carriero_priors(Yraw, p = 2)
-model <- bvar_conjugate0(priors = priors, keep=1000, fast_forecast = FALSE)
+priors <- Carriero_priors(Yraw, p = 3)
+model_chol <- bvar_conjugate0(priors = priors, keep=10000, fast_forecast = FALSE, 
+                              way_omega_post_root = "cholesky")
+model_svd <- bvar_conjugate0(priors = priors, keep=10000, fast_forecast = FALSE,
+                             way_omega_post_root = "svd")
+model_fast <- bvar_conjugate0(priors = priors, keep=10000, fast_forecast = TRUE,
+                              way_omega_post_root = "svd")
+
+# compare coef mean (sample vs theoretical), coef sd (svd/chol) :
+summary_conjugate(model_chol)
+summary_conjugate(model_svd)
+summary_conjugate(model_fast)
+
 # summary_conjugate(model)
-forecast_conjugate(model, h=12, include="mean", level=NULL)
-forecast_conjugate(model, h=12,  fast_forecast = TRUE)
+a <- forecast_conjugate(model_chol, h=12, include="mean", level=NULL)
+b <- forecast_conjugate(model_svd, h=12, include="mean", level=NULL)
+c <- forecast_conjugate(model_fast, h=12,  fast_forecast = TRUE)
+
+a <- rename(a, value_chol=value) %>% select(-what)
+b <- rename(b, value_svd=value) %>% select(-what)
+c <- rename(c, value_fast=value) %>% select(-what)
+
+abc <- left_join(a,b) %>% left_join(c)
+
+abc
+
+## test 10: what is faster chol or sqrtm?
+library("microbenchmark")
+library("expm")
+
+H <- matrix(c(2,1,1,2), nrow=2)
+
+microbenchmark(chol(H),sqrtm(H))

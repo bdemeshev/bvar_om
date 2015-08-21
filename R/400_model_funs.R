@@ -66,7 +66,7 @@ estimate_model <- function(model_info,
   
     model <- bvar_conjugate0(priors = priors, 
                              verbose=verbose, keep=keep, 
-                             fast_forecast = fast_forecast) 
+                             fast_forecast = fast_forecast,way_omega_post_root = way_omega_post_root) 
     status <- "estimated"
   }
   
