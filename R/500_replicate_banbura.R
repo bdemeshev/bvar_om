@@ -7,9 +7,9 @@ source("400_model_funs.R")
 source("400_model_lists.R")
 source("500_banbura_funs.R")
 
-# run once (commented out for speed)
-# source("200_load_after_eviews.R")
-# source("305_create_varset.R")
+# need to run only once 
+source("200_load_after_eviews.R")
+source("305_create_varset.R")
 
 
 parallel <- "off" # "windows"/"unix"/"off"
@@ -416,6 +416,7 @@ all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>
   select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
 some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% c(1,3,6,12))
 
+some_rmsfe_wide
 # step 10: optimal VAR selection
 
 # if using SC with lag.max=12 then optimal is 1
