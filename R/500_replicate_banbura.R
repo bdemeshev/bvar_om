@@ -354,41 +354,8 @@ omsfe_selected_rwwn %>% glimpse()
 
 omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_lag) 
 
-# relative-msfe
-rwwn_rel_msfe <- left_join(omsfe_bvar_table %>% rename(omsfe_bvar=omsfe), 
-                           omsfe_selected_rwwn %>% rename(omsfe_rwwn=omsfe), 
-                           by=c("variable","h")) 
-rwwn_rel_msfe %>% filter(fit_set=="ind+cpi+rate",var_set=="set_23",n_lag==6,h==12)
 
-rwwn_rel_msfe %>% glimpse()
-
-# casting VAR models 
-var_cast <- ungroup(omsfe_rwwn_var_table) %>%
-          filter(model_type=="var") %>% select(-model_type) %>%
-          rename(omsfe_var=omsfe) %>% 
-          mutate(var_set=plyr::revalue(var_set, c("set_3"="omsfe_var_3","set_6"="omsfe_var_6"))) %>%
-  dcast(variable+n_lag+h~var_set, value.var="omsfe_var")
-var_cast
-
-# joining omsfe from VAR
-rwwn_rel_msfe <- left_join(rwwn_rel_msfe, var_cast, by=c("variable","n_lag","h"))
-rwwn_rel_msfe
-
-# calculate rel-msfe
-rwwn_rel_msfe <- rwwn_rel_msfe %>% mutate(rmsfe_bvar=omsfe_bvar/omsfe_rwwn,
-                                          rmsfe_var_3=omsfe_var_3/omsfe_rwwn,
-                                          rmsfe_var_6=omsfe_var_6/omsfe_rwwn)
-rwwn_rel_msfe
-
-# step 8: test bvar set_3 against var_3
-test_3vs3 <- rwwn_rel_msfe %>% filter(var_set=="set_3") %>% na.omit()
-best_lambda %>% filter(var_set=="set_3") 
-
-test_3vs3 <- test_3vs3 %>% 
-  mutate(diff=abs(rmsfe_bvar-rmsfe_var_3)) %>% 
-  arrange(diff) 
-
-# step 9: replicate banbura table from page 79
+# replicate banbura table from page 79
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
   filter(model_type=="var",n_lag==12, variable %in% c("ind_prod","cpi","ib_rate")) 
 
@@ -417,7 +384,7 @@ all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>
 some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% c(1,3,6,12))
 
 some_rmsfe_wide
-# step 10: optimal VAR selection
+# step 8: optimal VAR selection
 
-# if using SC with lag.max=12 then optimal is 1
+# if using SC with lag.max=12 then optimal is 1, no changes are needed
 create_best_var_list("SC",12)
