@@ -3,6 +3,7 @@
 # RStudio: tools - check for packages update - select all - update
 
 install.packages("readr")
+install.packages("readxl")
 install.packages("haven")
 
 install.packages("MHadaptive")

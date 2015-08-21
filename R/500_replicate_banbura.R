@@ -44,7 +44,7 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
 # calculate msfe-0. Estimate RWWN (random walk OR white noise model)
 
 # classify variables into RW and WN
-deltas <- delta_i_prior(df, remove_vars = c("time_y","t"))
+deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
 # delta_i_from_ar1(df, remove_vars = "time_y")
 
 deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"))
