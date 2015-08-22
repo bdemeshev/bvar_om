@@ -20,7 +20,7 @@ var_set_info <- read_csv("../data/var_set_info.csv")
 T_available <- nrow(df)
 
 
-keep <- 2 # number of simulations from posterior
+keep <- 5000 # number of simulations from posterior
 # normally 10000, is ignored if fast forecast is true
 verbose <- FALSE # messages from functions 
 way_omega_post_root <- "svd" # "cholesky" or "svd"
@@ -415,3 +415,5 @@ some_rmsfe_wide
 
 # if using SC with lag.max=12 then optimal is 1, no changes are needed
 create_best_var_list("SC",12)
+
+

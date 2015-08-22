@@ -118,6 +118,7 @@ estimate_model <- function(model_info,
 estimate_models <- function(mlist, parallel = c("off","windows","unix"), 
                             no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE,
                             progress_bar=TRUE) {
+  start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
   
@@ -172,6 +173,8 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
     }
   }
   
+  end_time <- Sys.time()
+  message("Time elapsed: ", round(end_time - start_time,1)," ", attr(end_time - start_time,"units"))
   
   return(mlist) # statuses are updated
 }
@@ -328,6 +331,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
 forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
                             ncpu=4, test=FALSE, do_log=FALSE,
                             progress_bar=TRUE) {
+  start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
   
@@ -344,6 +348,9 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
     if (progress_bar) close(pb)
     answer <- rbind_all(all_data)
   }
+  
+  end_time <- Sys.time()
+  message("Time elapsed: ", round(end_time - start_time,1)," ", attr(end_time - start_time,"units"))
   return(answer) 
 }
 
