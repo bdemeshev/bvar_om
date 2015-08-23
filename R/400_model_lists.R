@@ -38,7 +38,7 @@ p_max <- 12 # для выравнивания первого внутривыб�
 # функция многих прогнозов:
 # 
 
-
+# this list is for testing purposes only, it is not used in Banbura procedure
 create_model_list <- function() {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="conjugate", 

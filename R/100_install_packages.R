@@ -19,6 +19,7 @@ install.packages("reshape2")
 install.packages("doParallel")
 install.packages("ggplot2")
 install.packages("RcppArmadillo")
+install.packages("R.matlab")
 
 
 
