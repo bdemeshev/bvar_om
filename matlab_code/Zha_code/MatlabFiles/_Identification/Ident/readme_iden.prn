@@ -1,0 +1,4 @@
+ftd_SRestrictRWZalg_FP_Model5plus.m:  Complicated RWZ sign restrictions for DNZ's fiscal policy article.
+      A better version or more general version than ftd_SRestrictRWZalg_FP_Model2.m.  USE this one in the future.
+
+ftd_SRestrictRWZalg_FP_Model2.m:  RWZ sign restrictions.  See ftd_SRestrictRWZalg_FP_Model5plus.m for a beter version.

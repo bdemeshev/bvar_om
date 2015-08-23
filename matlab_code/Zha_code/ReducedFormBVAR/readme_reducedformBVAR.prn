@@ -1,0 +1,38 @@
+The main program: bvar_run.m, which computes out-of-sample forecasts of a BVAR model with the Sims and Zha prior.
+  It may call a few M files that can be downloaded from Tao Zha's Archived Matlab Library ZhaZippedCode in
+  http://www.atl-res.com/~zha/ProgramCode/programCode.html
+
+The standard prior for quarterly data is based on Sims and Zha (98), which improves upon the Minnesota prior by
+  incorporating the cointegration and unit root prior.
+
+A few things that need be changed before running msstart2.m.
+In the file bvar_setup.m, make sure the data range, the sample range, the lag length, etc.  The following variables
+  may have to be changed accordingly.
+
+yrBin=1960;   % beginning of the year
+qmBin=1;    % begining of the quarter or month
+yrFin=2003;   % final year
+qmFin=4;    % final month or quarter
+vlist = [1 2];    % 1: U; 2: PCE inflation.
+varlist={'U', 'Inflation'};
+vlistlog = [ ];   % subset of "vlist.  Variables in log level so that differences are in **monthly** growth, unlike R and U which are in annual percent (divided by 100 already).
+vlistper = [1 2];           % subset of "vlist"
+%------- A specific sample is considered for estimation -------
+yrStart=1960;
+qmStart=1;
+yrEnd=2003;
+qmEnd=4;
+%------- Prior, etc. -------
+lags = 4        % number of lags
+
+
+*****************************  REFERENCES ********************
+The prior is discussed in
+   author = {Christopher A. Sims and Tao Zha},
+   title = {Bayesian Methods for Dynamic Multivariate Models},
+   journal = ier,
+   year = {1998},
+   pages = {949--968},
+   volume = {39},
+   number = {4}
+

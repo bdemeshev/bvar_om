@@ -1,0 +1,102 @@
+msstart_setup.m: setup matlab file.
+msstart2.m:  computes the point estimates of impulse responses, VAR model parameters, etc.
+msprob.m:  generates error bands for impulse responses using Sims and Zha (1999).
+msprobg.m: plots the error bands for impulse responses.
+swz_mardd.m: computes the marginal data density p(Y) for constant-parameter structural VAR models (including over-identified cases
+  with linear restrictions).  It may call a few M files that can be downloaded from Tao Zha's Archived Matlab Library ZhaZippedCode in
+  http://home.earthlink.net/~tzha02/ProgramCode/programCode.html
+
+ftd_cholesky.m: shows an example of how to impose linear restrictions on the current and lag structures.
+
+The standard prior for quarterly data is based on Sims and Zha (98), which improves upon the Minnesota prior by
+  incorporating the cointegration and unit root prior.
+The algorithm is based on Waggoner and Zha (03) and Chib (95).
+The error bands computation is based on Sims and Zha (99)
+*****************************  REFERENCES ********************
+The error-band computation is based on
+@ARTICLE{SZ99,
+  author = {Christopher A. Sims and Tao Zha},
+  title = {Error Bands for Impulse Responses},
+  journal = {Econometrica},
+  year = {1999},
+  volume = {67},
+  number = {5},
+  pages = {1113--1155},
+}
+---
+The prior is discussed in
+   author = {Christopher A. Sims and Tao Zha},
+   title = {Bayesian Methods for Dynamic Multivariate Models},
+   journal = ier,
+   year = {1998},
+   pages = {949--968},
+   volume = {39},
+   number = {4}
+---
+The lag restrictions on structural VARs are based on
+  author = {David O. Cushman and Tao Zha},
+  title = {Identifying Monetary Policy in a Small Open Economy under Flexible Exchange Rates},
+  journal = {Journal of Monetary Economics},
+  year = {1997},
+  volume = {39},
+  pages = {433--448},
+and
+  author = {Tao Zha},
+  title = {Block Recursion and Structural Vector Autoregressions},
+  journal = {Journal of Econometrics},
+  year = {1999},
+  volume = {90},
+  number = {2},
+  pages = {291--316},
+  month = {June},
+---
+The algorithm is based on
+   author = {Daniel F. Waggoner and Tao Zha},
+   title = {A Gibbs Sampler for Structural Vector Autoregressions},
+   journal = jedc,
+   year = {2003},
+   volume = {28},
+   number = {2},
+   pages = {349--366}
+and
+   author = {Siddhartha Chib},
+   title = {Marginal Likelihood from the Gibbs Output},
+   journal = jasa,
+   year = {1995},
+   pages = {1313--1321},
+   volume = {90}
+
+
+
+//====================================================================================================
+======================================================================================================//
+A few things that need to change.
+
+The file ftd_cholesky.m gives an example for a four-variable Choleski VAR.
+
+In the file msstart_setup.m, make sure the data range, the sample range, the lag length, etc.  The following variables
+  may have to be changed accordingly.
+
+yrBin=1960;   % beginning of the year
+qmBin=1;    % begining of the quarter or month
+yrFin=2003;   % final year
+qmFin=4;    % final month or quarter
+vlist = [1 2];    % 1: U; 2: PCE inflation.
+varlist={'U', 'Inflation'};
+vlistlog = [ ];   % subset of "vlist.  Variables in log level so that differences are in **monthly** growth, unlike R and U which are in annual percent (divided by 100 already).
+vlistper = [1 2];           % subset of "vlist"
+%------- A specific sample is considered for estimation -------
+yrStart=1960;
+qmStart=1;
+yrEnd=2003;
+qmEnd=4;
+%------- Prior, etc. -------
+lags = 4        % number of lags
+
+In msstart2.m, the key outputs are:
+  A0hat
+  Aphat
+  swish
+  Bhat
+  imfhat
+  scaleout

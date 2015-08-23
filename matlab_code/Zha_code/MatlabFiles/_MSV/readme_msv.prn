@@ -1,0 +1,35 @@
+**********************************************************************
+************************** Important Notes ***************************
+**********************************************************************
+When eu=[0,1] in the original gensys setup, it means that in our MSV setting that exogenous persistence is put
+  in a wrong place when we reorder the roots.  Thus, there is no such [0,1] return in our MSV solution.
+
+When eu=[1,0] in the original gensys setup, it means that the MSV solution must exist with another order.  See
+  example3_10_sw.m in D:\ZhaData\WorkDisk\LiuWZ\ZhaNotes\UnderstandingMSV\OneDimentionCaseImportant.
+
+With our MSV solution, we abuse the notation eu=[1,0], which really means that we have multiple MSV solutions.
+  But multiple MSV solutions can occur only in complex numbers.  The imaginary part of the solution can be scaled
+  arbitrarily, which gives sunspot solutions.  Thus, the real MSV solution will be unique.
+
+If we encourter eu=[3,?], it means that all MSV solutions are explosive.  Thus, no stable MSV solution.
+
+
+
+========================= New files for MSV solutions ==============================
+msv_complex_AR.m: gives an MSV solution (upon the order that first works) with a flag indicating if [1,0].  If
+                    [1;0], the complex solution exits and thus the MSV solution is NOT unique.
+                    AR: autoregressive or gensys form;
+msv_all_complex_AR.m: gives all MSV-like solutions (including complex solutions).  That is, all the solutions that
+                        come from the undetermined coefficients method.
+
+
+========================= Old files for MSV solutions ==============================
+msv_simple.m:  works only for the first order if an msv solution (even if it is non-unique where the solution is
+                 complex) exist.  It does not try the second order (where the exogenous persistence may be larger
+                 than the endogenous persistence).
+
+msv_one.m: works only for the unqiue MSV solution (thus, no complex solution) for the order that comes first.  If no
+             solution is found for all orders, then no unique MSV solution (but there may be multiple MSV solutions
+             such as a complex solution).
+
+msv_all.m:  gives all MSV-like real solutions (thus, some solutions are NOT an MSV solution).
