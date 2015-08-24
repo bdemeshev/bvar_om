@@ -93,7 +93,7 @@ rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t))
 rwwn_forecasts <- rename(rwwn_forecasts, forecast=value)
 
-plot_forecast(rwwn_forecasts, var_name="employment", mod_id=2)
+plot_forecast(rwwn_forecasts, var_name="m2", mod_id=2)
 
 #### if we prefer way b, just uncomment next two lines
 # Tf_common_start <- 2
@@ -247,7 +247,7 @@ fit_lam_table
 
 ##### banbura step 4
 # find optimal lambda
-# group_by is needed! otherwise cannot remove var_set (active group on var_set)
+# ungroup() is needed! otherwise cannot remove var_set (active group on var_set)
 fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_3") %>% ungroup() %>% dplyr::select(-var_set)
 fit_goal
 
@@ -267,7 +267,7 @@ check_uniqueness <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% summar
 if (max(check_uniqueness$num_of_best_lambdas)>1) warning("**** ACHTUNG ****: non unique optimal lambdas")
 check_uniqueness %>% filter(num_of_best_lambdas>1)
 
-# choose best_lambda in tie case --- with no sc if possible
+# choose best_lambda in tie case --- with no sc dummy obs if possible
 best_lambda <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% 
   mutate(sc_na_bonus=is.na(l_sc)) %>% arrange(desc(sc_na_bonus)) %>% 
   mutate(fit_tie_rank=row_number()) %>% 
@@ -386,15 +386,18 @@ omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_la
 
 
 # replicate banbura table from page 79
+desired_fit_set <- "ind+cpi+rate"
+filter_variables <- ( fit_set_info %>% filter(fit_set==desired_fit_set) ) $ variable %>% as.character()
+
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
-  filter(model_type=="var",n_lag==12, variable %in% c("ind_prod","cpi","ib_rate")) 
+  filter(model_type=="var",n_lag==12, variable %in% filter_variables) 
 
 omsfe_bvar_banbura <- omsfe_bvar_table %>% 
-  filter(fit_set=="ind+cpi+rate",n_lag==12, variable %in% c("ind_prod","cpi","ib_rate")) %>%
+  filter(fit_set==desired_fit_set,n_lag==12, variable %in% filter_variables ) %>%
   select(-fit_set) %>% mutate(model_type="bvar")
 
 omsfe_rwwn_banbura <- omsfe_selected_rwwn %>% 
-  filter(variable %in% c("ind_prod","cpi","ib_rate") ) %>%
+  filter(variable %in% filter_variables ) %>%
   rename(model_type=rw_wn) 
 
 omsfe_var_banbura 
