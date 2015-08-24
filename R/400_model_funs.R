@@ -8,6 +8,7 @@ library("MCMCpack") # IW
 # library("data.table")
 library("reshape2")
 library("dplyr")
+library("ggplot2")
 
 library("vars")
 library("bvarr")
