@@ -19,12 +19,10 @@ df <- read_csv("../data/df_2015_final.csv")
 
 T_available <- nrow(df)
 
-
-keep <- 5000 # number of simulations from posterior
-# normally 10000, is ignored if fast forecast is true
-verbose <- FALSE # messages from functions 
-way_omega_post_root <- "svd" # "cholesky" or "svd"
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
+keep <- 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
+verbose <- FALSE # turn on/off messages from functions 
+way_omega_post_root <- "svd" # "cholesky" or "svd" # how (Omega_post)^{1/2} is obtained
 
 ################################################
 # create fit_set_info
