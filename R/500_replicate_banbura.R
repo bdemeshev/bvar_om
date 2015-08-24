@@ -10,6 +10,10 @@ source("500_banbura_funs.R")
 # need to run only once 
 source("200_load_after_eviews.R")
 
+##################################################################
+######################## begin set-up part #######################
+##################################################################
+
 
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30
@@ -32,6 +36,9 @@ fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+
 
 fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
 fit_set_info
+
+# all versions of fit_set are considered, but only desired is reported:
+desired_fit_set <- "ind+cpi+rate"
 
 ################################################
 # create var_set_info
@@ -58,6 +65,10 @@ add_23 <- data_frame(var_set="set_23",variable=c("employment",
 var_set_info <- rbind(add_3,add_6,add_23)
 
 # write_csv(var_set_info,"../data/var_set_info.csv")
+
+##################################################################
+######################## end set-up part #########################
+##################################################################
 
 ####### step 0 (before banbura procedure)
 # melting actual observations
@@ -386,7 +397,7 @@ omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_la
 
 
 # replicate banbura table from page 79
-desired_fit_set <- "ind+cpi+rate"
+# desired_fit_set <- "ind+cpi+rate" # set up in the beginning of file
 filter_variables <- ( fit_set_info %>% filter(fit_set==desired_fit_set) ) $ variable %>% as.character()
 
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
