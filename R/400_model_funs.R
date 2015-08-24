@@ -227,9 +227,9 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- T_in - 1
     Tf_end <- Tf_start + Tf_length - 1
     
-    ## multivariate analog of simple idea: y_first + (1:h)*Delta_y
-    y_first <- c(t(D[Tf_start-1,])) # c(t()) is a transformation of data.frame row into a vector
-    value <- y_first + rep(1:Tf_length, each=n_vars) * model$coef[rep(1:n_vars,Tf_length)] 
+    ## multivariate analog of simple idea: y_lagged + Delta_y
+    y_lagged <- c(t(D[(Tf_start-1):(Tf_end-1),])) # c(t()) is a transformation of data.frame row into a vector
+    value <- y_lagged + model$coef[rep(1:n_vars,Tf_length)] 
     t <- rep(Tf_start:Tf_end, each=n_vars)
     answer <- data.frame(value=value, t=t, 
                          variable = rep(variables, Tf_length), h=NA)
