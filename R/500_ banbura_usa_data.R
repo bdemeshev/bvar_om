@@ -8,19 +8,19 @@ source("400_model_lists.R")
 source("500_banbura_funs.R")
 
 # need to run only once 
-source("200_load_after_eviews.R")
+source("200_load_after_matlab.R")
 
 
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30
 
-df <- read_csv("../data/df_2015_final.csv")
-
+df <- read_csv("../data/usa_carriero.csv")
+#var_set_info <- read_csv("../data/var_set_info.csv")
 
 T_available <- nrow(df)
 
 
-keep <- 5000 # number of simulations from posterior
+keep <- 5 # number of simulations from posterior
 # normally 10000, is ignored if fast forecast is true
 verbose <- FALSE # messages from functions 
 way_omega_post_root <- "svd" # "cholesky" or "svd"
@@ -29,8 +29,8 @@ fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for fore
 ################################################
 # create fit_set_info
 # describe which msfe ratios are averaged in fit
-fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
-fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
+fit_set_2vars <- data.frame(variable=c("var1","var2"),fit_set="var1+var2")
+fit_set_3vars <- data.frame(variable=c("var1","var2","var3"),fit_set="var1+var2+var3")
 
 fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
 fit_set_info
@@ -40,26 +40,22 @@ fit_set_info
 # describe which variables are included in each set
 dput(colnames(df))
 
-add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
-add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
-add_23 <- data_frame(var_set="set_23",variable=c("employment", 
-                                                 "ind_prod", 
-                                                 "cpi", 
-                                                 "ib_rate", "lend_rate", "real_income", 
-                                                 "unemp_rate", "oil_price", 
-                                                 "ppi", 
-                                                 "construction", "real_investment", 
-                                                 "wage", 
-                                                 "m2", 
-                                                 "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
-                                                 "agriculture", "retail", "gov_balance", 
-                                                 "export", 
-                                                 "import"
-) )
+add_3 <- data_frame(var_set="set_3", variable=c("var1", "var2", "var3"))
+add_6 <- data_frame(var_set="set_6", variable=c("var1", "var2", "var3", "var4", "var5", "var6"))
+add_13 <- data_frame(var_set="set_13",variable=c("var1", 
+                                                 "var2", 
+                                                 "var3", 
+                                                 "var4", "var5", "var6", 
+                                                 "var7", "var8", 
+                                                 "var9", 
+                                                 "var10", "var11", 
+                                                 "var12", 
+                                                 "var13"                                              ) )
 
-var_set_info <- rbind(add_3,add_6,add_23)
+var_set_info <- rbind(add_3,add_6,add_13)
+var_set_info
 
-# write_csv(var_set_info,"../data/var_set_info.csv")
+#write_csv(var_set_info,"../data/var_set_info.csv")
 
 ####### step 0 (before banbura procedure)
 # melting actual observations
@@ -74,7 +70,7 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
 deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
 # delta_i_from_ar1(df, remove_vars = "time_y")
 
-deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"), variable=as.character(variable))
+deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"))
 deltas
 
 # estimate all RW and WN models
@@ -93,9 +89,6 @@ rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 # b) use only common available predictions for all models
 
 rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t))
-rwwn_forecasts <- rename(rwwn_forecasts, forecast=value)
-
-plot_forecast(rwwn_forecasts, var_name="employment", mod_id=2)
 
 #### if we prefer way b, just uncomment next two lines
 # Tf_common_start <- 2
@@ -104,10 +97,8 @@ plot_forecast(rwwn_forecasts, var_name="employment", mod_id=2)
 
 # build table with corresponding msfe-0 (RW or WN)
 
-
-
 # joining actual observations
-
+rwwn_forecasts <- rename(rwwn_forecasts, forecast=value)
 rwwn_obs <- left_join(rwwn_forecasts, actual_obs, by=c("t","variable"))
 
 rwwn_obs <- mutate(rwwn_obs, sq_error=(forecast-actual)^2)
@@ -187,10 +178,10 @@ fit_inf_table
 
 # create model list to find optimal lambda 
 bvar_list <- create_bvar_banbura_list()
-# write_csv(bvar_list, path = "../estimation/bvar_list.csv")
+write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # estimate models from list
-# bvar_list <- read_csv("../estimation/bvar_list.csv")
+bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
 bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
 write_csv(bvar_list, path = "../estimation/bvar_list.csv")

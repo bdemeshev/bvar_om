@@ -227,7 +227,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_end <- Tf_start + Tf_length - 1
     
     ## multivariate analog of simple idea: y_first + (1:h)*Delta_y
-    y_first <- c(t(D[1,])) # c(t()) is a transformation of data.frame row into a vector
+    y_first <- c(t(D[Tf_start-1,])) # c(t()) is a transformation of data.frame row into a vector
     value <- y_first + rep(1:Tf_length, each=n_vars) * model$coef[rep(1:n_vars,Tf_length)] 
     t <- rep(Tf_start:Tf_end, each=n_vars)
     answer <- data.frame(value=value, t=t, 
@@ -354,5 +354,14 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
   return(answer) 
 }
 
+# forecasted_models -- data frame with "t", "forecast", "variable" and "model_id"
+# var_name -- name of variable to forecast
+# mod_id --- id of models 
+plot_forecast <- function(forecasted_models, var_name, mod_id ) {
+  forecasts_filtered <- filter(forecasted_models, variable==var_name, model_id==mod_id)
+  actual_filtered <- filter(actual_obs, variable==var_name)
+  data <- left_join(actual_filtered, forecasts_filtered, by="t")
+  ggplot(data=data, aes(x=t))+geom_line(aes(y=actual)) + geom_line(aes(y=forecast), col="red")
+}
 
 
