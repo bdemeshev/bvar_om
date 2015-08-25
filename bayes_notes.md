@@ -154,7 +154,7 @@ http://stackoverflow.com/questions/7719741/how-to-test-if-list-element-exists
 
 25 авгутса 2015
 * best_lambda наличие повторных строк (нет, ок)
-* дизайн реализации двух подходов
+* дизайн реализации двух подходов (ситуация слабо осложнена наличием nu всегда)
 obs2prior
 prior2obs (??? как выглядит решения для произвольных prior)
 lambda2obs
@@ -162,6 +162,7 @@ lambda2prior (двойная конвертация labmda -> obs -> prior)
 estimate from obs (выбрать более робастную из from obs/prior)
 estimate from prior
 * в пакете сделать prior$Omega вместо prior$Omega_prior?
+* хранить Omega или Omega^{-1}?
 * разделить симуляции по banbura от отчёта по банбуре? 
 в отчете сверху указывается желаемое число лагов и прочее
 * сделать корректные типы, чтобы убрать warnings() (ок)
