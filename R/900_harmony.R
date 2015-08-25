@@ -11,13 +11,14 @@ X_dummy_cniw <- priors$X_dummy_cniw
 Y_dummy_cniw <- priors$Y_dummy_cniw
 Omega_prior <- priors$Omega_prior
 Phi_prior <- priors$Phi_prior
+S_prior <- priors$S_prior
 
-# Omega_prior^{-1}
-sym_inv(Omega_prior) %>% is.diagonal()
-crossprod(X_dummy_cniw) %>% is.diagonal()
+# Omega_prior
+Omega_prior %>% is.diagonal()
+sym_inv(crossprod(X_dummy_cniw)) %>% is.diagonal()
 
-sym_inv(Omega_prior) %>% diag()
-crossprod(X_dummy_cniw) %>% diag()
+Omega_prior %>% diag()
+sym_inv(crossprod(X_dummy_cniw)) %>% diag()
 
 # Phi_prior 
 Phi_prior
@@ -27,7 +28,10 @@ model <- bvar_conjugate0(priors = priors, fast_forecast = TRUE)
 
 X_wo_dummy <- attr(model, "data")$X_wo_dummy
 Y_wo_dummy <- attr(model, "data")$Y_wo_dummy
+Phi_post <- attr(model,"post")$Phi_post
+S_post <- attr(model,"post")$S_post
 X_star <- rbind(X_dummy_cniw, X_wo_dummy)
+Omega_post <- attr(model,"post")$Omega_post
 Y_star <- rbind(Y_dummy_cniw, Y_wo_dummy)
 
 # Phi_post
@@ -35,7 +39,7 @@ attr(model,"post")$Phi_post
 solve(crossprod(X_star), crossprod(X_star, Y_star))
 
 # Omega_post
-attr(model,"post")$Omega_post
+Omega_post
 sym_inv(crossprod(X_star))
 
 # wo = without dummies 
@@ -60,4 +64,23 @@ crossprod(E_star)
 crossprod(E_wo)
 crossprod(E_cniw_wo)
 crossprod(E_star_wo)
+
+
+
+# equality test
+# Karlsson, p 15
+S_prior + t(E_wo) %*% E_wo +
+  t(Phi_prior - Phi_wo) %*% 
+  sym_inv(Omega_prior + sym_inv(crossprod(X_wo_dummy)))  %*% 
+  (Phi_prior - Phi_wo)
+
+# Carriero p 51 
+S_prior + t(E_wo) %*% E_wo +
+             t(Phi_wo) %*% crossprod(X_wo_dummy) %*% Phi_wo + 
+               t(Phi_prior) %*% solve(Omega_prior) %*% Phi_prior -
+                  t(Phi_post) %*% solve(Omega_post) %*% Phi_post
+
+
+
+
 
