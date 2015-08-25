@@ -76,3 +76,7 @@ text/mal_art/text_BVAR.log
 *.out
 
 text/mal_art/text_BVAR.run.xml
+
+text/code_description/matrices_in_bvar_om.log
+
+text/code_description/matrices_in_bvar_om.run.xml
