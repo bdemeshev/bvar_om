@@ -214,7 +214,7 @@ bvar_forecasts <- rename(bvar_forecasts, forecast=value)
 bvar_obs <- left_join(bvar_forecasts, actual_obs, by=c("t","variable"))
 
 bvar_obs <- mutate(bvar_obs, sq_error=(forecast-actual)^2)
-head(var_obs)
+head(bvar_obs)
 
 # calculate msfe-lam
 
