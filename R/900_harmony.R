@@ -55,15 +55,11 @@ E_cniw <- Y_dummy_cniw - X_dummy_cniw %*% Phi_cniw
 # S_prior
 priors$S_prior
 crossprod(E_cniw)
-# no analog?
+
 
 # S_post
 attr(model,"post")$S_post
 crossprod(E_star)
-
-crossprod(E_wo)
-crossprod(E_cniw_wo)
-crossprod(E_star_wo)
 
 
 

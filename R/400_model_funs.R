@@ -88,7 +88,7 @@ estimate_model <- function(model_info,
   
   if (minfo$type=="wn") {
     model_vector <- c(t(apply(D, MARGIN=2, mean))) # just sample means of variables
-    model <- data.frame(variables=variables)
+    model <- data_frame(variables=variables)
     model$coef <- model_vector
     status <- "estimated"
   }
@@ -96,7 +96,7 @@ estimate_model <- function(model_info,
   if (minfo$type=="rw") {
     # just mean growth rate
     model_vector <- c(t((tail(D,1)-head(D,1))/ (nrow(D)-1)))
-    model <- data.frame(variables=variables)
+    model <- data_frame(variables=variables)
     model$coef <- model_vector
     status <- "estimated"
   }
@@ -218,7 +218,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
       
       value <- model$coef[rep(1:n_vars,Tf_length)]
       t <- rep(Tf_start:Tf_end, each=n_vars)
-      answer <- data.frame(value=value, t=t, 
+      answer <- data_frame(value=value, t=t, 
                            variable = rep(variables, Tf_length), h=NA)
   }
 
@@ -231,7 +231,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     y_lagged <- c(t(D[(Tf_start-1):(Tf_end-1),])) # c(t()) is a transformation of data.frame row into a vector
     value <- y_lagged + model$coef[rep(1:n_vars,Tf_length)] 
     t <- rep(Tf_start:Tf_end, each=n_vars)
-    answer <- data.frame(value=value, t=t, 
+    answer <- data_frame(value=value, t=t, 
                          variable = rep(variables, Tf_length), h=NA)
   }
   
@@ -253,7 +253,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- T_in - n_lag
     Tf_end <- Tf_start + Tf_length - 1
     
-    predictions <- data.frame(fitted(model))
+    predictions <- as.data.frame(fitted(model))
     predictions$t <- Tf_start:Tf_end
     answer <- melt(predictions, id.vars = "t")
     answer$h <- NA
@@ -320,6 +320,9 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   answer$model_id <- model_id
   # easy answer$h <- pred_info$h is WRONG! max_h is requested, but all h will be computed!!!!
   answer$type <- pred_info$type
+  
+  answer <- mutate(answer, variable=as.character(variable)) %>% 
+    rename(forecast=value)
   
   return(answer) 
 }

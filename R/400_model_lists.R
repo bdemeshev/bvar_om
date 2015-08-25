@@ -64,7 +64,8 @@ create_model_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+    mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -85,7 +86,8 @@ create_rwwn_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+    mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -106,7 +108,8 @@ create_var_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+    mutate(variable=as.character(variable))
   return(mlist)
 }
 
@@ -139,7 +142,8 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist_melted <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  mlist_melted <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+    mutate(variable=as.character(variable))
   return(mlist_melted)
 }
 
@@ -147,10 +151,13 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
 
 create_bvar_banbura_list <- function() {
   # в столбце value получаем тип character
+  list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf)
+  if (testing_mode) list_of_lambdas <- c(1,Inf)
+  
   mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_3","set_6","set_23"),
                     n_lag=c(1,6,12),
-                    l_1=c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf),
+                    l_1=list_of_lambdas,
                     l_power=1,
                     l_const=Inf,
                     # l_sc=1,
@@ -176,7 +183,8 @@ create_bvar_banbura_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id)
+  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+    mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -198,7 +206,7 @@ rolling_model_replicate <- function(mlist_small) {
   # remove auxillary variables, create id
   mlist_big <- ungroup(mlist_big) %>% 
     select(-T_start_min, -T_start_max, -T_start_amount, -rownum) %>%
-    mutate(status="not estimated", id=row_number())   
+    mutate(status="not estimated", id=row_number()) 
 
   return(mlist_big)
 }
@@ -226,7 +234,8 @@ create_bvar_out_list <- function(best_lambda) {
   
   # mlist_big <- mlist_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
   
-  mlist_melted <- reshape2::melt(mlist_big, id.vars="id") %>% arrange(id)
+  mlist_melted <- reshape2::melt(mlist_big, id.vars="id") %>% arrange(id)  %>% 
+    mutate(variable=as.character(variable))
   
   return(mlist_melted)
 }

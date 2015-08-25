@@ -1,6 +1,6 @@
 # 500_replicate_banbura.R
 
-# input: "../data/df_2015_final.csv", "../data/var_set_info.csv"
+# input: "../data/df_2015_final.csv"
 # output: 
 
 source("400_model_funs.R")
@@ -15,30 +15,38 @@ source("200_load_after_eviews.R")
 ##################################################################
 
 
+# parallel computing details:
 parallel <- "off" # "windows"/"unix"/"off"
-ncpu <- 30
+ncpu <- 30 # number of cores for paralel computing, ignored if parallel=="off"
 
 df <- read_csv("../data/df_2015_final.csv")
 
+h_max <- 12 # maximum forecast horizont for VAR and BVAR 
 
-T_available <- nrow(df)
+T_available <- nrow(df) # number of observations
 
+# posterior simulation details:
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
 keep <- 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
 verbose <- FALSE # turn on/off messages from functions 
-way_omega_post_root <- "svd" # "cholesky" or "svd" # how (Omega_post)^{1/2} is obtained
+way_omega_post_root <- "svd" # "cholesky" or "svd", how (Omega_post)^{1/2} is obtained
+
+# testing mode (less lambdas are estimated, see 400_model_lists.R)
+testing_mode <- TRUE
 
 ################################################
 # create fit_set_info
 # describe which msfe ratios are averaged in fit
-fit_set_2vars <- data.frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
-fit_set_3vars <- data.frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
+fit_set_2vars <- data_frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
+fit_set_3vars <- data_frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
 
 fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
 fit_set_info
 
-# all versions of fit_set are considered, but only desired is reported:
+# a lot of models are estimated but only some are reported
 desired_fit_set <- "ind+cpi+rate"
+desired_n_lag <- 12
+desired_h <- c(1,3,6,12)
 
 ################################################
 # create var_set_info
@@ -73,7 +81,8 @@ var_set_info <- rbind(add_3,add_6,add_23)
 ####### step 0 (before banbura procedure)
 # melting actual observations
 df <- mutate(df, t=row_number()) 
-actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value)
+actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value) %>% 
+  mutate(variable=as.character(variable))
 
 
 ##### banbura step 1
@@ -92,7 +101,7 @@ message("Estimate RW and WN")
 rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
 
 # forecast all RW and WN models
-rwwn_forecast_list <- data.frame(model_id=c(1,2), h=NA, type="in-sample")
+rwwn_forecast_list <- data_frame(model_id=c(1,2), h=NA, type="in-sample")
 message("Forecast RW and WN")
 rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 
@@ -102,7 +111,6 @@ rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 # b) use only common available predictions for all models
 
 rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t))
-rwwn_forecasts <- rename(rwwn_forecasts, forecast=value)
 
 plot_forecast(rwwn_forecasts, var_name="m2", mod_id=2)
 
@@ -142,12 +150,11 @@ message("Estimating VAR")
 var_list <- estimate_models(var_list,parallel = parallel)
 
 # forecast VAR
-var_forecast_list <- data.frame(model_id=unique(var_list$id), h=NA, type="in-sample")
+var_forecast_list <- data_frame(model_id=unique(var_list$id), h=NA, type="in-sample")
 message("Forecasting VAR")
 var_forecasts <- forecast_models(var_forecast_list, var_list)
 
 # joining actual observations
-var_forecasts <- rename(var_forecasts, forecast=value)
 var_obs <- left_join(var_forecasts, actual_obs, by=c("t","variable"))
 
 var_obs <- mutate(var_obs, sq_error=(forecast-actual)^2)
@@ -205,12 +212,11 @@ bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FAL
 write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
-bvar_forecast_list <- data.frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
+bvar_forecast_list <- data_frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
 message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
 # joining actual observations
-bvar_forecasts <- rename(bvar_forecasts, forecast=value)
 bvar_obs <- left_join(bvar_forecasts, actual_obs, by=c("t","variable"))
 
 bvar_obs <- mutate(bvar_obs, sq_error=(forecast-actual)^2)
@@ -268,7 +274,7 @@ fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 # for each var_set, n_lag, fit_set the best lambdas are calculated
 best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
   mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank == 1) %>% ungroup()
-best_lambda
+best_lambda %>% arrange(var_set, n_lag, fit_set)
 
 
 
@@ -298,12 +304,13 @@ message("Estimate rolling BVAR")
 bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
-# forecast VAR
+# forecast BVAR
 bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% 
   mutate_each("as.numeric", n_lag, seed, starts_with("l_"), starts_with("T_") )
 bvar_out_wlist %>% glimpse()
+# check structure 
+bvar_out_wlist %>% group_by(var_set, fit_set, n_lag) %>% summarise(n=n())
 
-h_max <- 12
 bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id, 
                                  h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
@@ -315,11 +322,10 @@ message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
 # joining actual observations
-bvar_out_forecasts <- rename(bvar_out_forecasts, forecast=value)
 bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 
 bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
-head(bvar_out_obs)
+
 
 # join models info 
 bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag, fit_set),
@@ -348,7 +354,6 @@ rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
 message("Estimating rolling rw/wn/var models")
 rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
 
-h_max <- 12
 rwwn_var_out_forecast_list <- rwwn_var_out_wlist %>% rowwise() %>% mutate(model_id=id, 
   h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
@@ -360,7 +365,6 @@ rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_o
 
 
 # joining actual observations
-rwwn_var_out_forecasts <- rename(rwwn_var_out_forecasts, forecast=value)
 rwwn_var_out_obs <- left_join(rwwn_var_out_forecasts, actual_obs, by=c("t","variable"))
 
 rwwn_var_out_obs <- mutate(rwwn_var_out_obs, sq_error=(forecast-actual)^2)
@@ -375,7 +379,6 @@ rwwn_var_out_obs %>% head()
 # calculate OMSFE by var_set, h, n_lag, variable, model_type
 omsfe_rwwn_var_table <- rwwn_var_out_obs %>% group_by(var_set, n_lag, h, variable, model_type) %>% 
   summarise(omsfe=mean(sq_error))
-omsfe_rwwn_var_table 
 
 ##### banbura step 7: calculate relative omsfe 
 
@@ -401,10 +404,10 @@ omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_la
 filter_variables <- ( fit_set_info %>% filter(fit_set==desired_fit_set) ) $ variable %>% as.character()
 
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
-  filter(model_type=="var",n_lag==12, variable %in% filter_variables) 
+  filter(model_type=="var",n_lag==desired_n_lag, variable %in% filter_variables) 
 
 omsfe_bvar_banbura <- omsfe_bvar_table %>% 
-  filter(fit_set==desired_fit_set,n_lag==12, variable %in% filter_variables ) %>%
+  filter(fit_set==desired_fit_set,n_lag==desired_n_lag, variable %in% filter_variables ) %>%
   select(-fit_set) %>% mutate(model_type="bvar")
 
 omsfe_rwwn_banbura <- omsfe_selected_rwwn %>% 
@@ -421,11 +424,11 @@ var_bvar_omsfe_banbura_table <- rbind_list(omsfe_var_banbura,omsfe_bvar_banbura)
 
 var_bvar_omsfe_banbura_table
 
-
+# not automated!!!
 all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
   dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
   select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
-some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% c(1,3,6,12))
+some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% desired_h)
 
 some_rmsfe_wide
 # step 8: optimal VAR selection
