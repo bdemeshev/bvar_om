@@ -98,9 +98,10 @@
  % otherwise the current date is printed
 
 \begin{document}
+\pagenumbering{gobble}
 \begin{center}
 \begin{table}[h!]
-\begin{tabular}{lp{12cm}}
+\begin{tabular}{lp{10cm}}
 \toprule
 Название матрицы & Комментарий \\
 \midrule
@@ -140,6 +141,64 @@
  \verb|fit_inf_table| & подсчет \verb|fit| для каждого \verb|fit_set|, \verb|var_set| и количества лагов \\
  \verb|bvar_list| & список всех BVAR моделей (отличаются набором переменных, количеством лагов и гиперпараметрами\\
 \bottomrule
+\end{tabular}
+\end{table}
+\end{center}
+
+\newpage
+
+\begin{center}
+\begin{table}[h!]
+\begin{tabular}{lp{10cm}}
+\midrule
+
+\verb|bvar_forecast_list|& список прогнозов по BVAR моделям\\
+\verb|bvar_forecasts| &прогнозы in-sample по всем переменным в каждый момент времени\\ 
+\verb|bvar_obs|& то же, что и \verb|bvar_forecasts|, но с фактическими наблюдениями и квадратом ошибки\\
+\verb|msfe_lam|& среднеквадратичная ошибка для каждой переменной и каждой BVAR-модели, в которой она участвует\\
+\verb|bvar_wlist|& полная таблица с описание BVAR моделей\\
+\midrule
+\verb|msfe_lam_info|& объединение \verb|msfe_lam| с описанием каждой модели\\
+\verb|msfe_0_lam| &объединение \verb|msfe_lam_info| c msfe по RW или WN и соотношение MSFE\\
+\verb|fit_lam_table|& считает \verb|fit| для каждой возможной модели, для каждого \verb|var_set| и \verb|fit_set|\\
+\verb|fit_goal|& содержит \verb|fit| для VAR-модели из 3 переменных для разного количества лагов и для разных \verb|fit_set|\\
+\verb|fit_lam_table|& сопоставляет с \verb|fit_lam_table| c \verb|fit_goal| и рассчитывает разницу \verb|fit|-ов.\\
+\midrule
+\verb|best_lambda|&для каждой модели и номера лагов выбирает такое сочетание гиперпараметров, при котором отличие \verb|fit| в BVAR наименьшее\\
+\verb|bvar_out_list|& описание всех моделей BVAR, для которых будет строиться прогноз out-of-sample\\
+\verb|bvar_out_forecast_list|& расширенный список оцененных BVAR, подсчитанных по схеме rolling window \\
+\verb|bvar_out_forecasts|& out-of-sample прогнозы для всех переменных, для всех BVAR моделей для каждого момента времени\\
+\verb|bvar_out_obs| & совмещает \verb|bvar_out_forecasts| с фактическими значениями и информацией о модели, считает квадрат ошибки\\
+\midrule
+\verb|omsfe_bvar_table|& содержит out-of-sample MSFE для каждой переменной для каждого набора данных, количества лагов, прогнозного окна и \verb|fit_set|\\
+\verb|rwwn_var_unique_wlist|& содержит список моделей (VAR,RW,WN) с которыми происходит сравнение прогнозной способности BVAR\\
+\verb|rwwn_var_out_list|& полная информация по всем RW,WN и VAR моделям, по которым строится прогноз out-of-sample\\ 
+\verb|rwwn_var_out_forecast_list|& список всех прогнозных моделей и максимальных прогнозных окон по ним. Модели, использующие наблюдения, в конце выборки имеют меньшее прогнозное окно, чем более ранние за отсутствием наблюдений, с которыми прогноз будет сравниваться. \\
+\verb|rwwn_var_out_forecasts|& все out-of-sample прогнозы по VAR,RW и WN моделям \\
+\verb|rwwn_var_out_obs|& сопоставляет \verb|rwwn_var_out_forecasts| с фактическими наблюдениями и с информацией о типе модели, также считает квадрат ошибки\\
+\verb|omsfe_rwwn_var_table|& выдает MSFE по каждой переменной для моделей VAR,RW и WN для каждого набора переменных, количества лагов, прогнозного окна\\
+\verb|omsfe_selected_rwwn|& выбирает MSFE по RW и WN для каждой переменной в соответствии с тестом на (не)стационарность\\
+\midrule  
+\end{tabular}
+\end{table}
+\end{center}
+\newpage
+\begin{center}
+\begin{table}[h!]
+\begin{tabular}{lp{10cm}}
+\midrule 
+\verb|omsfe_bvar_table|& MSFE прогнозов по каждой переменной в зависимости от \verb|fit_set|, количества лагов и горизонта прогнозирования\\
+\verb|omsfe_var_banbura|& MSFE по VAR - моделям только для переменных, входящих в \verb|desired_fit_set|\\
+\verb|omsfe_var_banbura|& MSFE по BVAR - моделям только для переменных, входящих в \verb|desired_fit_set|\\
+\verb|omsfe_rwwb_banbura|& MSFE по RW и WN - моделям только для переменных, входящих в \verb|desired_fit_set|\\
+\midrule 
+\verb|var_bvar_omsfe_banbura_table|& MSFE по VAR и BVAR, нормированные на MSFE по RW и WN, для переменных, входящих в \verb|desired_fit_set|. \\ 
+\verb|all_rmsfe_wide| & Перегрупировка \verb|var_bvar_omsfe_banbura_table|\\
+\verb|some_rmsfe_wide|& То же, что и \verb|all_rmsfe_wide|, но для выбранных прогнозных окон\\
+\verb|create_best_var_list|& выбор наилучшего лага для VAR по критерию Шварца\\
+\bottomrule
+
+
 \end{tabular}
 \end{table}
 \end{center}
