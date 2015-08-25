@@ -1,0 +1,148 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or\ldots .
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+% read geometry.pdf for detailed page layout information
+
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{url}
+\usepackage{soulutf8}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another\ldots
+
+
+%%% HEADERS & FOOTERS
+%\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+%\pagestyle{fancy} % options: empty , plain , fancy
+
+
+
+
+%%My Additional Packages
+\usepackage{mathtext} % русские буквы в формулах
+\usepackage[T2A]{fontenc} % внутренняя кодировка TeX
+\usepackage[utf8]{inputenc} % кодировка исходного текста
+% \usepackage{cmap} % русский поиск в pdf
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage{amsmath} % Математические окружения AMS
+\usepackage{amsfonts} % Шрифты AMS
+\usepackage{amssymb} % Символы AMS
+\usepackage{graphicx} % Вставить pdf- или png-файлы
+
+\usepackage{euscript} % Красивый шрифт
+
+\usepackage{longtable} % Длинные таблицы
+\usepackage{multirow} % Слияние строк в таблице
+
+\usepackage{indentfirst} % Отступ в первом абзаце.
+\usepackage{pdflscape} %Переворачивает страницы, удобно для широких таблиц
+\usepackage{footnote} %сноски в таблицах
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
+
+%\usepackage[backend=biber, style=authoryear, citestyle=authoryear]{biblatex}
+\usepackage[backend=biber, style=bwl-FU, citestyle=bwl-FU]{biblatex}
+
+
+\addbibresource{bibliobase2.bib}
+
+\usepackage{wrapfig} % Обтекание рисунков текстом
+
+\usepackage{hyperref} % Гиперссылки
+
+\DeclareMathOperator{\etr}{etr}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Var}{\mathbb{V}\mathrm{ar}}
+\DeclareMathOperator{\chol}{chol}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cIW}{\mathcal{IW}}
+\newcommand{\lag}{\EuScript{L}}
+
+\newcommand{\prior}{\underline}
+\newcommand{\post}{\overline}
+
+\let\vec\relax
+\DeclareMathOperator{\vec}{vec}
+
+
+%\usepackage[toc,page]{appendix}
+
+
+%\renewcommand{\appendixtocname}{Приложения}
+%\renewcommand{\appendixpagename}{Приложения}
+%\renewcommand{\appendixname}{Приложение}
+%%% END Article customizations
+
+%%% The "real" document content comes below\ldots
+
+\title{Guide for BVAR package}
+%\date{} % Activate to display a given date or no date (if empty),
+ % otherwise the current date is printed
+
+\begin{document}
+\begin{center}
+\begin{table}[h!]
+\begin{tabular}{lp{12cm}}
+\toprule
+Название матрицы & Комментарий \\
+\midrule
+ \verb|all| & все данные, скаченные из EViews, содержат данные с 1992 г, включают столбец \verb|obs|, \verb|time| и \verb|time_y|\\
+ \verb|df_sa| & то же, что и \verb|all|, но без \verb|obs| и \verb|time|\\
+ \verb|df_final| & то же, что и \verb|df_sa|, но данные с 1995 г., часть переменных прологарифмирована\\ 
+ \verb|df| & то же, что и \verb|df_final|, но с индексом \verb|t|, отражающим номер наблюдения\\
+\midrule
+ \verb|fit_set_2var| & показывает, какие переменные входят в \verb|fit_set| из двух переменных\\
+ \verb|fit_set_3var| & показывает, какие переменные входят в \verb|fit_set| из трех переменных\\
+ \verb|fit_set_info| & объединение \verb|fit_set_2var| и \verb|fit_set_3var| \\
+ \verb|add_3| & список переменных, входящих в набор из трех переменных\\
+ \verb|add_6| & список переменных, входящих в набор из шести переменных\\
+ \verb|add_23| & список переменных, входящих в набор из 23 переменных\\
+ \verb|var_set_info| & объединение таблиц \verb|add_3|, \verb|add_6| и \verb|add_23| \\
+\midrule
+ \verb|actual_obs| & таблица с данными, где все наблюдения стоят друг под другом\\
+ \verb|deltas| & список $\delta_i$ для каждой переменной и вида модели для in-sample расчетов\\
+ \verb|rwwn_list| & описание двух моделей для in-sample расчетов (RW и WN)\\
+ \verb|rwwn_forecast_list| & обозначение моделей, для которых будут строиться in-sample прогнозы\\
+\midrule
+ \verb|rwwn_forecasts| & все in-sample прогнозы для всех переменных в каждый момент времени по RW и по WN\\
+ \verb|rwwn_obs| & объединение \verb|rwwn_forecasts| c фактическими наблюдениями и квадратом ошибки\\ 
+ \verb|msfe0_all| & среднеквадратичная ошибка по каждой переменной по RW и WN\\
+ \verb|rwwn_wlist| & описание оцененных RW и WN моделей. \\
+ \verb|msfe0| & среднеквадратичная ошибка по каждой переменной для каждой переменной в соответствии с тем классом временного ряда, который был выбран тестом на (не)стационарность\\
+\midrule
+ \verb|var_list| & описание всех частотных VAR-моделей, подлежащих оценке\\
+ \verb|var_forecast_list| & список VAR моделей, по которым строятся прогнозы\\
+ \verb|var_forecasts| & in-sample прогнозы по VAR-моделям (для каждого периода времени, сортировано по моделям)\\
+ \verb|var_obs| & то же, что и \verb|var_forecasts| плюс фактические значения и квадрат ошибки\\
+ \verb|msfe_Inf| & msfe in-sample прогнозов VAR, сортировано по переменным\\
+\midrule
+ \verb|var_wlist| & подробное описание оцененных VAR моделей\\
+ \verb|msfe_Inf_info| & объединение \verb|msfe_Inf| с информацией о самой модели \\
+ \verb|msfe_0_Inf| & объединение \verb|msfe_Inf_info| с msfe по RW или WN и соотношение MSFE\\
+ \verb|fit_inf_table| & подсчет \verb|fit| для каждого \verb|fit_set|, \verb|var_set| и количества лагов \\
+ \verb|bvar_list| & список всех BVAR моделей (отличаются набором переменных, количеством лагов и гиперпараметрами\\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{center}
+
+
+\end{document}
