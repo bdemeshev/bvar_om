@@ -154,6 +154,12 @@ http://stackoverflow.com/questions/7719741/how-to-test-if-list-element-exists
 
 25 авгутса 2015
 * best_lambda наличие повторных строк ???
-
+* дизайн реализации двух подходов
+obs2prior
+prior2obs (??? как выглядит решения для произвольных prior)
+lambda2obs
+lambda2prior (двойная конвертация labmda -> obs -> prior)
+estimate from obs (выбрать более робастную из from obs/prior)
+estimate from prior
 
 
