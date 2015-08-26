@@ -63,3 +63,25 @@ hyper$S
 hyper$Phi
 
 post_sample
+
+#### test old and new estimate function
+
+data(Yraw)
+priors <- Carriero_priors(Yraw, p=4, lambdas = c(0.2, 1, NA, NA, 100, 100))
+setup <- bvar_conj_setup(Yraw, p=4, lambda = c(0.2, 1, NA, NA, 100, 100))
+
+model_old <- bvar_conjugate0(priors=priors,fast_forecast = TRUE)
+model_new <- bvar_conj_estimate(setup, keep=0)
+
+old_post <- attr(model_old,"post")
+
+model_new$v_post
+old_post$v_post
+
+model_new$S_post
+old_post$S_post
+
+dimnames(model_new$Omega_post) <- NULL
+all.equal(model_new$Omega_post,old_post$Omega_post)
+
+all.equal(model_new$Phi_post, old_post$Phi_post)
