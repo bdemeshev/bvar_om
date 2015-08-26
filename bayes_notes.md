@@ -158,7 +158,7 @@ http://stackoverflow.com/questions/7719741/how-to-test-if-list-element-exists
 obs2prior
 prior2obs (??? как выглядит решения для произвольных prior)
 lambda2obs
-lambda2prior (двойная конвертация labmda -> obs -> prior)
+lambda2hyper (двойная конвертация labmda -> obs -> prior)
 estimate from obs (выбрать более робастную из from obs/prior)
 estimate from prior
 * в пакете сделать prior$Omega вместо prior$Omega_prior?
@@ -166,4 +166,4 @@ estimate from prior
 * разделить симуляции по banbura от отчёта по банбуре? 
 в отчете сверху указывается желаемое число лагов и прочее
 * сделать корректные типы, чтобы убрать warnings() (ок)
-
+* отказаться от длинных списков - оставить только широкие 
