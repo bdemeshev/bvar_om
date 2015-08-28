@@ -64,8 +64,8 @@ create_model_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
-    mutate(variable=as.character(variable))
+  #mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -86,8 +86,8 @@ create_rwwn_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
-    mutate(variable=as.character(variable))
+  #mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -108,8 +108,8 @@ create_var_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
-    mutate(variable=as.character(variable))
+  #mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
   return(mlist)
 }
 
@@ -142,9 +142,9 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist_melted <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
-    mutate(variable=as.character(variable))
-  return(mlist_melted)
+  #mlist_melted <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
+  return(mlist)
 }
 
 
@@ -183,8 +183,8 @@ create_bvar_banbura_list <- function() {
                                   ".Rds") ) 
   # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
   
-  mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
-    mutate(variable=as.character(variable))
+  #mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
   
   return(mlist)
 }
@@ -216,7 +216,7 @@ create_bvar_out_list <- function(best_lambda) {
   # ungroup and clear junk variables from data.frame:
   # we need to keep fit_set variable for further comparison 
   mlist <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
-  mlist <- mutate_each(mlist, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
+  # mlist <- mutate_each(mlist, "as.numeric", n_lag, l_1, l_const, l_io, l_power, l_sc)
   mlist <- mutate(mlist, status = "not estimated", type = "conjugate", 
                seed=13, T_in = n_lag + T_common )
   
@@ -234,8 +234,8 @@ create_bvar_out_list <- function(best_lambda) {
   
   # mlist_big <- mlist_big %>% select(-rownum, -T_start_min, -T_start_max, -T_start_amount)
   
-  mlist_melted <- reshape2::melt(mlist_big, id.vars="id") %>% arrange(id)  %>% 
-    mutate(variable=as.character(variable))
+  #mlist_melted <- reshape2::melt(mlist_big, id.vars="id") %>% arrange(id)  %>% 
+  #  mutate(variable=as.character(variable))
   
-  return(mlist_melted)
+  return(mlist_big)
 }

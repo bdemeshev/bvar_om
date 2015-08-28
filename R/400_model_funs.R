@@ -21,7 +21,7 @@ library("bvarr")
 # maybe we need to pass actual df for parallel computing
 estimate_model <- function(model_info, 
                            do_log=FALSE, test=FALSE ) {
-  minfo <- reshape2::dcast(model_info, id~variable)
+  minfo <- model_info # reshape2::dcast(model_info, id~variable)
   model_full_path <- paste0("../estimation/models/",minfo$file)
   
   
@@ -131,7 +131,8 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
 
   
   if (no_reestimation) {
-    temp <- dplyr::filter(mlist, variable=="status") %>% filter(!value=="estimated")
+    temp <- dplyr::filter(mlist, !status=="estimated")
+    # dplyr::filter(mlist, variable=="status") %>% filter(!value=="estimated")
     model_ids <- temp$id
     mlist_todo <- filter(mlist, id %in% model_ids)
   }  
@@ -146,7 +147,8 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
       status <- estimate_model(model_info, do_log=do_log, test=test)
-      mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
+      mlist$status[mlist$id==i] <- status
+      # mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
     }
     stopCluster(cl)
   }
@@ -158,7 +160,9 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
       status <- estimate_model(model_info, do_log=do_log, test=test)
-      mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
+      mlist$status[mlist$id==i] <- status
+      
+      #mlist$value[(mlist$id==i)&(mlist$variable=="status")] <- status
     }
   }
   
@@ -169,7 +173,9 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
       for (i in 1:length(model_ids))  {
         model_info <- mlist_todo %>% dplyr::filter(id==model_ids[i])
         status <- estimate_model(model_info, do_log=do_log, test=test)
-        mlist$value[(mlist$id==model_ids[i])&(mlist$variable=="status")] <- status
+        mlist$status[mlist$id==i] <- status
+        
+        # mlist$value[(mlist$id==model_ids[i])&(mlist$variable=="status")] <- status
         
         if (progress_bar) setTxtProgressBar(pb, i)
       }
@@ -196,8 +202,8 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
   
   # get info about model:
   model_id <- pred_info$model_id 
-  model_info <- mlist %>% filter(id==model_id)
-  minfo <- reshape2::dcast(model_info, id~variable)
+  minfo <- mlist %>% filter(id==model_id) # was: model_info <- ...
+  # minfo <- reshape2::dcast(model_info, id~variable)
   model_full_path <- paste0("../estimation/models/",minfo$file)
   model <- readRDS(model_full_path)
   
@@ -344,7 +350,6 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
   
   answer <- NULL
   if (parallel=="off") {
-    # fast version using rbindlist from data.table
     all_data <- list()
     if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(plist), style = 3)
     for (i in 1:nrow(plist)) {

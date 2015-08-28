@@ -134,9 +134,9 @@ msfe0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(s
 msfe0_all
 
 # add rw/wn label to msfe0
-rwwn_wlist <- dcast(rwwn_list, id~variable) %>% # wlist = wide list
-  mutate_each("as.numeric",n_lag,T_start,T_in) 
-msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_wlist, id, type), by=c("model_id"="id") )
+# rwwn_wlist <- dcast(rwwn_list, id~variable) %>% # wlist = wide list
+#  mutate_each("as.numeric",n_lag,T_start,T_in) 
+msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_list, id, type), by=c("model_id"="id") )
 
 msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
 
@@ -150,7 +150,7 @@ message("Estimating VAR")
 var_list <- estimate_models(var_list,parallel = parallel)
 
 # forecast VAR
-var_forecast_list <- data_frame(model_id=unique(var_list$id), h=NA, type="in-sample")
+var_forecast_list <- data_frame(model_id=var_list$id, h=NA, type="in-sample")
 message("Forecasting VAR")
 var_forecasts <- forecast_models(var_forecast_list, var_list)
 
@@ -166,10 +166,10 @@ msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe_Inf=mean
 msfe_Inf
 
 # join model info
-var_wlist <- dcast(var_list, id~variable) %>%
-  mutate_each("as.numeric",n_lag,T_start,T_in)
-var_wlist %>% glimpse()
-msfe_Inf_info <- left_join(msfe_Inf, select(var_wlist, id, type, var_set, n_lag),
+#var_wlist <- dcast(var_list, id~variable) %>%
+#  mutate_each("as.numeric",n_lag,T_start,T_in)
+# var_list %>% glimpse()
+msfe_Inf_info <- left_join(msfe_Inf, select(var_list, id, type, var_set, n_lag),
                            by=c("model_id"="id"))
 msfe_Inf_info
 # calculate fit-Inf
@@ -212,7 +212,7 @@ bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FAL
 # write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
-bvar_forecast_list <- data_frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
+bvar_forecast_list <- data_frame(model_id=bvar_list$id, h=NA, type="in-sample")
 message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
@@ -228,12 +228,12 @@ msfe_lam <- bvar_obs %>% group_by(variable, model_id) %>% summarise(msfe_lam=mea
 msfe_lam
 
 # join model info
-bvar_wlist <- dcast(bvar_list, id~variable) %>%
-  mutate_each("as.numeric",n_lag,T_start,T_in)
-bvar_wlist %>% select(-file,-type)
+#bvar_wlist <- dcast(bvar_list, id~variable) %>%
+#  mutate_each("as.numeric",n_lag,T_start,T_in)
+#bvar_wlist %>% select(-file,-type)
 
 msfe_lam_info <- left_join(msfe_lam, 
-            select(bvar_wlist, id, type, var_set, n_lag,
+            select(bvar_list, id, type, var_set, n_lag,
                    l_1, l_const, l_io, l_power, l_sc, n_lag),
                            by=c("model_id"="id"))
 msfe_lam_info 
@@ -302,16 +302,16 @@ bvar_out_list  <- create_bvar_out_list(best_lambda)
 
 message("Estimate rolling BVAR")
 bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
-write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
+#write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
 # forecast BVAR
-bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% 
-  mutate_each("as.numeric", n_lag, seed, starts_with("l_"), starts_with("T_") )
-bvar_out_wlist %>% glimpse()
+# bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% 
+#  mutate_each("as.numeric", n_lag, seed, starts_with("l_"), starts_with("T_") )
+# bvar_out_wlist %>% glimpse()
 # check structure 
-bvar_out_wlist %>% group_by(var_set, fit_set, n_lag) %>% summarise(n=n())
+bvar_out_list %>% group_by(var_set, fit_set, n_lag) %>% summarise(n=n())
 
-bvar_out_forecast_list <- bvar_out_wlist %>% rowwise() %>% mutate(model_id=id, 
+bvar_out_forecast_list <- bvar_out_list %>% rowwise() %>% mutate(model_id=id, 
                                  h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
 # without rowwise min will be global and always equal to 1
@@ -328,7 +328,7 @@ bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
 
 
 # join models info 
-bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_wlist, id, var_set, n_lag, fit_set),
+bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_list, id, var_set, n_lag, fit_set),
                           by=c("model_id"="id"))
 bvar_out_obs %>% head()
 
@@ -339,22 +339,22 @@ omsfe_bvar_table %>% head()
 
 ##### banbura step 6: calculate omsfe for RW/WN/VAR
 # look at lists:
-var_wlist
-rwwn_wlist
-str(rwwn_wlist)
+var_list
+rwwn_list
+str(rwwn_list)
 
-rwwn_var_unique_wlist <- rbind_list(var_wlist, rwwn_wlist) %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+rwwn_var_unique_list <- rbind_list(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
-rwwn_var_out_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>% 
+rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>% 
   mutate(file=paste0(type,"_",id,
                      "_T_",T_start,"_",T_in,"_",
                                 var_set,"_lags_",n_lag,".Rds") ) 
-rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
+# rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
 message("Estimating rolling rw/wn/var models")
 rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
 
-rwwn_var_out_forecast_list <- rwwn_var_out_wlist %>% rowwise() %>% mutate(model_id=id, 
+rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% mutate(model_id=id, 
   h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
 # without rowwise min will be global and always equal to 1
@@ -369,10 +369,9 @@ rwwn_var_out_obs <- left_join(rwwn_var_out_forecasts, actual_obs, by=c("t","vari
 
 rwwn_var_out_obs <- mutate(rwwn_var_out_obs, sq_error=(forecast-actual)^2)
 head(rwwn_var_out_obs)
-glimpse(rwwn_var_out_obs)
 
 # join models info 
-rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_wlist, id, var_set, n_lag, model_type=type),
+rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_list, id, var_set, n_lag, model_type=type),
                           by=c("model_id"="id"))
 rwwn_var_out_obs %>% head()
 
