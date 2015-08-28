@@ -29,7 +29,6 @@ T_available <- nrow(df) # number of observations
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
 keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
 verbose <- FALSE # turn on/off messages from functions 
-way_omega_post_root <- "svd" # "cholesky" or "svd", how (Omega_post)^{1/2} is obtained
 
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE
@@ -106,7 +105,7 @@ message("Forecast RW and WN")
 rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
 
 # calculate all msfe-0
-# two ways to calculate msfe
+# two ways to calculate msfe (we use b)
 # a) use all available predictions for each model
 # b) use only common available predictions for all models
 
@@ -114,10 +113,6 @@ rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start=min(t),Tf_end=max(t
 
 plot_forecast(rwwn_forecasts, var_name="m2", mod_id=2)
 
-#### if we prefer way b, just uncomment next two lines
-# Tf_common_start <- 2
-# rwwn_forecasts <- filter(rwwn_forecasts, t >= Tf_common_start)
-####
 
 # build table with corresponding msfe-0 (RW or WN)
 
@@ -134,8 +129,6 @@ msfe0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(s
 msfe0_all
 
 # add rw/wn label to msfe0
-# rwwn_wlist <- dcast(rwwn_list, id~variable) %>% # wlist = wide list
-#  mutate_each("as.numeric",n_lag,T_start,T_in) 
 msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_list, id, type), by=c("model_id"="id") )
 
 msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
@@ -166,9 +159,6 @@ msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe_Inf=mean
 msfe_Inf
 
 # join model info
-#var_wlist <- dcast(var_list, id~variable) %>%
-#  mutate_each("as.numeric",n_lag,T_start,T_in)
-# var_list %>% glimpse()
 msfe_Inf_info <- left_join(msfe_Inf, select(var_list, id, type, var_set, n_lag),
                            by=c("model_id"="id"))
 msfe_Inf_info
@@ -228,9 +218,6 @@ msfe_lam <- bvar_obs %>% group_by(variable, model_id) %>% summarise(msfe_lam=mea
 msfe_lam
 
 # join model info
-#bvar_wlist <- dcast(bvar_list, id~variable) %>%
-#  mutate_each("as.numeric",n_lag,T_start,T_in)
-#bvar_wlist %>% select(-file,-type)
 
 msfe_lam_info <- left_join(msfe_lam, 
             select(bvar_list, id, type, var_set, n_lag,
@@ -305,9 +292,6 @@ bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
 #write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
 # forecast BVAR
-# bvar_out_wlist <- dcast(bvar_out_list, id~variable) %>% 
-#  mutate_each("as.numeric", n_lag, seed, starts_with("l_"), starts_with("T_") )
-# bvar_out_wlist %>% glimpse()
 # check structure 
 bvar_out_list %>% group_by(var_set, fit_set, n_lag) %>% summarise(n=n())
 
@@ -341,7 +325,7 @@ omsfe_bvar_table %>% head()
 # look at lists:
 var_list
 rwwn_list
-str(rwwn_list)
+
 
 rwwn_var_unique_list <- rbind_list(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
@@ -350,7 +334,6 @@ rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>%
   mutate(file=paste0(type,"_",id,
                      "_T_",T_start,"_",T_in,"_",
                                 var_set,"_lags_",n_lag,".Rds") ) 
-# rwwn_var_out_list <- melt(rwwn_var_out_wlist, id.vars = "id") %>% arrange(id)
 message("Estimating rolling rw/wn/var models")
 rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
 
@@ -399,7 +382,6 @@ omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_la
 
 
 # replicate banbura table from page 79
-# desired_fit_set <- "ind+cpi+rate" # set up in the beginning of file
 filter_variables <- ( fit_set_info %>% filter(fit_set==desired_fit_set) ) $ variable %>% as.character()
 
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
