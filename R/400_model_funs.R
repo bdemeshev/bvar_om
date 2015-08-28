@@ -60,17 +60,20 @@ estimate_model <- function(model_info,
     n_lag <- as.numeric(minfo$n_lag)
     
 
-    priors <- Carriero_priors( D, p=n_lag,    # p=n_lag
-                               lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
+    #priors <- Carriero_priors( D, p=n_lag,    # p=n_lag
+    #                           lambdas=c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
+    
+    setup <- bvar_conj_setup(D, p=n_lag, lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
     
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
     # estimate model
     
+    model <- bvar_conj_estimate(setup=setup, verbose=verbose, keep=keep)
   
-    model <- bvar_conjugate0(priors = priors, 
-                             verbose=verbose, keep=keep, 
-                             fast_forecast = fast_forecast,way_omega_post_root = way_omega_post_root) 
+    # model <- bvar_conjugate0(priors = priors, 
+    #                         verbose=verbose, keep=keep, 
+    #                         fast_forecast = fast_forecast,way_omega_post_root = way_omega_post_root) 
     status <- "estimated"
   }
   
@@ -241,7 +244,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- T_in - n_lag
     Tf_end <- Tf_start + Tf_length - 1
     
-    predictions <- forecast_conjugate(model, 
+    predictions <- bvar_conj_forecast(model, 
                   fast_forecast = TRUE, out_of_sample = FALSE)
     # in-sample forecasts are one-step predictions, so fast_forecast is TRUE
     answer <- mutate(predictions, t=h+Tf_start-1, h=NA) %>% select(-what) 
@@ -267,7 +270,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
     Tf_length <- pred_info$h
     Tf_end <- Tf_start + Tf_length - 1
     
-    predictions <- forecast_conjugate(model, h = pred_info$h, include="mean", level=NULL, 
+    predictions <- bvar_conj_forecast(model, h = pred_info$h, include="mean", level=NULL, 
                                       fast_forecast = fast_forecast)
     answer <- mutate(predictions, t=h+Tf_start-1) %>% select(-what) 
   }

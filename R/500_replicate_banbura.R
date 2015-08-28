@@ -27,12 +27,12 @@ T_available <- nrow(df) # number of observations
 
 # posterior simulation details:
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
-keep <- 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
+keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
 verbose <- FALSE # turn on/off messages from functions 
 way_omega_post_root <- "svd" # "cholesky" or "svd", how (Omega_post)^{1/2} is obtained
 
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
-testing_mode <- TRUE
+testing_mode <- FALSE
 
 ################################################
 # create fit_set_info
@@ -209,7 +209,7 @@ bvar_list <- create_bvar_banbura_list()
 # bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
 bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
-write_csv(bvar_list, path = "../estimation/bvar_list.csv")
+# write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
 bvar_forecast_list <- data_frame(model_id=unique(bvar_list$id), h=NA, type="in-sample")
