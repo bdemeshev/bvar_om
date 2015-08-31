@@ -115,18 +115,8 @@ plot_forecast(rwwn_forecasts, var_name="m2", mod_id=2)
 
 
 # build table with corresponding msfe-0 (RW or WN)
+msfe0_all <- get_msfe(rwwn_forecasts, actual_obs, msfe_name = "msfe")
 
-
-
-# joining actual observations
-
-rwwn_obs <- left_join(rwwn_forecasts, actual_obs, by=c("t","variable"))
-
-rwwn_obs <- mutate(rwwn_obs, sq_error=(forecast-actual)^2)
-head(rwwn_obs)
-
-msfe0_all <- rwwn_obs %>% group_by(variable, model_id) %>% summarise(msfe=mean(sq_error))
-msfe0_all
 
 # add rw/wn label to msfe0
 msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_list, id, type), by=c("model_id"="id") )
@@ -147,16 +137,9 @@ var_forecast_list <- data_frame(model_id=var_list$id, h=NA, type="in-sample")
 message("Forecasting VAR")
 var_forecasts <- forecast_models(var_forecast_list, var_list)
 
-# joining actual observations
-var_obs <- left_join(var_forecasts, actual_obs, by=c("t","variable"))
-
-var_obs <- mutate(var_obs, sq_error=(forecast-actual)^2)
-head(var_obs)
 
 # calculate msfe-inf
-
-msfe_Inf <- var_obs %>% group_by(variable, model_id) %>% summarise(msfe_Inf=mean(sq_error))
-msfe_Inf
+msfe_Inf <- get_msfe(var_forecasts, actual_obs, msfe_name = "msfe_Inf")
 
 # join model info
 msfe_Inf_info <- left_join(msfe_Inf, select(var_list, id, type, var_set, n_lag),
@@ -206,16 +189,10 @@ bvar_forecast_list <- data_frame(model_id=bvar_list$id, h=NA, type="in-sample")
 message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
-# joining actual observations
-bvar_obs <- left_join(bvar_forecasts, actual_obs, by=c("t","variable"))
-
-bvar_obs <- mutate(bvar_obs, sq_error=(forecast-actual)^2)
-head(bvar_obs)
-
 # calculate msfe-lam
+msfe_lam <- get_msfe(bvar_forecasts, actual_obs, msfe_name = "msfe_lam")
 
-msfe_lam <- bvar_obs %>% group_by(variable, model_id) %>% summarise(msfe_lam=mean(sq_error))
-msfe_lam
+msfe_lam %>% head()
 
 # join model info
 

@@ -61,6 +61,23 @@ delta_i_from_ar1 <- function(df_ts, varset=colnames(df_ts), remove_vars=NULL, re
 }
 
 
+get_msfe <- function(forecasts, actuals, 
+                      plus_group_vars = NULL, 
+                      msfe_name="msfe" ) {
+  
+  # joining actual observations
+  for_p_act <- left_join(forecasts, actuals, by=c("t","variable"))
+  
+  for_p_act <- mutate(for_p_act, sq_error=(forecast-actual)^2)
+  
+  # calculate msfe
 
+  msfes <- for_p_act %>% group_by_(.dots=c("variable", "model_id", plus_group_vars)) %>% 
+                                    summarise(msfe=mean(sq_error))
+  
+  colnames(msfes)[colnames(msfes)=="msfe"] <- msfe_name
+  
+  return(msfes)
+}
 
 
