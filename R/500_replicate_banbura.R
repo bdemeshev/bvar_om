@@ -115,11 +115,12 @@ plot_forecast(rwwn_forecasts, var_name="m2", mod_id=2)
 
 
 # build table with corresponding msfe-0 (RW or WN)
-msfe0_all <- get_msfe(rwwn_forecasts, actual_obs, msfe_name = "msfe")
+msfe0_all <- get_msfe(rwwn_forecasts, actual_obs, 
+                      models = dplyr::select(rwwn_list, id, type),
+                      msfe_name = "msfe")
 
 
-# add rw/wn label to msfe0
-msfe0_all <- left_join(msfe0_all, dplyr::select(rwwn_list, id, type), by=c("model_id"="id") )
+# add deltas info to msfe0_all
 
 msfe0 <- left_join(deltas, msfe0_all, by= c("variable"="variable","rw_wn"="type") )
 
@@ -139,15 +140,13 @@ var_forecasts <- forecast_models(var_forecast_list, var_list)
 
 
 # calculate msfe-inf
-msfe_Inf <- get_msfe(var_forecasts, actual_obs, msfe_name = "msfe_Inf")
+msfe_Inf_info <- get_msfe(var_forecasts, actual_obs, 
+                     models = select(var_list, id, type, var_set, n_lag),
+                     msfe_name = "msfe_Inf")
 
-# join model info
-msfe_Inf_info <- left_join(msfe_Inf, select(var_list, id, type, var_set, n_lag),
-                           by=c("model_id"="id"))
-msfe_Inf_info
-# calculate fit-Inf
 
-# msfe_0_Inf <- rename(msfe_Inf_info, msfe_Inf=msfe)
+msfe_Inf_info %>% head()
+
 # join msfe0
 msfe_0_Inf <- left_join(msfe_Inf_info,
                         msfe0 %>% select(msfe,rw_wn,variable) %>% rename(msfe0=msfe),
@@ -190,17 +189,13 @@ message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
 
 # calculate msfe-lam
-msfe_lam <- get_msfe(bvar_forecasts, actual_obs, msfe_name = "msfe_lam")
+msfe_lam_info <- get_msfe(bvar_forecasts, actual_obs, 
+                     models = select(bvar_list, id, type, var_set, n_lag,
+                                     l_1, l_const, l_io, l_power, l_sc, n_lag),
+                     msfe_name = "msfe_lam")
 
-msfe_lam %>% head()
 
-# join model info
-
-msfe_lam_info <- left_join(msfe_lam, 
-            select(bvar_list, id, type, var_set, n_lag,
-                   l_1, l_const, l_io, l_power, l_sc, n_lag),
-                           by=c("model_id"="id"))
-msfe_lam_info 
+msfe_lam_info %>% head()
 
 # join msfe0
 msfe_0_lam <- left_join(msfe_lam_info,msfe0 
@@ -282,20 +277,11 @@ bvar_out_forecast_list <- bvar_out_list %>% rowwise() %>% mutate(model_id=id,
 message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
-# joining actual observations
-bvar_out_obs <- left_join(bvar_out_forecasts, actual_obs, by=c("t","variable"))
 
-bvar_out_obs <- mutate(bvar_out_obs, sq_error=(forecast-actual)^2)
-
-
-# join models info 
-bvar_out_obs <- left_join(bvar_out_obs, select(bvar_out_list, id, var_set, n_lag, fit_set),
-                          by=c("model_id"="id"))
-bvar_out_obs %>% head()
-
-# calculate OMSFE by var_set, h, n_lag, variable
-omsfe_bvar_table <- bvar_out_obs %>% group_by(var_set, n_lag, h, variable, fit_set) %>% 
-  summarise(omsfe=mean(sq_error))
+omsfe_bvar_table <- get_msfe(bvar_out_forecasts, actual_obs,
+                             models = select(bvar_out_list, id, var_set, n_lag, fit_set),
+                             plus_group_vars = "fit_set",
+                             msfe_name = "omsfe", msfe_type = "out-of-sample")
 omsfe_bvar_table %>% head()
 
 ##### banbura step 6: calculate omsfe for RW/WN/VAR
@@ -324,20 +310,12 @@ message("Forecasting rolling rw/wn/var models, out-of-sample")
 rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, progress_bar=TRUE)
 
 
-# joining actual observations
-rwwn_var_out_obs <- left_join(rwwn_var_out_forecasts, actual_obs, by=c("t","variable"))
 
-rwwn_var_out_obs <- mutate(rwwn_var_out_obs, sq_error=(forecast-actual)^2)
-head(rwwn_var_out_obs)
+omsfe_rwwn_var_table <- get_msfe(rwwn_var_out_forecasts, actual_obs,
+                                 models = select(rwwn_var_out_list, id, var_set, n_lag, model_type=type),
+                                 plus_group_vars = "model_type",
+                                 msfe_name = "omsfe", msfe_type = "out-of-sample")
 
-# join models info 
-rwwn_var_out_obs <- left_join(rwwn_var_out_obs, select(rwwn_var_out_list, id, var_set, n_lag, model_type=type),
-                          by=c("model_id"="id"))
-rwwn_var_out_obs %>% head()
-
-# calculate OMSFE by var_set, h, n_lag, variable, model_type
-omsfe_rwwn_var_table <- rwwn_var_out_obs %>% group_by(var_set, n_lag, h, variable, model_type) %>% 
-  summarise(omsfe=mean(sq_error))
 
 ##### banbura step 7: calculate relative omsfe 
 

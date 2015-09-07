@@ -62,18 +62,41 @@ delta_i_from_ar1 <- function(df_ts, varset=colnames(df_ts), remove_vars=NULL, re
 
 
 get_msfe <- function(forecasts, actuals, 
+                      models = NULL, # list of models, all field from models will be joined
                       plus_group_vars = NULL, 
-                      msfe_name="msfe" ) {
+                      msfe_name="msfe",
+                      msfe_type=c("in-sample","out-of-sample")) {
   
-  # joining actual observations
-  for_p_act <- left_join(forecasts, actuals, by=c("t","variable"))
+  msfe_type <- match.arg(msfe_type)
+    
+  # joining forecast and actual observations
+  for_and_act <- left_join(forecasts, actuals, by=c("t","variable"))
+  for_and_act <- mutate(for_and_act, sq_error=(forecast-actual)^2)
   
-  for_p_act <- mutate(for_p_act, sq_error=(forecast-actual)^2)
+  # join info from model list
+  
   
   # calculate msfe
-
-  msfes <- for_p_act %>% group_by_(.dots=c("variable", "model_id", plus_group_vars)) %>% 
+  
+  if (msfe_type=="in-sample") {
+    # for in-sample forecast errors are averaged for each model
+    msfes <- for_and_act %>% group_by_(.dots=c("variable", "model_id", plus_group_vars)) %>% 
                                     summarise(msfe=mean(sq_error))
+    if (!is.null(models)) {
+      msfes <- left_join(msfes, models, by=c("model_id"="id"))
+    }
+  }
+  if (msfe_type=="out-of-sample") {
+    if (!is.null(models)) {
+      for_and_act <- left_join(for_and_act, models, by=c("model_id"="id"))
+    }
+    # for out-of-sample forecasts 
+    # errors are averaged between models of the same type evaluated for moving time slot
+    msfes <- for_and_act %>% group_by_(.dots=c("variable", "var_set", "n_lag", "h", plus_group_vars)) %>% 
+      summarise(msfe=mean(sq_error))
+  }
+  
+  
   
   colnames(msfes)[colnames(msfes)=="msfe"] <- msfe_name
   
