@@ -213,10 +213,13 @@ best_bvars_forecast_list <- best_bvars %>% rowwise() %>%
 message("Forecasting best BVAR, out-of-sample")
 best_bvars_forecasts <- forecast_models(best_bvars_forecast_list, best_bvars)
 
+# проверить, по каким переменным группировать в get_msfe!!!!!!!!!!!
 omsfe_best <- get_msfe(best_bvars_forecasts, actual_obs,
                              models = select(best_bvars, id, var_set, n_lag),
                              msfe_name = "omsfe", msfe_type = "out-of-sample")
 omsfe_best %>% head()
 
+#### calculate rmsfe
 
+# ... 
 
