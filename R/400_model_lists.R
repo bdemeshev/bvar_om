@@ -189,6 +189,55 @@ create_bvar_banbura_list <- function() {
   return(mlist)
 }
 
+
+create_mdd_list <- function() {
+  # в столбце value получаем тип character
+  list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5)
+  list_of_sets <- c("set_3","set_6","set_23")
+  
+  if (testing_mode) {
+    list_of_lambdas <- c(1,10)
+    list_of_sets <- c("set_6")
+  }
+  
+  mlist <- expand.grid(type="conjugate", 
+                       var_set=list_of_sets,
+                       n_lag=c(1,6,12),
+                       l_1=list_of_lambdas,
+                       l_power=1,
+                       l_const=Inf,
+                       # l_sc=1,
+                       l_io=c(1), # NA means no initial observations
+                       seed=13, # good luck, mcmc
+                       status="not estimated")
+  
+  # add no sc dummy and l_sc=10*l_1
+  mlist_sc <- mlist %>% mutate(l_sc=10*l_1)
+  mlist_nosc <- mlist %>% mutate(l_sc=NA)
+  mlist <- rbind_list(mlist_sc,mlist_nosc)
+  
+  mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
+  mlist <- mlist %>% mutate(id=row_number())
+  mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+                                        var_set,"_lags_",n_lag,
+                                        "_lams_",round(100*l_1),
+                                        "_sc_",round(100*l_sc),
+                                        "_io_",round(100*l_io),
+                                        "_pow_",round(100*l_power),
+                                        "_cst_",round(100*l_const),
+                                        ".Rds") ) 
+  # mlist <- mlist %>% mutate_each("as.factor",type, status, var_set) 
+  
+  #mlist <- reshape2::melt(mlist, id.vars="id") %>% arrange(id) %>% 
+  #  mutate(variable=as.character(variable))
+  
+  return(mlist)
+}
+
+
+
+
 # add for each model all possible shifts for T_in
 rolling_model_replicate <- function(mlist_small) {
   # we need mlist_small with n_lag

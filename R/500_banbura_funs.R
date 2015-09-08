@@ -103,4 +103,32 @@ get_msfe <- function(forecasts, actuals,
   return(msfes)
 }
 
+# input: bvar_list
+# output: bvar_list augmented with mdd variable
+calculate_mdd <- function(bvar_list, parallel = c("off","windows","unix"), 
+                          ncpu=4, test=FALSE, do_log=FALSE,
+                          progress_bar=TRUE, verbose=FALSE) {
+  start_time <- Sys.time()
+  
+  parallel <- match.arg(parallel)
+  
+  if (parallel=="off") {
+    bvar_list$mdd <- NA
+    
+    if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(bvar_list), style = 3)
+    for (i in 1:nrow(bvar_list)) {
+      file_wpath <- paste0("../estimation/models/", bvar_list$file[i])
+      model <- readRDS(file_wpath)
+      if (verbose) message(bvar_list$file[i])
+      bvar_list$mdd[i] <- bvar_conj_mdd(model)
+      if (progress_bar) setTxtProgressBar(pb, i)
+    }
+    if (progress_bar) close(pb)
+    
+  }
+  end_time <- Sys.time()
+  message("Time elapsed: ", round(end_time - start_time,1)," ", attr(end_time - start_time,"units"))
+
+  return(bvar_list)
+}
 
