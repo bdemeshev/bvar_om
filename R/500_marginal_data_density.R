@@ -198,7 +198,7 @@ bvar_list <- calculate_mdd(bvar_list)
 #### for each t find optimal model (maybe we'll add grouping variable)
 
 best_bvars <- bvar_list %>% mutate(Tf_start=T_start+n_lag) %>% 
-  group_by(Tf_start) %>% 
+  group_by(Tf_start) %>% # , var_set, n_lag
   mutate(mdd_rank=dense_rank(mdd)) %>% filter(mdd_rank == 1) %>% ungroup()
 
 #### ACHTUNG: check for non-unique optimal mdd!!!!!!!!!
