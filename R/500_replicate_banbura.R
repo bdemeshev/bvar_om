@@ -231,24 +231,24 @@ fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
 fit_lam_table <- mutate(fit_lam_table, delta_fit = abs(fit_lam-fit_inf))
 
 # for each var_set, n_lag, fit_set the best lambdas are calculated
-best_lambda <- fit_lam_table %>% group_by(var_set, n_lag, fit_set) %>% 
+optimal_by <- c("var_set", "n_lag", "fit_set")
+best_lambda <- fit_lam_table %>% group_by_(.dots=optimal_by) %>% 
   mutate(fit_rank=dense_rank(delta_fit)) %>% filter(fit_rank == 1) %>% ungroup()
 best_lambda %>% arrange(var_set, n_lag, fit_set)
 
 
 
 # check whether best lambda is unique
-check_uniqueness <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% summarise(num_of_best_lambdas=n())
+check_uniqueness <- best_lambda %>% group_by_(.dots=optimal_by) %>% summarise(num_of_best_lambdas=n())
 # num of best lambdas should be always one
-if (max(check_uniqueness$num_of_best_lambdas)>1) warning("**** ACHTUNG ****: non unique optimal lambdas")
-check_uniqueness %>% filter(num_of_best_lambdas>1)
-
-# choose best_lambda in tie case --- with no sc dummy obs if possible
-best_lambda <- best_lambda %>% group_by(var_set, n_lag, fit_set) %>% 
-  mutate(sc_na_bonus=is.na(l_sc)) %>% arrange(desc(sc_na_bonus)) %>% 
-  mutate(fit_tie_rank=row_number()) %>% 
-  filter(fit_tie_rank == 1) %>% ungroup()
-best_lambda
+if (max(check_uniqueness$num_of_best_lambdas)>1) {
+  warning("**** ACHTUNG ****: non unique optimal lambdas")
+  check_uniqueness %>% filter(num_of_best_lambdas>1)
+  message("First in list optimal lambda will be chosen")
+  best_lambda <- best_lambda %>% group_by_(.dots=optimal_by) %>%
+    mutate(rownum = row_number()) %>% filter(rownum==1) %>% select(-rownum)
+  
+}
 
 
 ##### banbura step 5: calculate omsfe for bvar

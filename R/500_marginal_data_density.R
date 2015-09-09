@@ -197,11 +197,22 @@ bvar_list <- calculate_mdd(bvar_list)
 
 #### for each t find optimal model (maybe we'll add grouping variable)
 
+optimal_by <- c("Tf_start") # , var_set, n_lag
+
 best_bvars <- bvar_list %>% mutate(Tf_start=T_start+n_lag) %>% 
-  group_by(Tf_start) %>% # , var_set, n_lag
+  group_by_(.dots=optimal_by) %>% 
   mutate(mdd_rank=dense_rank(mdd)) %>% filter(mdd_rank == 1) %>% ungroup()
 
-#### ACHTUNG: check for non-unique optimal mdd!!!!!!!!!
+#### check for non-unique optimal mdd
+check_uniqueness <- best_bvars %>% group_by_(.dots=optimal_by) %>% 
+  summarise(num_of_best_mdd=n())
+if (max(check_uniqueness$num_of_best_mdd)>1) {
+  warning("**** ACHTUNG ****: non unique optimal mdd")
+  check_uniqueness %>% filter(num_of_best_mdd>1)
+  message("First in list optimal mdd will be chosen")
+  best_bvars <- best_bvars %>% group_by_(.dots=optimal_by) %>%
+    mutate(rownum = row_number()) %>% filter(rownum==1) %>% select(-rownum)
+}
 
 
 #### forecast all best BVAR models
@@ -214,12 +225,12 @@ message("Forecasting best BVAR, out-of-sample")
 best_bvars_forecasts <- forecast_models(best_bvars_forecast_list, best_bvars)
 
 # проверить, по каким переменным группировать в get_msfe!!!!!!!!!!!
-omsfe_best <- get_msfe(best_bvars_forecasts, actual_obs,
+omsfe_best_mdd <- get_msfe(best_bvars_forecasts, actual_obs,
                              models = select(best_bvars, id, var_set, n_lag),
                              msfe_name = "omsfe", msfe_type = "out-of-sample")
-omsfe_best %>% head()
+omsfe_best_mdd %>% head()
 
 #### calculate rmsfe
 
-# ... 
+
 
