@@ -172,6 +172,17 @@ omsfe_rwwn_var_table <- get_msfe(rwwn_var_out_forecasts, actual_obs,
                                  plus_group_vars = "model_type",
                                  msfe_name = "omsfe", msfe_type = "out-of-sample")
 
+# select rw or wn omsfe for each variable, for each h
+omsfe_selected_rwwn <- left_join(deltas, 
+                                 filter(omsfe_rwwn_var_table, model_type %in% c("wn","rw")),
+                                 by=c("rw_wn"="model_type","variable"="variable")) %>% 
+  select(-var_set, -n_lag, -delta)
+omsfe_selected_rwwn %>% glimpse()
+
+omsfe_rwwn_banbura <- omsfe_selected_rwwn %>% 
+  # filter(variable %in% filter_variables ) %>%
+  rename(model_type=rw_wn) 
+
 
 #### estimate bvar model and calculate mdd for each t 
 
@@ -234,9 +245,14 @@ omsfe_best_mdd %>% head()
 rmsfe_long <- omsfe_best_mdd %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), 
             by=c("h","variable")) %>%
-  mutate(rmsfe=omsfe/omsfe_rwwn) 
+  mutate(rmsfe=omsfe/omsfe_rwwn, model_type="mdd") 
    # %>% select(-n_lag) # ???
 
+rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn, -n_lag, -var_set) %>% 
+  dcast(h+variable~model_type, value.var="rmsfe") 
+some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h)
+
+some_rmsfe_wide
 
 
 
