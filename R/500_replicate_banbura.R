@@ -354,17 +354,17 @@ omsfe_var_banbura
 omsfe_bvar_banbura
 omsfe_rwwn_banbura 
 
-var_bvar_omsfe_banbura_table <- bind_rows(omsfe_var_banbura,omsfe_bvar_banbura) %>%
+rmsfe_long <- bind_rows(omsfe_var_banbura,omsfe_bvar_banbura) %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
   mutate(rmsfe=omsfe/omsfe_rwwn) %>% select(-n_lag)
 
-var_bvar_omsfe_banbura_table
+rmsfe_long
 
 # not automated!!!
-all_rmsfe_wide <- var_bvar_omsfe_banbura_table %>% select(-omsfe,-omsfe_rwwn) %>% 
+rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn) %>% 
   dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
   select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
-some_rmsfe_wide <- all_rmsfe_wide %>% filter(h %in% desired_h)
+some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h)
 
 some_rmsfe_wide
 # step 8: optimal VAR selection

@@ -231,6 +231,12 @@ omsfe_best_mdd <- get_msfe(best_bvars_forecasts, actual_obs,
 omsfe_best_mdd %>% head()
 
 #### calculate rmsfe
+rmsfe_long <- omsfe_best_mdd %>%
+  left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), 
+            by=c("h","variable")) %>%
+  mutate(rmsfe=omsfe/omsfe_rwwn) 
+   # %>% select(-n_lag) # ???
+
 
 
 
