@@ -92,7 +92,7 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value) %>%
 
 # classify variables into RW and WN
 deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
-# delta_i_from_ar1(df, remove_vars = "time_y")
+# deltas <- delta_i_from_ar1(df, remove_vars = c("time_y","t"))
 
 deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"), variable=as.character(variable))
 deltas
@@ -183,7 +183,7 @@ bvar_list <- create_bvar_banbura_list()
 # estimate models from list
 # bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
-bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
+bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=TRUE) # status and filename are updated
 # write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR

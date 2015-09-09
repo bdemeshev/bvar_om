@@ -173,7 +173,7 @@ create_bvar_banbura_list <- function() {
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
   mlist <- mlist %>% mutate(id=row_number())
   mlist <- mlist %>% mutate(T_in = T_common + n_lag, T_start = p_max + 1 - n_lag)
-  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
+  mlist <- mlist %>% mutate(file=paste0(type,"_",id,"_T_st",T_start,"_in",T_in,"_",
                                   var_set,"_lags_",n_lag,
                                   "_lams_",round(100*l_1),
                                   "_sc_",round(100*l_sc),
