@@ -39,7 +39,7 @@ testing_mode <- FALSE
 fit_set_2vars <- data_frame(variable=c("ind_prod","cpi"),fit_set="ind+cpi")
 fit_set_3vars <- data_frame(variable=c("ind_prod","cpi","ib_rate"),fit_set="ind+cpi+rate")
 
-fit_set_info <- rbind(fit_set_2vars, fit_set_3vars)
+fit_set_info <- bind_rows(fit_set_2vars, fit_set_3vars)
 fit_set_info
 
 # a lot of models are estimated but only some are reported
@@ -69,7 +69,7 @@ add_23 <- data_frame(var_set="set_23",variable=c("employment",
                                                  "import"
 ) )
 
-var_set_info <- rbind(add_3,add_6,add_23)
+var_set_info <- bind_rows(add_3,add_6,add_23)
 
 # write_csv(var_set_info,"../data/var_set_info.csv")
 
@@ -165,7 +165,7 @@ for (current_fit_set in unique(fit_set_info$fit_set)) {
   fit_variables <- filter(fit_set_info, fit_set==current_fit_set)$variable
   block <- filter(msfe_0_Inf, variable %in% fit_variables) %>% group_by(var_set,n_lag) %>%
     summarise(fit_inf=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
-  fit_inf_table <- rbind(fit_inf_table,block)
+  fit_inf_table <- bind_rows(fit_inf_table,block)
 }
 
 fit_inf_table
@@ -216,7 +216,7 @@ for (current_fit_set in unique(fit_set_info$fit_set)) {
   block <- filter(msfe_0_lam, variable %in% fit_variables) %>% 
     group_by(var_set,n_lag,l_1,l_const,l_io,l_power,l_sc) %>%
     summarise(fit_lam=mean(msfe_ratio)) %>% mutate(fit_set=current_fit_set)
-  fit_lam_table <- rbind(fit_lam_table,block)
+  fit_lam_table <- bind_rows(fit_lam_table,block)
 }
 
 fit_lam_table
@@ -290,7 +290,7 @@ var_list
 rwwn_list
 
 
-rwwn_var_unique_list <- rbind_list(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+rwwn_var_unique_list <- bind_cols(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
 rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>% 
@@ -354,7 +354,7 @@ omsfe_var_banbura
 omsfe_bvar_banbura
 omsfe_rwwn_banbura 
 
-var_bvar_omsfe_banbura_table <- rbind_list(omsfe_var_banbura,omsfe_bvar_banbura) %>%
+var_bvar_omsfe_banbura_table <- bind_rows(omsfe_var_banbura,omsfe_bvar_banbura) %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
   mutate(rmsfe=omsfe/omsfe_rwwn) %>% select(-n_lag)
 
