@@ -33,6 +33,9 @@ verbose <- FALSE # turn on/off messages from functions
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE
 
+s2_lag <- 1 # number of lags in AR() model used to estimate sigma^2 
+# if s2_lag <- NULL then p will be used
+
 ################################################
 # create fit_set_info
 # describe which msfe ratios are averaged in fit

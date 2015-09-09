@@ -60,7 +60,9 @@ estimate_model <- function(minfo,
     
 
 
-    setup <- bvar_conj_setup(D, p=n_lag, lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo) )
+    setup <- bvar_conj_setup(D, p=n_lag, lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), 
+                             s2_lag = s2_lag)
+
     
     # priors$X_dummy <- NULL
     # priors$Y_dummy <- NULL
