@@ -33,8 +33,8 @@ verbose <- FALSE # turn on/off messages from functions
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE
 
-s2_lag <- 1 # number of lags in AR() model used to estimate sigma^2 
-# if s2_lag <- NULL then p will be used
+num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
+# if num_AR_lags <- NULL then p will be used
 
 ################################################
 # create fit_set_info
@@ -177,13 +177,13 @@ fit_inf_table
 # goal: calculate fit-lam
 
 # create model list to find optimal lambda 
-bvar_list <- create_bvar_banbura_list()
+bvar_list_ <- create_bvar_banbura_list()
 # write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # estimate models from list
 # bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
-bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=TRUE) # status and filename are updated
+bvar_list <- estimate_models(bvar_list_, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
 # write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
@@ -276,7 +276,7 @@ bvar_out_forecast_list <- bvar_out_list %>% rowwise() %>% mutate(model_id=id,
 # without rowwise min will be global and always equal to 1
 
 # a lot of forecasts
-### WARNING: maybe to many observations!!!
+### WARNING: maybe too many observations!!!
 message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
 
@@ -293,7 +293,7 @@ var_list
 rwwn_list
 
 
-rwwn_var_unique_list <- bind_cols(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+rwwn_var_unique_list <- bind_rows(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
 rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>% 

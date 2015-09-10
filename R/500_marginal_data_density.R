@@ -30,6 +30,9 @@ fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for fore
 keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
 verbose <- FALSE # turn on/off messages from functions 
 
+num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
+# if num_AR_lags <- NULL then p will be used
+
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- TRUE
 
@@ -245,7 +248,7 @@ omsfe_best_mdd %>% head()
 rmsfe_long <- omsfe_best_mdd %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), 
             by=c("h","variable")) %>%
-  mutate(rmsfe=omsfe/omsfe_rwwn, model_type="mdd") 
+  mutate(rmsfe=omsfe/omsfe_rwwn, model_type="rmsfe_mdd") 
    # %>% select(-n_lag) # ???
 
 rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn, -n_lag, -var_set) %>% 
