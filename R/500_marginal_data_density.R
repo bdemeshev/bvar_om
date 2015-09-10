@@ -36,6 +36,9 @@ num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- TRUE
 
+set_delta_by <- 0.9 # "ADF-test" or "global AR1" or "AR1" or a number
+
+
 ################################################
 
 # a lot of models are estimated but only some are reported
@@ -83,12 +86,32 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value) %>%
 ##### banbura step 1
 # calculate msfe-0. Estimate RWWN (random walk OR white noise model)
 
-# classify variables into RW and WN
-deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
-# delta_i_from_ar1(df, remove_vars = "time_y")
+# set delta (prior hyperparameter)
 
-deltas <- mutate(deltas, rw_wn = ifelse(delta==1,"rw","wn"), variable=as.character(variable))
-deltas
+if (set_delta_by == "ADF-test") {
+  deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
+} 
+
+if (set_delta_by == "global AR1") {
+  deltas <- delta_i_from_ar1(df, remove_vars = c("time_y","t"))
+}
+
+if ((set_delta_by == "AR1") | is.finite(set_delta_by) ) { 
+  # if "AR1" then will be calculated automatically by bvar_conj_setup
+  deltas <- data_frame(
+    variable = setdiff(colnames(df),c("t","time_y")),
+    delta = set_delta_by)
+}
+
+
+# Important!!!
+# value of delta determines prior
+# RW/WN determines model for comparison
+
+deltas <- mutate(deltas, 
+                 rw_wn = "rw", # always compare with Random Walk
+                 variable=as.character(variable))
+deltas # 
 
 # estimate all RW and WN models
 rwwn_list <- create_rwwn_list()

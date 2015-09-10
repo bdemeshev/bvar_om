@@ -36,7 +36,7 @@ testing_mode <- FALSE
 num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
-set_delta_by <- "ADF-test" # "ADF-test" or "AR(1)"
+set_delta_by <- 0.9 # "ADF-test" or "global AR1" or "AR1" or a number
 
 ################################################
 # create fit_set_info
@@ -98,9 +98,17 @@ if (set_delta_by == "ADF-test") {
   deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
 } 
 
-if (set_delta_by == "AR(1)") {
+if (set_delta_by == "global AR1") {
   deltas <- delta_i_from_ar1(df, remove_vars = c("time_y","t"))
 }
+
+if ((set_delta_by == "AR1") | is.finite(set_delta_by) ) { 
+  # if "AR1" then will be calculated automatically by bvar_conj_setup
+  deltas <- data_frame(
+    variable = setdiff(colnames(df),c("t","time_y")),
+    delta = set_delta_by)
+}
+
 
 
 # Important!!!
