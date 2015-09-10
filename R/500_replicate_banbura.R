@@ -190,6 +190,8 @@ bvar_list <- estimate_models(bvar_list_, parallel = parallel, ncpu=ncpu, test=FA
 bvar_forecast_list <- data_frame(model_id=bvar_list$id, h=NA, type="in-sample")
 message("Forecasting BVAR in-sample")
 bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
+message("Forecasting BVAR in-sample ok")
+
 
 # calculate msfe-lam
 msfe_lam_info <- get_msfe(bvar_forecasts, actual_obs, 
@@ -279,7 +281,7 @@ bvar_out_forecast_list <- bvar_out_list %>% rowwise() %>% mutate(model_id=id,
 ### WARNING: maybe too many observations!!!
 message("Forecasting rolling BVAR, out-of-sample")
 bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
-
+message("Forecasting rolling BVAR out-of-sample ok")
 
 omsfe_bvar_table <- get_msfe(bvar_out_forecasts, actual_obs,
                              models = select(bvar_out_list, id, var_set, n_lag, fit_set),

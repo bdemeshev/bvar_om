@@ -188,3 +188,17 @@ estimate from prior
 * rmsfe for mdd ok
 * в чем все (!) отличия кода каррьеро от нашего?
 
+10 сентября 2015
+* СТРАННАЯ ошибка: source() в R работает, пошаговое исполнение в Rstudio - ok
+source() в Rstudio не работает
+"Error in eval(expr, envir, enclos) : object at index 356 not a data.frame"
+" incompatible type (data index: 414, column: 't', was collecting: numeric (dplyr::Collecter_Impl<14>),"
+свежий RRO и Rstudio и пакеты после переустановки
+  - вымарать foreach? (не помогло) попробовать классику?
+  - перезагрузка? (кажется помогло?)
+* автоматизация номеров столбцов в конце
+* (!) проверка корректности оценок при sigma^2 из AR(1) 
+
+
+ 
+

@@ -1,6 +1,6 @@
 # 400_model_funs.R
 
-library("foreach") # parallel processing
+# library("foreach") # parallel processing
 library("readr") # reading csv files
 # library("MHadaptive")
 library("MCMCpack") # IW
