@@ -58,10 +58,13 @@ estimate_model <- function(minfo,
     l_exo <- 1 # does not matter as we don't have exo variables
     n_lag <- as.numeric(minfo$n_lag)
     
+    deltas_table_part <- filter(deltas, variable %in% variables)
+    
 
-
-    setup <- bvar_conj_setup(D, p=n_lag, lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), 
-                             s2_lag = num_AR_lags)
+    setup <- bvar_conj_setup(D, p=n_lag, 
+                delta = deltas_table_part$delta,
+                lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), 
+                s2_lag = num_AR_lags)
 
     
     # priors$X_dummy <- NULL
