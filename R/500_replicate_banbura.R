@@ -28,7 +28,7 @@ T_available <- nrow(df) # number of observations
 # posterior simulation details:
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
 keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
-verbose <- TRUE # turn on/off messages from functions 
+verbose <- FALSE # turn on/off messages from functions 
 
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE

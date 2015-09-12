@@ -350,7 +350,7 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
       if (progress_bar) setTxtProgressBar(pb, i)
     }
     if (progress_bar) close(pb)
-    answer <- bind_rows(all_data)
+    answer <- data.table::rbindlist(all_data) %>% as.data.frame()
   }
   
   end_time <- Sys.time()
