@@ -37,10 +37,14 @@ num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2
 testing_mode <- TRUE
 
 # use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
-carriero_hack <- FALSE 
+carriero_hack <- FALSE
 
-set_delta_by <- 0.9 # "ADF-test" or "global AR1" or "AR1" or a number
+num_AR_lags <- 1 # NULL # number of lags in AR() model used to estimate sigma^2 
+# if num_AR_lags <- NULL then p will be used
 
+set_delta_by <- "ADF" # "ADF", "KPSS" or "global AR1" or "AR1" or a number
+
+v_prior <- "m+2" # "m+2" / "T_dummy" / константа
 
 ################################################
 
@@ -91,8 +95,9 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value) %>%
 
 # set delta (prior hyperparameter)
 
-if (set_delta_by == "ADF-test") {
-  deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
+if (set_delta_by %in% c("ADF","KPSS")) {
+  deltas <- delta_i_prior(df, test = set_delta_by,
+                          remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
 } 
 
 if (set_delta_by == "global AR1") {

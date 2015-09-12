@@ -14,12 +14,16 @@ source("200_load_after_eviews.R")
 ######################## begin set-up part #######################
 ##################################################################
 
+df <- read_csv("../data/df_2015_final.csv")
+
+# subset t:
+df <- tail(df, -12)
+
 
 # parallel computing details:
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30 # number of cores for paralel computing, ignored if parallel=="off"
 
-df <- read_csv("../data/df_2015_final.csv")
 
 h_max <- 12 # maximum forecast horizont for VAR and BVAR 
 
@@ -39,7 +43,7 @@ carriero_hack <- FALSE
 num_AR_lags <- 1 # NULL # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
-set_delta_by <- "ADF-test" # "ADF-test" or "global AR1" or "AR1" or a number
+set_delta_by <- "KPSS" # "ADF", "KPSS" or "global AR1" or "AR1" or a number
 
 v_prior <- "m+2" # "m+2" / "T_dummy" / константа
 
@@ -99,8 +103,9 @@ actual_obs <- melt(df, id.vars="t" ) %>% rename(actual=value) %>%
 
 # set delta (prior hyperparameter)
 
-if (set_delta_by == "ADF-test") {
-  deltas <- delta_i_prior(df, remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
+if (set_delta_by %in% c("ADF","KPSS")) {
+  deltas <- delta_i_prior(df, test = set_delta_by,
+                          remove_vars = c("time_y","t"), c_0 = 0, c_1 = 1)
 } 
 
 if (set_delta_by == "global AR1") {
