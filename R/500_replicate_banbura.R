@@ -58,16 +58,21 @@ fit_set_info
 
 # a lot of models are estimated but only some are reported
 desired_fit_set <- "ind+cpi+rate"
-desired_n_lag <- 12
+desired_n_lag <- c(6,12)
 desired_h <- c(1,3,6,12)
+desired_variable <- c("construction", "cpi", "employment", "export", "gas_price", 
+                      "gov_balance", "ib_rate", "import", "ind_prod", "labor_request", 
+                      "lend_rate", "m2", "ner", "nfa_cb", "oil_price", "ppi", "real_income", 
+                      "real_investment", "reer", "retail", "unemp_rate", 
+                      "wage", "agriculture")
 
 ################################################
 # create var_set_info
 # describe which variables are included in each set
 # dput(colnames(df))
 
-add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
-add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
+add_03 <- data_frame(var_set="set_03", variable=c("ind_prod", "cpi", "ib_rate"))
+add_06 <- data_frame(var_set="set_06", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
 add_23 <- data_frame(var_set="set_23",variable=c("employment", 
                                                  "ind_prod", 
                                                  "cpi", 
@@ -83,7 +88,7 @@ add_23 <- data_frame(var_set="set_23",variable=c("employment",
                                                  "import"
 ) )
 
-var_set_info <- bind_rows(add_3,add_6,add_23)
+var_set_info <- bind_rows(add_03,add_06,add_23)
 
 # write_csv(var_set_info,"../data/var_set_info.csv")
 
@@ -262,7 +267,7 @@ fit_lam_table
 ##### banbura step 4
 # find optimal lambda
 # ungroup() is needed! otherwise cannot remove var_set (active group on var_set)
-fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_3") %>% ungroup() %>% dplyr::select(-var_set)
+fit_goal <- dplyr::filter(fit_inf_table, var_set=="set_03") %>% ungroup() %>% dplyr::select(-var_set)
 fit_goal
 
 fit_lam_table <- left_join(fit_lam_table, fit_goal, by=c("n_lag","fit_set"))
@@ -376,17 +381,14 @@ omsfe_bvar_table <- ungroup(omsfe_bvar_table) %>% mutate_each("as.numeric", n_la
 
 
 # replicate banbura table from page 79
-filter_variables <- ( fit_set_info %>% filter(fit_set==desired_fit_set) ) $ variable %>% as.character()
 
 omsfe_var_banbura <- ungroup(omsfe_rwwn_var_table) %>% 
-  filter(model_type=="var",n_lag==desired_n_lag, variable %in% filter_variables) 
+  filter(model_type=="var") 
 
 omsfe_bvar_banbura <- omsfe_bvar_table %>% 
-  filter(fit_set==desired_fit_set,n_lag==desired_n_lag, variable %in% filter_variables ) %>%
-  select(-fit_set) %>% mutate(model_type="bvar")
+  mutate(model_type="bvar") 
 
 omsfe_rwwn_banbura <- omsfe_selected_rwwn %>% 
-  filter(variable %in% filter_variables ) %>%
   rename(model_type=rw_wn) 
 
 omsfe_var_banbura 
@@ -394,18 +396,30 @@ omsfe_bvar_banbura
 omsfe_rwwn_banbura 
 
 rmsfe_long <- bind_rows(omsfe_var_banbura,omsfe_bvar_banbura) %>%
-  left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
-  mutate(rmsfe=omsfe/omsfe_rwwn) %>% select(-n_lag)
+  left_join(omsfe_rwwn_banbura %>% 
+  select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
+  mutate(rmsfe=omsfe/omsfe_rwwn) 
 
-rmsfe_long
+# rmsfe_long
 
-# not automated!!!
-rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn) %>% 
-  dcast(h+variable~var_set+model_type, value.var="rmsfe") %>%
-  select(h,variable,set_3_var,set_3_bvar,set_6_var,set_6_bvar,set_23_bvar) 
-some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h)
 
-some_rmsfe_wide
+rmsfe_wide_bvar <- rmsfe_long %>% filter(model_type=="bvar") %>% select(-omsfe,-omsfe_rwwn) %>% 
+  dcast(h+variable+n_lag+fit_set~var_set+model_type, value.var="rmsfe") 
+
+rmsfe_wide_var <- rmsfe_long %>% filter(model_type=="var") %>% select(-omsfe,-omsfe_rwwn) %>% 
+  dcast(h+variable+n_lag~var_set+model_type, value.var="rmsfe") 
+
+rmsfe_wide <- left_join(rmsfe_wide_bvar, rmsfe_wide_var, by=c("h","variable","n_lag"))
+
+some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h,
+                                         variable %in% desired_variable,
+                                         n_lag %in% desired_n_lag,
+                                         fit_set %in% desired_fit_set) 
+
+some_rmsfe_wide %>% # show columns in order
+         select(h,variable,set_03_var,set_03_bvar,set_06_var,set_06_bvar,set_23_bvar) 
+
+
 # step 8: optimal VAR selection
 
 # if using SC with lag.max=12 then optimal is 1, no changes are needed

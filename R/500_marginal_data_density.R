@@ -62,8 +62,8 @@ desired_h <- c(1,3,6,12)
 # describe which variables are included in each set
 # dput(colnames(df))
 
-add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
-add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
+add_3 <- data_frame(var_set="set_03", variable=c("ind_prod", "cpi", "ib_rate"))
+add_6 <- data_frame(var_set="set_06", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
 add_23 <- data_frame(var_set="set_23",variable=c("employment", 
                                                  "ind_prod", 
                                                  "cpi", 
@@ -246,7 +246,7 @@ bvar_list <- calculate_mdd(bvar_list)
 
 #### for each t find optimal model (maybe we'll add grouping variable)
 
-optimal_by <- c("Tf_start") # , var_set, n_lag
+optimal_by <- c("Tf_start") #, var_set, n_lag
 
 best_bvars <- bvar_list %>% mutate(Tf_start=T_start+n_lag) %>% 
   group_by_(.dots=optimal_by) %>% 
@@ -284,10 +284,11 @@ rmsfe_long <- omsfe_best_mdd %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), 
             by=c("h","variable")) %>%
   mutate(rmsfe=omsfe/omsfe_rwwn, model_type="rmsfe_mdd") 
-   # %>% select(-n_lag) # ???
 
-rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn, -n_lag, -var_set) %>% 
-  dcast(h+variable~model_type, value.var="rmsfe") 
+rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn, -var_set) %>% 
+  dcast(h+variable+n_lag~model_type, value.var="rmsfe") 
+
+
 some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h)
 
 some_rmsfe_wide
