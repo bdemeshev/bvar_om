@@ -62,7 +62,9 @@ desired_n_lag <- c(6,12)
 desired_h <- c(1,3,6,12)
 desired_variable <- c("construction", "cpi", "employment", "export", "gas_price", 
                       "gov_balance", "ib_rate", "import", "ind_prod", "labor_request", 
-                      "lend_rate", "m2", "ner", "nfa_cb", "oil_price", "ppi", "real_income", 
+                      "lend_rate", "m2", "ner", "nfa_cb", 
+                      # "oil_price", 
+                      "ppi", "real_income", 
                       "real_investment", "reer", "retail", "unemp_rate", 
                       "wage", "agriculture")
 
