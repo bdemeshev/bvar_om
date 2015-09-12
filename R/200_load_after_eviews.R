@@ -16,7 +16,7 @@ library(stringr)
 all <- read_excel("../data/adjusted_data_x.xlsx", sheet = 1, skip=0)
 
 # get time in years
-str(all)
+# str(all)
 # all$time_y <- as.numeric(as.yearmon(all$time, format = "%Y %b"))
 
 # remove SA in colnames
