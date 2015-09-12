@@ -319,7 +319,7 @@ var_wlist
 rwwn_wlist
 str(rwwn_wlist)
 
-rwwn_var_unique_wlist <- rbind_list(var_wlist, rwwn_wlist) %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+rwwn_var_unique_wlist <- bind_rows(var_wlist, rwwn_wlist) %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
 rwwn_var_out_wlist <- rolling_model_replicate(rwwn_var_unique_wlist) %>% 
@@ -394,7 +394,7 @@ omsfe_var_banbura
 omsfe_bvar_banbura
 omsfe_rwwn_banbura 
 
-var_bvar_omsfe_banbura_table <- rbind_list(omsfe_var_banbura,omsfe_bvar_banbura) %>%
+var_bvar_omsfe_banbura_table <- bind_rows(omsfe_var_banbura,omsfe_bvar_banbura) %>%
   left_join(omsfe_rwwn_banbura %>% select(-model_type, omsfe_rwwn=omsfe), by=c("h","variable")) %>%
   mutate(rmsfe=omsfe/omsfe_rwwn) %>% select(-n_lag)
 

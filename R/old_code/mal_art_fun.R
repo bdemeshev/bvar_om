@@ -235,8 +235,8 @@ add_models <- function(add_block) {
   }
   
   # I am doing fake rbind to (possibly) change the structure of mod_table and add_block
-  mod_table <- rbind_list(mod_table, head(add_block,0))
-  add_block <- rbind_list(add_block, head(mod_table,0))
+  mod_table <- bind_rows(mod_table, head(add_block,0))
+  add_block <- bind_rows(add_block, head(mod_table,0))
   
   # remove already estimated, or non-estimated but specified in mod_table models
   # from add_block
@@ -244,7 +244,7 @@ add_models <- function(add_block) {
   j_by <- j_by[!j_by %in% c("estimated","model_id","T","m")]
   add_block_filtered <- anti_join(add_block, mod_table, by = j_by )
   
-  mod_table <- rbind_list(mod_table, add_block_filtered)
+  mod_table <- bind_rows(mod_table, add_block_filtered)
   
   mod_table$model_id <- 1:nrow(mod_table)
   saveRDS(mod_table, file="./estimation/mod_table.Rds") 

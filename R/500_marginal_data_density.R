@@ -36,6 +36,9 @@ num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- TRUE
 
+# use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
+carriero_hack <- FALSE 
+
 set_delta_by <- 0.9 # "ADF-test" or "global AR1" or "AR1" or a number
 
 
@@ -172,7 +175,7 @@ var_list
 rwwn_list
 
 
-rwwn_var_unique_list <- rbind_list(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
+rwwn_var_unique_list <- bind_rows(var_list, rwwn_list) # %>% mutate_each("as.numeric", n_lag, T_in, T_start)
 
 # every model should be rolled
 rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>% 

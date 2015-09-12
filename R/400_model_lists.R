@@ -168,7 +168,7 @@ create_bvar_banbura_list <- function() {
   # add no sc dummy and l_sc=10*l_1
   mlist_sc <- mlist %>% mutate(l_sc=10*l_1)
   mlist_nosc <- mlist %>% mutate(l_sc=NA)
-  mlist <- rbind_list(mlist_sc,mlist_nosc)
+  mlist <- bind_rows(mlist_sc,mlist_nosc)
   
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
   mlist <- mlist %>% mutate(id=row_number())
@@ -214,7 +214,7 @@ create_mdd_list <- function() {
   # add no sc dummy and l_sc=10*l_1
   mlist_sc <- mlist %>% mutate(l_sc=10*l_1)
   mlist_nosc <- mlist %>% mutate(l_sc=NA)
-  mlist <- rbind_list(mlist_sc,mlist_nosc)
+  mlist <- bind_rows(mlist_sc,mlist_nosc)
   
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
   mlist <- mlist %>% mutate(id=row_number())
