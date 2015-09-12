@@ -10,22 +10,24 @@ source("200_load_after_eviews.R")
 
 #
 
-df <- read_csv("../data/df_2015_final.csv")
+# df <- read_csv("../data/df_2015_final.csv")
+df <- read_csv("../data/usa_carriero.csv")
+
 
 # observations used for estimating model
 # real number of obs for regression will be T_start - T_end - n_lag + 1
-T_start <- 10 
-T_end <- 120
-variables <- c("ind_prod","cpi","m2")
+T_start <- 48 
+T_end <- 171
+variables <- colnames(df)
 
-l_1 <- 1
+l_1 <- 0.2
 l_power <- 1 
-l_sc <- 1
-l_io <- 1
-l_const <- 1
-l_exo <- 1
+l_sc <- 2
+l_io <- NA
+l_const <- 1000
+l_exo <- 1 # not used
 keep <- 0 # 0 means only posterior are calculated
-n_lag <- 5
+n_lag <- 4
 
 
 num_AR_lags <- 1 # 1/NULL
@@ -42,4 +44,5 @@ setup <- bvar_conj_setup(D, p=n_lag,
 
 model <- bvar_conj_estimate(setup=setup, verbose=verbose, keep=keep)
 bvar_conj_summary(model)
-forecasts <- bvar_conj_forecast(model, out_of_sample = TRUE, h = 3)
+forecasts <- bvar_conj_forecast(model, out_of_sample = TRUE, h = 1)
+forecasts
