@@ -29,7 +29,7 @@ l_exo <- 1 # not used
 carriero_hack <- FALSE
 
 n_lag <- 4
-v_prior <- NULL # m+2 if NULL
+v_prior <- "m+2" # m+2 if NULL
 
 keep <- 2000 # 0 means only posterior are calculated
 

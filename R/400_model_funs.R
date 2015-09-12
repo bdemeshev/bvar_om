@@ -60,8 +60,10 @@ estimate_model <- function(minfo,
     
     deltas_table_part <- filter(deltas, variable %in% variables)
     
+    
+    
 
-    setup <- bvar_conj_setup(D, p=n_lag, 
+    setup <- bvar_conj_setup(D, p=n_lag, v_prior=v_prior,
                 delta = deltas_table_part$delta,
                 lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), 
                 s2_lag = num_AR_lags, carriero_hack=carriero_hack)

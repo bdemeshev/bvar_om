@@ -34,12 +34,14 @@ verbose <- FALSE # turn on/off messages from functions
 testing_mode <- FALSE
 
 # use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
-carriero_hack <- TRUE
+carriero_hack <- FALSE
 
-num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
+num_AR_lags <- NULL # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
-set_delta_by <- 0.9 # "ADF-test" or "global AR1" or "AR1" or a number
+set_delta_by <- 0.99 # "ADF-test" or "global AR1" or "AR1" or a number
+
+v_prior <- "T_dummy" # "m+2" / "T_dummy" / константа
 
 ################################################
 # create fit_set_info
