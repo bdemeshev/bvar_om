@@ -285,6 +285,7 @@ rmsfe_long <- omsfe_best_mdd %>%
             by=c("h","variable")) %>%
   mutate(rmsfe=omsfe/omsfe_rwwn, model_type="rmsfe_mdd") 
 
+# how to automate depending on optimal_by??????????
 rmsfe_wide <- rmsfe_long %>% select(-omsfe,-omsfe_rwwn, -var_set) %>% 
   dcast(h+variable+n_lag~model_type, value.var="rmsfe") 
 

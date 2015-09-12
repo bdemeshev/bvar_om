@@ -209,8 +209,10 @@ source() в Rstudio не работает
 * добавлена опция carriero_hack
 * добавлена опция текстовой формулой для v_prior
 * АХТУНГ: мистика вернулась!!!!!!!!!!! 
-* для борьбы с мистикой: обновили dplyr, отказались в forecast_models от bind_rows в пользу 
+* для борьбы с мистикой: обновили dplyr, отказались в forecast_models от bind_rows в пользу. 
 data.table::rbindlist. Главное еще там опцию use.names=TRUE ставить :)
+Кажется ок!!!
+* как автоматизировать в mdd вывод rmsfe_wide при разных optimal_by?
 
 
 
