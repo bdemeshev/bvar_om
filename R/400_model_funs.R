@@ -64,7 +64,7 @@ estimate_model <- function(minfo,
     setup <- bvar_conj_setup(D, p=n_lag, 
                 delta = deltas_table_part$delta,
                 lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), 
-                s2_lag = num_AR_lags)
+                s2_lag = num_AR_lags, carriero_hack=carriero_hack)
 
     
     # priors$X_dummy <- NULL

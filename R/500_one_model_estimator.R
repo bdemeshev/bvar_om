@@ -18,7 +18,7 @@ df <- read_csv("../data/usa_carriero.csv")
 # real number of obs for regression will be T_start - T_end - n_lag + 1
 T_start <- 48 
 T_end <- 171
-variables <- colnames(df)
+variables <- paste0("var",1:3) # colnames(df)
 
 l_1 <- 0.2
 l_power <- 1 
@@ -26,10 +26,12 @@ l_sc <- 2
 l_io <- NA
 l_const <- 1000
 l_exo <- 1 # not used
-keep <- 0 # 0 means only posterior are calculated
+carriero_hack <- FALSE
+
 n_lag <- 4
 v_prior <- NULL # m+2 if NULL
 
+keep <- 2000 # 0 means only posterior are calculated
 
 num_AR_lags <- 1 # 1/NULL
 deltas <- 1
@@ -44,7 +46,8 @@ lambda <- c(l_1, l_power, l_sc, l_io, l_const, l_exo)
 setup <- bvar_conj_setup(D, p=n_lag, v_prior = v_prior,
                          delta = deltas,
                          lambda = lambda, 
-                         s2_lag = num_AR_lags)
+                         s2_lag = num_AR_lags,
+                         carriero_hack = carriero_hack)
 
 model <- bvar_conj_estimate(setup=setup, verbose=verbose, keep=keep)
 bvar_conj_summary(model)
@@ -59,6 +62,9 @@ Y_plus <- setup$Y_plus # ?
 dummy <- bvar_conj_lambda2dummy(Y_in=D, Z_in=NULL, constant=TRUE, p=n_lag,
                                 lambda=lambda, delta=deltas, s2_lag=num_AR_lags,
                                 y_bar_type=y_bar_type)
+
+X_plus <- dummy$X_plus # ?
+Y_plus <- dummy$Y_plus # ?
 
 X <- setup$X # ok
 Y <- setup$Y # ok

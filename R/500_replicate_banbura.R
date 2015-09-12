@@ -33,6 +33,8 @@ verbose <- FALSE # turn on/off messages from functions
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE
 
+carriero_hack <- TRUE
+
 num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
