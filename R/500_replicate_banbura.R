@@ -34,7 +34,7 @@ verbose <- FALSE # turn on/off messages from functions
 testing_mode <- FALSE
 
 # use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
-carriero_hack <- FALSE 
+carriero_hack <- TRUE
 
 num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
@@ -58,7 +58,7 @@ desired_h <- c(1,3,6,12)
 ################################################
 # create var_set_info
 # describe which variables are included in each set
-dput(colnames(df))
+# dput(colnames(df))
 
 add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
 add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))

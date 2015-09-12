@@ -52,7 +52,7 @@ desired_h <- c(1,3,6,12)
 ################################################
 # create var_set_info
 # describe which variables are included in each set
-dput(colnames(df))
+# dput(colnames(df))
 
 add_3 <- data_frame(var_set="set_3", variable=c("ind_prod", "cpi", "ib_rate"))
 add_6 <- data_frame(var_set="set_6", variable=c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
