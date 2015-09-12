@@ -20,11 +20,11 @@ library("bvarr")
 
 # maybe we need to pass actual df for parallel computing
 estimate_model <- function(minfo, 
-                           do_log=FALSE, test=FALSE ) {
+                           do_log=FALSE, verbose=FALSE ) {
   model_full_path <- paste0("../estimation/models/",minfo$file)
   
   
-  if (test) message("Estimating model for file ", minfo$file, "...")
+  if (verbose) message("Estimating: ", minfo$file, "...")
   
   if (do_log) {
     log_con <- file(paste0("../estimation/log_model_",minfo$id,".csv"), open="a")
@@ -122,7 +122,7 @@ estimate_model <- function(minfo,
 
 estimate_models <- function(mlist, parallel = c("off","windows","unix"), 
                             no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE,
-                            progress_bar=TRUE) {
+                            progress_bar=TRUE, verbose=FALSE) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
@@ -142,7 +142,7 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
     
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, do_log=do_log, test=test)
+      status <- estimate_model(model_info, do_log=do_log, test=test, verbose=verbose)
       mlist$status[mlist$id==i] <- status
     }
     stopCluster(cl)
@@ -154,7 +154,7 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
 
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, do_log=do_log, test=test)
+      status <- estimate_model(model_info, do_log=do_log, test=test, verbose=verbose)
       mlist$status[mlist$id==i] <- status
       
     }
@@ -166,7 +166,7 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
       if (progress_bar) pb <- txtProgressBar(min = 1, max = length(model_ids), style = 3)
       for (i in 1:length(model_ids))  {
         model_info <- mlist_todo %>% dplyr::filter(id==model_ids[i])
-        status <- estimate_model(model_info, do_log=do_log, test=test)
+        status <- estimate_model(model_info, do_log=do_log, verbose=verbose)
         mlist$status[mlist$id==i] <- status
         
         if (progress_bar) setTxtProgressBar(pb, i)
@@ -189,13 +189,14 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
 # pred_info - one line describing desired forecast
 # mlist - list of all models
 forecast_model <- function(pred_info, mlist, parallel = parallel, 
-                            ncpu=4, test=FALSE, do_log=FALSE) {
+                            ncpu=4, test=FALSE, do_log=FALSE, verbose=FALSE) {
   
   
   # get info about model:
   model_id <- pred_info$model_id 
   minfo <- mlist %>% filter(id==model_id) 
   model_full_path <- paste0("../estimation/models/",minfo$file)
+  if (verbose) message("Forecasting: ",minfo$file)
   model <- readRDS(model_full_path)
   
   T_start <- as.numeric(minfo$T_start) # starting observation for model estimation 
@@ -333,8 +334,8 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
 
 # function to make forecasts of many model for many datasets
 forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
-                            ncpu=4, test=FALSE, do_log=FALSE,
-                            progress_bar=TRUE) {
+                            ncpu=4, do_log=FALSE,
+                            progress_bar=TRUE, verbose=verbose) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
@@ -345,7 +346,7 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
     if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(plist), style = 3)
     for (i in 1:nrow(plist)) {
       all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, parallel = parallel,
-                                      ncpu=ncpu, test=test, do_log=do_log)
+                                      ncpu=ncpu, verbose=verbose, do_log=do_log)
       if (progress_bar) setTxtProgressBar(pb, i)
     }
     if (progress_bar) close(pb)

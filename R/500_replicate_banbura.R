@@ -28,7 +28,7 @@ T_available <- nrow(df) # number of observations
 # posterior simulation details:
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
 keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
-verbose <- FALSE # turn on/off messages from functions 
+verbose <- TRUE # turn on/off messages from functions 
 
 # testing mode (less lambdas are estimated, see 400_model_lists.R)
 testing_mode <- FALSE
@@ -36,12 +36,12 @@ testing_mode <- FALSE
 # use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
 carriero_hack <- FALSE
 
-num_AR_lags <- NULL # number of lags in AR() model used to estimate sigma^2 
+num_AR_lags <- 1 # NULL # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
-set_delta_by <- 0.99 # "ADF-test" or "global AR1" or "AR1" or a number
+set_delta_by <- "ADF-test" # "ADF-test" or "global AR1" or "AR1" or a number
 
-v_prior <- "T_dummy" # "m+2" / "T_dummy" / константа
+v_prior <- "m+2" # "m+2" / "T_dummy" / константа
 
 ################################################
 # create fit_set_info
@@ -128,12 +128,12 @@ deltas #
 # estimate all RW and WN models
 rwwn_list <- create_rwwn_list()
 message("Estimate RW and WN")
-rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
+rwwn_list <- estimate_models(rwwn_list,parallel = parallel, verbose=verbose)
 
 # forecast all RW and WN models
 rwwn_forecast_list <- data_frame(model_id=c(1,2), h=NA, type="in-sample")
 message("Forecast RW and WN")
-rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
+rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list, verbose=verbose)
 
 # calculate all msfe-0
 # two ways to calculate msfe (we use b)
@@ -162,12 +162,12 @@ msfe0
 # estimate VAR
 var_list <- create_var_list()
 message("Estimating VAR")
-var_list <- estimate_models(var_list,parallel = parallel)
+var_list <- estimate_models(var_list,parallel = parallel, verbose=verbose)
 
 # forecast VAR
 var_forecast_list <- data_frame(model_id=var_list$id, h=NA, type="in-sample")
 message("Forecasting VAR")
-var_forecasts <- forecast_models(var_forecast_list, var_list)
+var_forecasts <- forecast_models(var_forecast_list, var_list, verbose=verbose)
 
 
 # calculate msfe-inf
@@ -211,13 +211,13 @@ bvar_list_ <- create_bvar_banbura_list()
 # estimate models from list
 # bvar_list <- read_csv("../estimation/bvar_list.csv")
 message("Estimating BVAR")
-bvar_list <- estimate_models(bvar_list_, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
+bvar_list <- estimate_models(bvar_list_, parallel = parallel, ncpu=ncpu, verbose=verbose) # status and filename are updated
 # write_csv(bvar_list, path = "../estimation/bvar_list.csv")
 
 # forecast BVAR
 bvar_forecast_list <- data_frame(model_id=bvar_list$id, h=NA, type="in-sample")
 message("Forecasting BVAR in-sample")
-bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list)
+bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list, verbose=verbose)
 message("Forecasting BVAR in-sample ok")
 
 
@@ -293,7 +293,7 @@ bvar_out_list  <- create_bvar_out_list(best_lambda)
 # best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set
 
 message("Estimate rolling BVAR")
-bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel)
+bvar_out_list <- estimate_models(bvar_out_list,parallel = parallel, verbose=verbose)
 #write_csv(bvar_out_list, path = "../estimation/bvar_out_list.csv")
 
 # forecast BVAR
@@ -308,7 +308,7 @@ bvar_out_forecast_list <- bvar_out_list %>% rowwise() %>% mutate(model_id=id,
 # a lot of forecasts
 ### WARNING: maybe too many observations!!!
 message("Forecasting rolling BVAR, out-of-sample")
-bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list)
+bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list, verbose=verbose)
 message("Forecasting rolling BVAR out-of-sample ok")
 
 omsfe_bvar_table <- get_msfe(bvar_out_forecasts, actual_obs,
@@ -331,7 +331,7 @@ rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>%
                      "_T_",T_start,"_",T_in,"_",
                                 var_set,"_lags_",n_lag,".Rds") ) 
 message("Estimating rolling rw/wn/var models")
-rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
+rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel, verbose=verbose) # takes some minutes
 
 rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% mutate(model_id=id, 
   h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
@@ -340,7 +340,7 @@ rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% mutate(model_i
 
 # forecast all rolling models  
 message("Forecasting rolling rw/wn/var models, out-of-sample")
-rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, progress_bar=TRUE)
+rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, verbose=verbose)
 
 
 

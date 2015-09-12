@@ -230,7 +230,7 @@ bvar_list <- rolling_model_replicate(bvar_list_zero) %>%
                          ".Rds") ) 
 
 message("Estimating rolling BVAR")
-bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, test=FALSE) # status and filename are updated
+bvar_list <- estimate_models(bvar_list, parallel = parallel, ncpu=ncpu, verbose=verbose) # status and filename are updated
 
 message("Calculating mdd for rolling BVAR")
 bvar_list <- calculate_mdd(bvar_list)
