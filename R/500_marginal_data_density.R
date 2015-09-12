@@ -15,11 +15,15 @@ source("200_load_after_eviews.R")
 ##################################################################
 
 
+df <- read_csv("../data/df_2015_final.csv")
+
+# subset t:
+df <- tail(df, -12) # tail(df, -12) # all obs except first twelve
+
 # parallel computing details:
 parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30 # number of cores for paralel computing, ignored if parallel=="off"
 
-df <- read_csv("../data/df_2015_final.csv")
 
 h_max <- 12 # maximum forecast horizont for VAR and BVAR 
 
@@ -39,7 +43,7 @@ testing_mode <- TRUE
 # use wrong formulas from carriero code for dummy cNIW without square root for sigma^2
 carriero_hack <- FALSE
 
-num_AR_lags <- 1 # NULL # number of lags in AR() model used to estimate sigma^2 
+num_AR_lags <- NULL # NULL # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
 
 set_delta_by <- "ADF" # "ADF", "KPSS" or "global AR1" or "AR1" or a number

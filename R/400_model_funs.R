@@ -335,7 +335,7 @@ forecast_model <- function(pred_info, mlist, parallel = parallel,
 # function to make forecasts of many model for many datasets
 forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
                             ncpu=4, do_log=FALSE,
-                            progress_bar=TRUE, verbose=verbose) {
+                            progress_bar=TRUE, verbose=FALSE) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
