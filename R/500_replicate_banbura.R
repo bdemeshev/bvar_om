@@ -344,7 +344,8 @@ rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_o
 
 
 
-omsfe_rwwn_var_table <- get_msfe(rwwn_var_out_forecasts, actual_obs,
+omsfe_rwwn_var_table <- get_msfe(forecasts = rwwn_var_out_forecasts, 
+                                 actuals = actual_obs,
                                  models = select(rwwn_var_out_list, id, var_set, n_lag, model_type=type),
                                  plus_group_vars = "model_type",
                                  msfe_name = "omsfe", msfe_type = "out-of-sample")
