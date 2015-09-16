@@ -1,6 +1,6 @@
 # 400_model_funs.R
 
-# library("foreach") # parallel processing
+library("foreach") # parallel processing
 library("readr") # reading csv files
 # library("MHadaptive")
 library("MCMCpack") # IW
@@ -133,31 +133,31 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
   model_ids <- mlist$id
   
 
-  requested_packages <- c("mvtnorm","MHadaptive","MCMCpack","bvarr")
+  requested_packages <- c("mvtnorm","MCMCpack","bvarr", "dplyr")
   
   if (parallel=="windows") {
-    library("doSNOW")
     cl <- makeCluster(ncpu, outfile="") # number of CPU cores
     registerDoSNOW(cl)
     
     foreach(i=model_ids, .packages=requested_packages) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, do_log=do_log, test=test, verbose=verbose)
+      status <- estimate_model(model_info, do_log=do_log, verbose=verbose)
       mlist$status[mlist$id==i] <- status
     }
     stopCluster(cl)
   }
   
   if (parallel=="unix") {
-    library("doMC")
-    registerDoMC(ncpu) # number of CPU cores
-
-    foreach(i=model_ids, .packages=requested_packages) %dopar% {
+    cl <- makeCluster(ncpu, outfile="")
+    registerDoParallel(cl)
+    
+    foreach(i=model_ids, .packages=requested_packages, 
+            .export = c("estimate_model","var_set_info")) %dopar% {
       model_info <- mlist_todo %>% dplyr::filter(id==i)
-      status <- estimate_model(model_info, do_log=do_log, test=test, verbose=verbose)
+      status <- estimate_model(model_info, do_log=do_log, verbose=verbose)
       mlist$status[mlist$id==i] <- status
-      
     }
+    stopCluster(cl)
   }
   
   if (parallel=="off") {
@@ -188,8 +188,7 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
 # function to make forecast of one model for one dataset
 # pred_info - one line describing desired forecast
 # mlist - list of all models
-forecast_model <- function(pred_info, mlist, parallel = parallel, 
-                            ncpu=4, test=FALSE, do_log=FALSE, verbose=FALSE) {
+forecast_model <- function(pred_info, mlist, do_log=FALSE, verbose=FALSE) {
   
   
   # get info about model:
@@ -341,17 +340,45 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
   parallel <- match.arg(parallel)
   
   answer <- NULL
+  # preallocate space:
+  all_data <- vector("list", nrow(plist)) 
+  
   if (parallel=="off") {
-    all_data <- list()
     if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(plist), style = 3)
     for (i in 1:nrow(plist)) {
-      all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, parallel = parallel,
-                                      ncpu=ncpu, verbose=verbose, do_log=do_log)
+      all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log)
       if (progress_bar) setTxtProgressBar(pb, i)
     }
     if (progress_bar) close(pb)
-    answer <- data.table::rbindlist(all_data, use.names = TRUE) %>% as.data.frame()
   }
+  
+  requested_packages <- c("mvtnorm","MCMCpack","bvarr","dplyr")
+  
+  
+  if (parallel=="windows") {
+    cl <- makeCluster(ncpu, outfile="") # number of CPU cores
+    registerDoSNOW(cl)
+    
+    foreach(i=1:nrow(plist), .packages=requested_packages) %dopar% {
+      all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log)
+    }
+    stopCluster(cl)
+  }
+  
+  if (parallel=="unix") {
+    cl <- makeCluster(ncpu, outfile="")
+    registerDoParallel(cl)
+    foreach(i=1:nrow(plist), .packages=requested_packages) %dopar% {
+      all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log)
+    }
+    stopCluster(cl)
+  }
+  
+  
+  if (verbose) message("Binding forecasts...")
+  answer <- data.table::rbindlist(all_data, use.names = TRUE) %>% as.data.frame()
+  
+  
   
   end_time <- Sys.time()
   message("Time elapsed: ", round(end_time - start_time,1)," ", attr(end_time - start_time,"units"))

@@ -21,7 +21,7 @@ df <- read_csv("../data/df_2015_final.csv")
 df <- tail(df, -12) # tail(df, -12) # all obs except first twelve
 
 # parallel computing details:
-parallel <- "off" # "windows"/"unix"/"off"
+parallel <- "unix" # "windows"/"unix"/"off"
 ncpu <- 30 # number of cores for paralel computing, ignored if parallel=="off"
 
 
@@ -32,7 +32,7 @@ T_available <- nrow(df) # number of observations
 # posterior simulation details:
 fast_forecast <- TRUE # TRUE = posterior means of coefficients are used for forecast
 keep <- 0 # 5000 # number of simulations from posterior (used only if fast_forecast is FALSE)
-verbose <- FALSE # turn on/off messages from functions 
+verbose <- TRUE # turn on/off messages from functions 
 
 num_AR_lags <- 1 # number of lags in AR() model used to estimate sigma^2 
 # if num_AR_lags <- NULL then p will be used
@@ -56,6 +56,17 @@ v_prior <- "m+2" # "m+2" / "T_dummy" / константа
 
 desired_n_lag <- 12
 desired_h <- c(1,3,6,12)
+
+###############################################
+if (parallel=="unix") {
+  library("doParallel")
+  # library("doMC")
+  # registerDoMC(ncpu) # number of CPU cores
+}
+if (parallel=="windows") {
+  library("doSNOW")
+}
+
 
 ################################################
 # create var_set_info
@@ -128,12 +139,13 @@ deltas #
 # estimate all RW and WN models
 rwwn_list <- create_rwwn_list()
 message("Estimate RW and WN")
-rwwn_list <- estimate_models(rwwn_list,parallel = parallel)
+rwwn_list <- estimate_models(rwwn_list,parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 # forecast all RW and WN models
 rwwn_forecast_list <- data_frame(model_id=c(1,2), h=NA, type="in-sample")
 message("Forecast RW and WN")
-rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list)
+rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list,
+                                  parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 # calculate all msfe-0
 # two ways to calculate msfe (we use b)
@@ -162,12 +174,13 @@ msfe0
 # estimate VAR
 var_list <- create_var_list()
 message("Estimating VAR")
-var_list <- estimate_models(var_list,parallel = parallel)
+var_list <- estimate_models(var_list,parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 # forecast VAR
 var_forecast_list <- data_frame(model_id=var_list$id, h=NA, type="in-sample")
 message("Forecasting VAR")
-var_forecasts <- forecast_models(var_forecast_list, var_list)
+var_forecasts <- forecast_models(var_forecast_list, var_list, 
+                                 parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 
 # calculate msfe-inf
@@ -192,7 +205,7 @@ rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>%
                      "_T_",T_start,"_",T_in,"_",
                      var_set,"_lags_",n_lag,".Rds") ) 
 message("Estimating rolling rw/wn/var models")
-rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel) # takes some minutes
+rwwn_var_out_list <- estimate_models(rwwn_var_out_list,parallel = parallel, ncpu=ncpu, verbose=verbose) # takes some minutes
 
 rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% mutate(model_id=id, 
                                                                          h=min(h_max, T_available - T_start - T_in + 1 ) ) %>%
@@ -201,7 +214,8 @@ rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% mutate(model_i
 
 # forecast all rolling models  
 message("Forecasting rolling rw/wn/var models, out-of-sample")
-rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, progress_bar=TRUE)
+rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, progress_bar=TRUE,
+                                          parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 
 
@@ -271,7 +285,8 @@ best_bvars_forecast_list <- best_bvars %>% rowwise() %>%
   select(model_id, h) %>% mutate(type="out-of-sample")
 
 message("Forecasting best BVAR, out-of-sample")
-best_bvars_forecasts <- forecast_models(best_bvars_forecast_list, best_bvars)
+best_bvars_forecasts <- forecast_models(best_bvars_forecast_list, best_bvars, 
+                                        parallel = parallel, ncpu=ncpu, verbose=verbose)
 
 # проверить, по каким переменным группировать в get_msfe!!!!!!!!!!!
 omsfe_best_mdd <- get_msfe(best_bvars_forecasts, actual_obs,
