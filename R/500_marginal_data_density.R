@@ -21,7 +21,7 @@ df <- read_csv("../data/df_2015_final.csv")
 df <- tail(df, -12) # tail(df, -12) # all obs except first twelve
 
 # parallel computing details:
-parallel <- "unix" # "windows"/"unix"/"off"
+parallel <- "off" # "windows"/"unix"/"off"
 ncpu <- 30 # number of cores for paralel computing, ignored if parallel=="off"
 
 

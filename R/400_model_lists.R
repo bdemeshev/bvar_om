@@ -202,12 +202,12 @@ create_mdd_list <- function() {
   
   mlist <- expand.grid(type="conjugate", 
                        var_set=list_of_sets,
-                       n_lag=c(1,6,12),
+                       n_lag=1:12, # c(1,6,12),
                        l_1=list_of_lambdas,
                        l_power=1,
                        l_const=Inf,
                        # l_sc=1,
-                       l_io=c(1), # NA means no initial observations
+                       l_io=c(1,NA), # NA means no initial observations
                        seed=13, # good luck, mcmc
                        status="not estimated")
   
