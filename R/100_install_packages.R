@@ -22,11 +22,18 @@ install.packages("RcppArmadillo")
 install.packages("R.matlab")
 
 
+install.packages("MSBVAR")
 
 devtools::install_github("bdemeshev/bvarr")
-install.packages("MSBVAR")
+
+# mac+linux
 # devtools::install_github("kthohr/BMR")
-# install BMR on windows download manually from http://bayes.squarespace.com/bmr/
+
+# windows - auto
+# download.file("http://bayes.squarespace.com/storage/bmr/BMR_0.5.1.zip", destfile = "BMR.zip")
+# install.packages("BMR.zip", repos = NULL)
+# windows - manual
+# download manually from http://bayes.squarespace.com/bmr/
 # RStudio: tools-install package - from "package archive"
 
 # install X13 instructions
