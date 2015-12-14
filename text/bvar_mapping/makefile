@@ -15,5 +15,14 @@ $(file_name).pdf: $(file_name).tex
 	# clean auxillary files
 	latexmk -c $(file_name).tex
 
+	# manual clean
+	rm $(file_name).bbl
+	rm $(file_name).tdo
+	rm $(file_name).run.xml
+
+
 # $(file_name).tex : $(file_name).Rnw
 #	Rscript -e "library(knitr); knit('$(file_name).Rnw')"
+
+clean:
+	rm $(file_name).pdf
