@@ -90,3 +90,9 @@ text/bvar_mapping/bvar_mapping.tdo
 text/mal_art/text_BVAR.fls
 
 text/mal_art/text_BVAR.fdb_latexmk
+
+text/bvar_mapping/bvar_mapping.fdb_latexmk
+
+text/bvar_mapping/bvar_mapping.fls
+
+text/bvar_mapping/bvar_mapping.log

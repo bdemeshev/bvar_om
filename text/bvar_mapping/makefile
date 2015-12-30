@@ -3,7 +3,7 @@
 # .Rnw extension is automatically added
 file_name = bvar_mapping
 
-$(file_name).pdf: $(file_name).tex
+$(file_name).pdf: $(file_name).tex bibliobase2.bib
 	# protection against biber error
 	# http://tex.stackexchange.com/questions/140814/
 	rm -rf `biber --cache`
