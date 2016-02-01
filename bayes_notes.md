@@ -218,3 +218,27 @@ data.table::rbindlist. Главное еще там опцию use.names=TRUE с
 * корова оценивает (именно оценивает) для mdd около 3х часов
 * ошибка при расчете mdd, функция bvar_conj_mdd()
 
+
+01 февраля 2016
+статус кво:
+1. статья по прогнозированию: (eng, tex)
+- model selection set или
+- bayesian model selection или
+- SVS stochastic variable selection
+
+- добить marginal likelihood
+- сравнить с кодом на данных Банбуры
+
+2. статья по картографированию (rus, tex)
+- проверить раздел про density
+- таблица с описанием кодов (убрать или доделать)
+- отправить в Прикладную эконометрику
+- перевести
+
+3. статья старая (rus, word)
+- отравлять в разные журналы
+
+прочее:
+- ОМ: density forecasting
+- OM: bvar sign restriction
+
