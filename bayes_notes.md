@@ -225,6 +225,7 @@ data.table::rbindlist. Главное еще там опцию use.names=TRUE с
 - model selection set или
 - bayesian model selection или
 - SVS stochastic variable selection
+- что из этого разумнее сделать?
 
 - добить marginal likelihood
 - сравнить с кодом на данных Банбуры
@@ -242,4 +243,12 @@ data.table::rbindlist. Главное еще там опцию use.names=TRUE с
 прочее:
 - ОМ: density forecasting
 - OM: bvar sign restriction
+
+07 февраля 2016
+байесовское сравнение делать очень долго
+mcs философски частотный, но есть люди делающие mcs для bvar
+
+хороший пакет для байесовского выбора линейных моделей
+https://cran.r-project.org/web/packages/BMS/vignettes/bms.pdf
+
 
