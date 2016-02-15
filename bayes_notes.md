@@ -257,3 +257,7 @@ https://cran.r-project.org/web/packages/BMS/vignettes/bms.pdf
 https://github.com/FK83/bvarsv
 * добавить четкое описание VAR и RW как частных случаев BVAR
 * marginal likelihood и bayesian factors - связь?
+
+* 52-53 моё
+* 54 моё
+* F - условия прописать?
