@@ -43,6 +43,10 @@ num_AR_lags <- 1  # NULL # number of lags in AR() model used to estimate sigma^2
 # if num_AR_lags <- NULL then p will be used
 
 set_delta_by <- "KPSS"  # 'ADF', 'KPSS' or 'global AR1' or 'AR1' or a number
+c_0 <- 0.5 # delta for stationary process
+c_1 <- 1 # delta for non stationary process
+# 'global AR1' -- AR(1) is estimated using all available observations (does not depend on the model)
+# 'AR1' -- AR(1) is estimated using only observations for estimating model (?)
 
 v_prior <- "m+2"  # 'm+2' / 'T_dummy' / константа
 
@@ -96,7 +100,7 @@ actual_obs <- melt(df, id.vars = "t") %>% rename(actual = value) %>% mutate(vari
 
 if (set_delta_by %in% c("ADF", "KPSS")) {
   deltas <- delta_i_prior(df, test = set_delta_by, remove_vars = c("time_y", "t"), 
-                          c_0 = 0, c_1 = 1)
+                          c_0 = c_0, c_1 = c_1)
 }
 
 if (set_delta_by == "global AR1") {
@@ -110,8 +114,8 @@ if ((set_delta_by == "AR1") | is.finite(set_delta_by)) {
 
 
 
-# Important!!!  value of delta determines prior RW/WN determines model for
-# comparison
+# Important!!!  value of delta determines prior 
+# RW/WN determines model for comparison
 
 # always compare with Random Walk:
 deltas <- mutate(deltas, rw_wn = "rw", variable = as.character(variable))
