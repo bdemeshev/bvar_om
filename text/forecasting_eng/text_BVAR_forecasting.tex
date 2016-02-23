@@ -107,8 +107,8 @@
 \author{Boris Demeshev,$^{1}$   Oxana Malakhovskaya$^{1}$\\
 \\
 \normalsize{$^{1}$National Research University Higher School of Economics}\\
-}    
-\date{}          
+}
+\date{}
 
 \begin{document}
 
@@ -132,7 +132,7 @@ Accurate macroeconomic forecasts are extremely important for policy making. Cent
 
 In this paper, we forecast Russian macroeconomic indicators with Bayesian vector autoregressions (BVARs) of different sizes. Our goal is twofold.  First, we compare the forecast accuracy of BVAR with that of unrestricted vector autoregressions (VARs) and random walk with drift models for 23 important macroeconomic indicators. Second, we  question whether a high-dimensional model always outperforms a low-dimensional one in terms of forecasting accuracy.
 
-For the last 30 years, VARs introduced by \cite{sims_1980} have become a  widely-used tool for forecasting. However, unrestricted VARs bear the risk of over-parametrization even for samples of moderate size. This risk stems from the fact that the number of  parameters to be estimated  increases nonlinearly with the number of equations. For this reason, in economic applications unrestricted VARs usually contain  only up to eight variables, and this may potentially lead  to the loss of some relevant information and undermine the forecast accuracy. 
+For the last 30 years, VARs introduced by \cite{sims_1980} have become a  widely-used tool for forecasting. However, unrestricted VARs bear the risk of over-parametrization even for samples of moderate size. This risk stems from the fact that the number of  parameters to be estimated  increases nonlinearly with the number of equations. For this reason, in economic applications unrestricted VARs usually contain  only up to eight variables, and this may potentially lead  to the loss of some relevant information and undermine the forecast accuracy.
 
 To deal with a data-rich environment researchers modify VARs and impose restrictions on the covariance structure. One strand of the literature focuses on  dynamic factor models (DFM, \cite{forni_al_2000} and \cite{stock_watson_2002})and Panel VARs and Global VARs (PVARs, GVARs, \cite{pesaran_al_2004} and \cite{dees_guntner_2014}).  DFM are based on the idea that a relatively small set of indices extracted from a high-dimensional set of variables can summarize the information from this set.
 These factors are treated as variables in a VAR model either separately or in conjunction with several time series from the original information set in a factor-augmented VAR (FAVAR) model. For data sets with a panel structure a suitable choice is a PVAR or a GVAR with shrinkage done by exclusion, exogeneity or homogeneity restrictions.
@@ -144,8 +144,8 @@ However, in their influential paper,  \cite{demol_al_2008} show that Bayesian me
 Several authors have recently shown that, in terms of forecasting accuracy, medium and large BVARs outperform their low-dimensional counterparts. For example,  \cite{beauchemin_zaman_2011} present a medium BVAR with a good forecasting performance applied to the US data.  \cite{bloor_matheson_2010} compare univariate autoregresions (ARs), unrestricted VARs and BVARs and show evidence that high-dimensional BVARs, in general demonstrate better forecasting performance. \cite{koop_2013} demonstrates that  high-dimensional BVARs outperform factor models in terms of forecasting performance. Moreover, he argues that more complicated priors than those that are usually applied may not lead to more precise forecasts. \cite{alessandri_mumtaz_2014} underline the importance of financial factors for an accurate forecast of output and inflation, especially <<for predicting <<tail>> macroeconomic outcomes>>.
 \cite{carriero_al_2015} study some characteristics of  BVARs and find those providing the most accurate forecasts.
 
-Our analysis delivers two important results. First, we show that most Russian macroeconomic indicators in our sample can be forecast by BVARs more accurately than by competing models. However, contrary to other studies (for example, \cite{bloor_matheson_2010}, \cite{banbura_al_2010})   we do not confirm that relative forecast error monotonically decreases with the dimension of the sample. In almost half of those cases where a BVAR is the most accurate model, a small-dimensional BVAR outperforms its high-dimensional counterpart. 
- 
+Our analysis delivers two important results. First, we show that most Russian macroeconomic indicators in our sample can be forecast by BVARs more accurately than by competing models. However, contrary to other studies (for example, \cite{bloor_matheson_2010}, \cite{banbura_al_2010})   we do not confirm that relative forecast error monotonically decreases with the dimension of the sample. In almost half of those cases where a BVAR is the most accurate model, a small-dimensional BVAR outperforms its high-dimensional counterpart.
+
 The paper is structured as follows. Section 2 presents our model and the prior distribution we apply. In Section 3 we describe our sample and the data transformations we use. Section 4 contains the results and their interpretation.  Section 5 concludes.
 
 
@@ -179,16 +179,16 @@ p(\Phi, \Sigma|Y)\propto p(\Phi,\Sigma) L(Y|\Phi,\Sigma)
 
 \subsection{Сonjugate normal --- inverse Wishart prior}
 
-Our benchmark model for estimation and forecasting purposes is a BVAR with a conjugate normal --- inverse Wishart prior.  The prior can be written as: 
+Our benchmark model for estimation and forecasting purposes is a BVAR with a conjugate normal --- inverse Wishart prior.  The prior can be written as:
 
 \begin{equation}
 \begin{cases} \label{conjugate_prior}
 \Sigma\sim \cIW(\prior S, \prior \nu) \\
 \Phi|\Sigma\sim \cN (\prior \Phi, \Sigma\otimes\prior \Omega)
-\end{cases} 
+\end{cases}
 \end{equation}
 
-The prior mean of the coefficient matrices is  written with a $k\times m$ matrix  $\prior \Phi = \E (\Phi)$, where $\prior\Phi=[\prior\Phi_1 \ldots \prior\Phi_p \; \prior\Phi_{const}]'$.% и $\prior \phi = \vec{ \prior \Phi}$. 
+The prior mean of the coefficient matrices is  written with a $k\times m$ matrix  $\prior \Phi = \E (\Phi)$, where $\prior\Phi=[\prior\Phi_1 \ldots \prior\Phi_p \; \prior\Phi_{const}]'$.% и $\prior \phi = \vec{ \prior \Phi}$.
 The matrices $\prior\Phi_l$ are defined as follows:
 
 
@@ -202,16 +202,16 @@ The matrices $\prior\Phi_l$ are defined as follows:
 
 A matrix $\prior \Omega$  is assumed to be diagonal and it depends on several hyperparameters:
 \begin{gather}
-\prior \Omega=\diag\lbrace{\prior \Omega_{lag=1},\ldots, \prior \Omega_{lag=p},\prior \Omega_{const} \rbrace}\\ 
-(\prior \Omega_{lag=l})_{jj} 
+\prior \Omega=\diag\lbrace{\prior \Omega_{lag=1},\ldots, \prior \Omega_{lag=p},\prior \Omega_{const} \rbrace}\\
+(\prior \Omega_{lag=l})_{jj}
 =\left(\frac{\lambda}{l^{\lambda_{lag}}\hat\sigma_j}\right)^2
 \quad
 \prior \Omega_{const}=\lambda_{const}^2 \label{prior_omega2}
 \end{gather}
 
 The  hyperparameters have the following interpretation: $\lambda$ determines the overall tightness of the prior and it is responsible for the relative weight of the prior with respect to the information incorporated in the data, $\lambda_{lag}$  controls the velocity of the decrease of the prior variance with increasing the lag length, and $\lambda_{const}$ governs the relative tightness of the prior for the constant terms.
- 
-The scale matrix $\prior S$ is diagonal and its non-zero elements assure that the mean of $\Sigma$ is equal to the fixed covariance matrix of the standard Minnesota prior: 
+
+The scale matrix $\prior S$ is diagonal and its non-zero elements assure that the mean of $\Sigma$ is equal to the fixed covariance matrix of the standard Minnesota prior:
 
 \begin{equation}
 (\prior S)_{ii}= (\prior \nu- m- 1) \hat\sigma^2_{i}
@@ -223,13 +223,13 @@ It is possible to show that the posterior distribution formed by combining this 
 \begin{equation}
 \begin{cases}
 \Sigma|Y \sim \cIW(\post S, \post \nu) \\
-\Phi|\Sigma,Y\sim \cN (\post \Phi, \Sigma\otimes\post \Omega) 
+\Phi|\Sigma,Y\sim \cN (\post \Phi, \Sigma\otimes\post \Omega)
 \end{cases}
 \end{equation}
 with the following parameters:
 %где
 %\footnote{
-%Эквивалентная формула (карлсон p15) для $\post S$, 
+%Эквивалентная формула (карлсон p15) для $\post S$,
 %$\post S=\prior S +\hat E'\hat E + (\prior \Phi - \hat \Phi)'(\prior \Omega $+ (X'X)^{-1})^{-1}(\prior \Phi - \hat \Phi)$}
 \begin{align*}
 \post\nu &=\prior \nu+T\\
@@ -243,18 +243,18 @@ with the following parameters:
 \hat E&=Y-X\hat\Phi
 \end{align*}
 
-There is a popular alternative approach to calculate hyperparameters of the posterior distribution. 
+There is a popular alternative approach to calculate hyperparameters of the posterior distribution.
 We set $\prior S$ and $\prior \Omega^{-1}$ to be zero matrices and to compensate the difference we add supplementary observations into  $X$ and  $Y$ matrices according to:
 
 \begin{equation}\label{star_sample}
 Y^*=\begin{bmatrix}
 Y^{NIW} \\
-Y 
+Y
 \end{bmatrix}
 \quad
 X^*=\begin{bmatrix}
 X^{NIW} \\
-X 
+X
 \end{bmatrix},
 \end{equation}
 where matrices $Y^{NIW}$ and $X^{NIW}$ are defined as follows\footnote{The similar formulae provided in \cite{banbura_al_2010}, \cite{berg_henzel_2013} can be regarded as special cases of  \eqref{NIW_observations} for $\lambda_{lag}=1$ и $\lambda_{const}\to\infty$.}:
@@ -278,7 +278,7 @@ X^{NIW}=\begin{bmatrix}
 \end{bmatrix}\label{NIW_observations}
 \end{equation}
 
-This method permits the calculation $\post \Phi$ as an OLS estimate of the regression of $Y^*$ on $X^*$: $\post \Phi=(X^{*\prime}X^*)^{-1} X^{*\prime}Y^*$ and $\post S$ as a sum of the squared residuals for this regression: 
+This method permits the calculation $\post \Phi$ as an OLS estimate of the regression of $Y^*$ on $X^*$: $\post \Phi=(X^{*\prime}X^*)^{-1} X^{*\prime}Y^*$ and $\post S$ as a sum of the squared residuals for this regression:
 $\post S =(Y^* - \post \Phi X^*)'(Y^* - \post \Phi X^*)$.
 
 %При этом математические ожидания и дисперсии априорного распределения параметров могут быть заданы по тому же принципу, что и в априорном распределении Миннесоты (см. \eqref{minnesota_exp}-\eqref{minnesota_variance}).
@@ -290,7 +290,7 @@ $\post S =(Y^* - \post \Phi X^*)'(Y^* - \post \Phi X^*)$.
 \cite{doan_al_1984} and \cite{sims_1993} propose complementing this prior distribution with additional information in form of two other priors. This modification reflects the belief that time series may have unit roots and cointegration relations. These elements in the prior allow avoiding an unreasonably large share of the variation in the data which is accounted for by deterministic components (\cite{sims_1993}).
 
 
-A sum-of-coefficients prior was introduced by \cite{doan_al_1984}. If all the time-series in a sample have a unit root, this information can be taken into account with a prior where a sum of all the lag parameters for each dependent variable is equal to one (\cite{robertson_tallman_1999}, \cite{blake_mumtaz_2012}). In other words, when the mean of the lagged values of a variable is at a certain level, this level is a good forecast for future observations of this dependent variable.  
+A sum-of-coefficients prior was introduced by \cite{doan_al_1984}. If all the time-series in a sample have a unit root, this information can be taken into account with a prior where a sum of all the lag parameters for each dependent variable is equal to one (\cite{robertson_tallman_1999}, \cite{blake_mumtaz_2012}). In other words, when the mean of the lagged values of a variable is at a certain level, this level is a good forecast for future observations of this dependent variable.
 We implement this prior by combining the dataset given in \ref{star_sample} with artificial dummy-observations according to the following scheme:
 %\begin{gather*}
 %y_d(i,j)=\begin{cases}
@@ -310,7 +310,7 @@ Y^{SC}=\frac{1}{\lambda_{sc}}\begin{bmatrix}\diag(\delta_1\mu_1,\ldots,\delta_m\
 X^{SC}=\frac{1}{\lambda_{sc}}\begin{bmatrix}(1_{1\times p})\otimes \diag(\delta_1\mu_1,\ldots,\delta_m\mu_m) &0_{m\times 1}\end{bmatrix},
 \end{gather}
 
-\noindent where $(1_{1\times p})$  is a unitary $[1\times p]$ vector, $\mu_i$ is $i$-th component of vector   $\mu$, which contains the average values of initial observations of all variables in the sample\footnote{Some authors calculate $\mu$  using the average values of all observations in a sample, so that   $\mu=\frac{1}{T}\sum_{t=1}^T y_t$ (\cite{banbura_al_2010} and \cite{carriero_al_2015}). However, following \cite{sims_zha_1998} we calculate $\mu$ using only initial $p$ observations.}: $\mu=\frac{1}{p}\sum_{t=1}^p y_t$.  
+\noindent where $(1_{1\times p})$  is a unitary $[1\times p]$ vector, $\mu_i$ is $i$-th component of vector   $\mu$, which contains the average values of initial observations of all variables in the sample\footnote{Some authors calculate $\mu$  using the average values of all observations in a sample, so that   $\mu=\frac{1}{T}\sum_{t=1}^T y_t$ (\cite{banbura_al_2010} and \cite{carriero_al_2015}). However, following \cite{sims_zha_1998} we calculate $\mu$ using only initial $p$ observations.}: $\mu=\frac{1}{p}\sum_{t=1}^p y_t$.
 
 The dummy initial observation prior proposed by  \cite{sims_1993} expresses the belief that the variables have a common stochastic trend. Only one observation is added so that the values of all variables are equal to the average value of initial observations $\mu_i$ normalized to a scale coefficient $\lambda_{io}$. Therefore, this extra observation is defined as follows:
 \begin{gather}
@@ -330,26 +330,26 @@ This prior distribution reflects the belief that the average value for a variabl
 %1/\lambda_4 \quad \text{в обратном случае,}
 %\end{cases}
 %\end{gather*}
-%где $j=1,\ldots m, s=1,\ldots km$. 
+%где $j=1,\ldots m, s=1,\ldots km$.
 
-The hyperparameter $\lambda_{io}$ controls the tightness of this prior. When $\lambda_{io}\to 0 $, the model implies that either all variables are stationary with the mean equal to sample mean of the initial observations or non-stationary without drift and cointegrated. 
+The hyperparameter $\lambda_{io}$ controls the tightness of this prior. When $\lambda_{io}\to 0 $, the model implies that either all variables are stationary with the mean equal to sample mean of the initial observations or non-stationary without drift and cointegrated.
 
 
 \subsection{Choice of tightness hyperparameter: the algorithm of shrinkage}
 
-As shown by \cite{demol_al_2008} and confirmed in several other recent studies, a sample with a larger cross-sectional dimension requires a lower  $\lambda$, so the prior must be tighter for a larger sample than for a smaller one. In this paper, we use the approach introduced by \cite{banbura_al_2010} to determine the optimal $\lambda$ for every model. 
+As shown by \cite{demol_al_2008} and confirmed in several other recent studies, a sample with a larger cross-sectional dimension requires a lower  $\lambda$, so the prior must be tighter for a larger sample than for a smaller one. In this paper, we use the approach introduced by \cite{banbura_al_2010} to determine the optimal $\lambda$ for every model.
 
-This algorithm is based on the idea that the shrinkage should be sufficiently tight  to avoid over-parametrization. Moreover, it is assumed that a three-variable unrestricted VAR is parsimonious enough and does not require any additional shrinkage. This implies that the hyperparameter $\lambda$ can be chosen so that the model has the same in-sample fit as a three-variable VAR.  In other words, a BVAR model of any dimension is shrunk to the size of a small unrestricted VAR.  A detailed description of the procedure is laid out below. We denote  the actual value of a variable $var$ at moment $T+h$ by $y_{var,T+h}$, and  a forecast of the variable $var$ at moment $T$ for a  horizon $h$ in a model with $m$ variables and an overall tightness parameter $\lambda$ by  $y_{var,T+h|T}^{\lambda,m}$. The algorithm for choosing $\lambda$ has the following steps. 
+This algorithm is based on the idea that the shrinkage should be sufficiently tight  to avoid over-parametrization. Moreover, it is assumed that a three-variable unrestricted VAR is parsimonious enough and does not require any additional shrinkage. This implies that the hyperparameter $\lambda$ can be chosen so that the model has the same in-sample fit as a three-variable VAR.  In other words, a BVAR model of any dimension is shrunk to the size of a small unrestricted VAR.  A detailed description of the procedure is laid out below. We denote  the actual value of a variable $var$ at moment $T+h$ by $y_{var,T+h}$, and  a forecast of the variable $var$ at moment $T$ for a  horizon $h$ in a model with $m$ variables and an overall tightness parameter $\lambda$ by  $y_{var,T+h|T}^{\lambda,m}$. The algorithm for choosing $\lambda$ has the following steps.
 \begin{enumerate}
 \item We make in-sample one-period forecasts with BVAR on a training sample and calculate the mean squared forecast error for the set  of $M$ variables of central interest\footnote{Our benchmark set of variables of central interest $(\EuScript{M})$ includes the industrial production index, consumer price index and interbank interest rate so that $M=3$. As a  robustness check we excluded the interest rate from this set and there was almost no change in the vector of the optimal $\lambda$.}:
 \begin{equation}
 MSFE_{var,1}^{\lambda,m}=\frac{1}{T_0 - p}\sum_{t=p}^{T_0-1} \left(y_{var,t+1|t}^{\lambda,m}-y_{var,t+1}\right)^2,
 %\quad var=\lbrace{ip,p,r\rbrace},
 \end{equation}
-\noindent where  the BVAR coefficients are obtained using the training sample: $t=p+1,\ldots, T_0$ and $T_0$ is the last observation of the training sample: $T_0=p+120$. 
+\noindent where  the BVAR coefficients are obtained using the training sample: $t=p+1,\ldots, T_0$ and $T_0$ is the last observation of the training sample: $T_0=p+120$.
 \item In a similar way we calculate one-period forecasts according to the random walk model\footnote{We normalize MSFE for the BVAR and VAR models by MSFE obtained with the random walk model to take into account the different scales of the series.
 We use a superscript 0 for the random walk model as random walk may be considered as a special case of BVAR if $\lambda=0$ and $\delta_i=1, i=1,\ldots,k$.} for the same variables $\left(MSFE_{var,1}^0\right)$ and a new indicator $FIT^{\lambda,m}$:
-% We estimate models for  $m$ variables with many different $\lambda$ and calculate MSF errors  for output  $(MSFE_y^{\lambda,m})$ and prices $(MSFE_{\pi}^{\lambda,m})$  as well as $FIT^{{\lambda,m}}$: 
+% We estimate models for  $m$ variables with many different $\lambda$ and calculate MSF errors  for output  $(MSFE_y^{\lambda,m})$ and prices $(MSFE_{\pi}^{\lambda,m})$  as well as $FIT^{{\lambda,m}}$:
 \begin{equation}
 FIT^{\lambda,m}=\frac{1}{M} \sum_{var\in \EuScript{M}} \frac{MSFE_{var,1}^{\lambda,m}}{MSFE_{var,1}^{0}}
 %FIT^{\lambda,m}=\frac{1}{2}\cdot\frac{MSFE_y^{\lambda,m}}{MSFE^0_y} + \frac{1}{2}\cdot\frac{MSFE_{\pi}^{\lambda,m}}{MSFE^0_{\pi}}
@@ -363,10 +363,10 @@ FIT^{\infty,M}=\frac{1}{M} \sum_{var\in \EuScript{M}} \frac{MSFE_{var,1}^{\infty
 
 \item The optimal lambda is the value minimizing the difference between $FIT^{\lambda,m}$ and $FIT^{\infty,M}$:
 \begin{equation}
-\lambda^*_m=\argmin_{\lambda} |FIT^{\lambda, m}-FIT^{\infty,M}| 
+\lambda^*_m=\argmin_{\lambda} |FIT^{\lambda, m}-FIT^{\infty,M}|
 \end{equation}
 \end{enumerate}
-After the optimal $\lambda$ is chosen for every $m$, we keep it fixed  and make out-of-sample forecasts on the evaluation sample.  
+After the optimal $\lambda$ is chosen for every $m$, we keep it fixed  and make out-of-sample forecasts on the evaluation sample.
 
 
 \subsection{Out-of-sample forecasting}
@@ -380,8 +380,8 @@ OMSFE_{var,h}^{\lambda,m}=\frac{1}{T_1-T_0-h+1}\sum_{\tau=T_0}^{T_1-h} \\\left(y
 %where $y_{var,T+h}$ - actual values of a variable $var$ at$T+h$,  $y_{var,T+h|T}^{\lambda,m}$ - is a forecast of a variable $var$ at a horizon $h$ in a model with $m$ variables and an overall tightness parameter $\lambda$.
 
 Then we calculate the MSFE of out-of-sample forecasts obtained with random walk with drift $(OMSFE_{var,h}^{0})$ and unrestricted VAR $(OMSFE_{var,h}^{\infty,m})$:
-	 
-%We measure the out-of-sample forecast accuracy in terms of mean squared forecast error: 
+
+%We measure the out-of-sample forecast accuracy in terms of mean squared forecast error:
 %\begin{equation}
 %OMSFE_{var,h}^{\lambda,m}=\frac{1}{2+T_1-T_0-h}\sum_{\tau=T_0-1}^{T_1} (y_{var,\tau+h|\tau}^{\lambda,m}-y_{var,\tau+h|\tau})^2
 %\end{equation}
@@ -391,7 +391,7 @@ OMSFE_{var,h}^{\infty,m}=\frac{1}{T_1-T_0-h+1}\sum_{\tau=T_0}^{T_1-h} \left(y_{v
 OMSFE_{var,h}^{0}=\frac{1}{T_1-T_0-h+1}\sum_{\tau=T_0}^{T_1-h} \left(y_{var,\tau+h|\tau}^{0}-y_{var,\tau+h}\right)^2,
 \end{gather}
 
-To compare the forecast accuracy of different models we report the relative MSFE, that is, the ratio of the MSFE of the model in question by the MSFE of a reference model (random walk in our case): 
+To compare the forecast accuracy of different models we report the relative MSFE, that is, the ratio of the MSFE of the model in question by the MSFE of a reference model (random walk in our case):
 
 \begin{equation}\label{rmsfe}
 RMSFE_{var}=\frac{OMSFE_{var,h}^{\lambda,m}}{OMSFE_{var,h}^0}
@@ -401,12 +401,12 @@ RMSFE_{var}=\frac{OMSFE_{var,h}^{\lambda,m}}{OMSFE_{var,h}^0}
 
 \section{Data and Estimations}
 
-Our dataset consists  of 23 time series running from January 1996 to April 2015. Our sample containing 232 observations is limited by data availability. The full list of the series and their sources is displayed in Appendix 2. We seasonally adjust data which demonstrate seasonal fluctuations with TRAMO/SEATS option in EViews and apply logarithms to the series, with the exception of those already expressed in rates. 
+Our dataset consists  of 23 time series running from January 1996 to April 2015. Our sample containing 232 observations is limited by data availability. The full list of the series and their sources is displayed in Appendix 2. We seasonally adjust data which demonstrate seasonal fluctuations with TRAMO/SEATS option in EViews and apply logarithms to the series, with the exception of those already expressed in rates.
 
 We estimate models of different cross-sectional dimension. The industrial production index, CPI and interbank interest rate are forecast with three-variable, six-variable and 23-variable models.  Monetary aggregate, the real effective exchange rate and the oil price index are forecast with four-variable, six-variable and 23-variable models. All the other series are forecast  with four-variable, seven-variable and 23-variable models. For all models with dimension less than eight we estimate both unrestricted VARs and BVARs. We estimate only a BVAR on the sample with 23 variables.
-The three-variable VAR is the simplest specification that can be justified by a textbook version of a New Keynesian model.  
-A model with six variables is specified in line with many monetary models used previously for the structural analysis of different economies (\cite{sims_1992}, \cite{kim_roubini_2000}, \cite{bjornland_2008}, \cite{scholl_uhlig_2008}) and it contains the real effective exchange rate, monetary aggregate M2, and the oil price index in addition to three variables included in the smallest VAR. The oil price index is used as a variable in the model to reflect the belief that oil price index is an important explanatory factor for the other variables in the sample as Russia has a petroleum export-based economy. To forecast variables outside of these core sets we estimate four-variable and seven-variable VARs containing three or six-variable samples described above plus an additional variable of interest. We include all available time series in our 23-variable model. In totally, after the optimal $\lambda$ is chosen, we estimate 79 models. In a compact form the models used for forecasting are presented in  Table \ref{tab:models}. 
-For VARs and BVARs we take all possible lags from 1 to 12. 
+The three-variable VAR is the simplest specification that can be justified by a textbook version of a New Keynesian model.
+A model with six variables is specified in line with many monetary models used previously for the structural analysis of different economies (\cite{sims_1992}, \cite{kim_roubini_2000}, \cite{bjornland_2008}, \cite{scholl_uhlig_2008}) and it contains the real effective exchange rate, monetary aggregate M2, and the oil price index in addition to three variables included in the smallest VAR. The oil price index is used as a variable in the model to reflect the belief that oil price index is an important explanatory factor for the other variables in the sample as Russia has a petroleum export-based economy. To forecast variables outside of these core sets we estimate four-variable and seven-variable VARs containing three or six-variable samples described above plus an additional variable of interest. We include all available time series in our 23-variable model. In totally, after the optimal $\lambda$ is chosen, we estimate 79 models. In a compact form the models used for forecasting are presented in  Table \ref{tab:models}.
+For VARs and BVARs we take all possible lags from 1 to 12.
 
 
 \begin{table}
@@ -429,9 +429,9 @@ BVAR23&$Y$ includes all 23 variables from the dataset\\
 
 \section{Results}
 
-For every variable and every forecasting horizon we find a model with the lowest RMSFE. We compare 60 specifications for each variable and each forecasting horizon as we have 5 models (a VAR and a BVAR with 3 or 4 variables, a VAR and a BVAR with 6 or 7 variables, and a BVAR with 23 variables) and 12 lags for each of them. 
-We visualize our results with color tables (Figures \ref{fig:rmsfe1}-\ref{fig:rmsfe2} ). 
-The two tables in these Figures differ by the hyperparameter sets used for the BVAR priors. For models depicted in Figure 1  we take $\delta_i =1$ for nonstationary series and $\delta_i =0.5$ for stationary series while constructing the prior. We use the KPSS test to split the series into two groups. The parameters $\sigma_i$ are taken to be equal to the standard deviations of the residuals in the univariate $AR(p)$ model. This hyperparapeter set will be referenced as set A in what follows. Figure 2 is related to BVARs with the prior determined by the univariate $AR(1)$ model. We take $\delta_i$ as equal to the OLS estimates of the first lag parameter and  $\sigma_i$ as equal to the standard deviations of residuals in AR(1) models. This set will be referenced as set B. 
+For every variable and every forecasting horizon we find a model with the lowest RMSFE. We compare 60 specifications for each variable and each forecasting horizon as we have 5 models (a VAR and a BVAR with 3 or 4 variables, a VAR and a BVAR with 6 or 7 variables, and a BVAR with 23 variables) and 12 lags for each of them.
+We visualize our results with color tables (Figures \ref{fig:rmsfe1}-\ref{fig:rmsfe2} ).
+The two tables in these Figures differ by the hyperparameter sets used for the BVAR priors. For models depicted in Figure \ref{fig:rmsfe1}  we take $\delta_i =1$ for nonstationary series and $\delta_i =0.5$ for stationary series while constructing the prior. We use the KPSS test to split the series into two groups. The parameters $\sigma_i$ are taken to be equal to the standard deviations of the residuals in the univariate $AR(p)$ model. This hyperparapeter set will be referenced as set A in what follows. Figure \ref{fig:rmsfe2} is related to BVARs with the prior determined by the univariate $AR(1)$ model. We take $\delta_i$ as equal to the OLS estimates of the first lag parameter and  $\sigma_i$ as equal to the standard deviations of residuals in AR(1) models. This set will be referenced as set B.
 
 
 \begin{figure}[!h]
@@ -446,7 +446,7 @@ The two tables in these Figures differ by the hyperparameter sets used for the B
 %\begin{figure}
 \begin{center}
 \includegraphics[scale=0.80]{hyper4.jpg}
-\caption{RMSFE of the best forecasting accuracy models, parameter set B: $\sigma_i$ are std of $AR(1)$ residuals, $\delta_i=1$ are first lag $AR(1)$ estimates}
+\caption{RMSFE of the best forecasting accuracy models, parameter set B: $\sigma_i$ are std of $AR(1)$ residuals, $\delta_i$ are first lag $AR(1)$ estimates}
 \label{fig:rmsfe2}
 \end{center}
 \end{figure}
@@ -454,20 +454,20 @@ The two tables in these Figures differ by the hyperparameter sets used for the B
 
 The color of a cell corresponds to the model that appears to outperform the others in terms of forecasting accuracy for a given variable and a given forecasting horizon. Most of cells are green (either light green or bright green) reflecting that a BVAR  provides the most accurate forecast for the corresponding  variables and forecasting horizons. An unrestricted VAR gives the most accurate forecast for variables and horizons indicated by yellow and orange cells. The procedure for choosing $\lambda$ is such that the BVAR and the unrestricted VAR  necessarily coincide  for the smallest sample (3 or 4 variables). This explains why orange represents both of these models.  Blue means that neither BVAR nor VAR beat the random walk in terms of forecast accuracy.
 
-The forecast accuracy is measured with RMSFE calculated according to (\ref{rmsfe}) and is also shown in Figures \ref{fig:rmsfe1}-\ref{fig:rmsfe2}. 
-The numbers less than one indicate that the a VAR or a BVAR model provides a better forecast than the random walk and the smaller the number is, the more accurate the forecasts are relative to the random walk.  We see that in most cases we have at least one model that provides a forecast much better than the reference model. 
+The forecast accuracy is measured with RMSFE calculated according to (\ref{rmsfe}) and is also shown in Figures \ref{fig:rmsfe1}-\ref{fig:rmsfe2}.
+The numbers less than one indicate that the a VAR or a BVAR model provides a better forecast than the random walk and the smaller the number is, the more accurate the forecasts are relative to the random walk.  We see that in most cases we have at least one model that provides a forecast much better than the reference model.
 
-Despite different prior parameter sets, the two tables are very similar both in terms of the best forecasting models and  the relative accuracy  with respect to the random walk. 
+Despite different prior parameter sets, the two tables are very similar both in terms of the best forecasting models and  the relative accuracy  with respect to the random walk.
 
-We  interpret our results as follows. First, for many variables and forecasting horizons, BVARs outperforms the random walk and unrestricted VARs. Out of the 115 forecasting cases highlighted in the paper (23 variables times 5 forecasting horizons) BVARs appear to be best in terms of forecast accuracy in 71 cases for the prior hyperparameter set A and in 77 cases for the prior hyperparameter set B.  There are variables in our sample that are forecast more accurately by BVARs for all forecasting horizons we try  (such as employment, import and lending rate). For several variables BVARs are the best option for the shortest horizons (for example, monetary aggregate M2 and the real effective exchange rate). On the contrary, for the agricultural production index a BVAR model has the lowest forecast error only for a one-year horizon.  
+We  interpret our results as follows. First, for many variables and forecasting horizons, BVARs outperforms the random walk and unrestricted VARs. Out of the 115 forecasting cases highlighted in the paper (23 variables times 5 forecasting horizons) BVARs appear to be best in terms of forecast accuracy in 71 cases for the prior hyperparameter set A and in 77 cases for the prior hyperparameter set B.  There are variables in our sample that are forecast more accurately by BVARs for all forecasting horizons we try  (such as employment, import and lending rate). For several variables BVARs are the best option for the shortest horizons (for example, monetary aggregate M2 and the real effective exchange rate). On the contrary, for the agricultural production index a BVAR model has the lowest forecast error only for a one-year horizon.
 
-Second, among all cases where BVARs show their forecasting accuracy, a high-dimensional BVAR is the best option  in about half of the cases (35 of 71 for set A and 39 of 77 for set B).  In other cases it is beaten by a low-dimensional BVAR (6 or 7 variables). 
+Second, among all cases where BVARs show their forecasting accuracy, a high-dimensional BVAR is the best option  in about half of the cases (35 of 71 for set A and 39 of 77 for set B).  In other cases it is beaten by a low-dimensional BVAR (6 or 7 variables).
 
 Third, for some variables and some forecasting horizons neither unrestricted VARs nor BVARs outperform  the random walk. For example, in all specifications we consider the nominal exchange rate cannot be forecast by either VARs or BVARs better than by the random walk, and it is a long-held consensus in economics remounting to \cite{meese_rogoff_1983}. However, we question another wide-spread belief that the price of oil is a random walk process. We show that the oil price index can be forecasted by BVARs much better than by the random walk and the result is robust for different prior settings.
 
 \section{Conclusion}
 
-This paper evaluates the forecasting performance of BVARs on Russian data. We estimate BVARs of different sizes and compare the accuracy of their out-of-sample forecasts with those obtained with unrestricted VARs and random walk.   Our sample consists of 23 variables and we forecast at 5 different horizons up to 12 months. We show that for the majority of the variables  BVARs  outperform the competing models in terms of forecasting accuracy. 
+This paper evaluates the forecasting performance of BVARs on Russian data. We estimate BVARs of different sizes and compare the accuracy of their out-of-sample forecasts with those obtained with unrestricted VARs and random walk.   Our sample consists of 23 variables and we forecast at 5 different horizons up to 12 months. We show that for the majority of the variables  BVARs  outperform the competing models in terms of forecasting accuracy.
 However, we cannot confirm the conclusion drawn in some other studies (for example, \cite{bloor_matheson_2010}, \cite{banbura_al_2010}), where Bayesian methods were applied to data from developed countries, claiming that high-dimensional BVARs forecast better than low-dimensional models. Our results implies that a 23-variable BVAR performs most accurately in only about a half of cases where a BVAR is considered as a better forecasting tool with respect to its competitors. For the rest of those cases a BVAR with a relatively small size (6 or 7 variables in our case)  can outperform a 23-variable BVAR in terms of forecasting accuracy.
 
 
@@ -566,4 +566,4 @@ UAESD - United Archive of Economic and Sociological Data \url{http://sophist.hse
 
 %\end{landscape}
 %\end{appendices}
-\end{document} 
+\end{document}
