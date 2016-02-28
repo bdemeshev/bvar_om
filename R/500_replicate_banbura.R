@@ -75,10 +75,10 @@ desired_variable <- c("cpi", "ib_rate", "ind_prod")
 ################################################ create var_set_info describe which variables are included in each set
 ################################################ dput(colnames(df))
 
-add_03 <- data_frame(var_set = "set_03", variable = c("ind_prod", "cpi", "ib_rate"))
-add_06 <- data_frame(var_set = "set_06", variable = c("ind_prod", "cpi", "ib_rate", 
+add_03 <- data_frame(var_set = "set_A", variable = c("ind_prod", "cpi", "ib_rate"))
+add_06 <- data_frame(var_set = "set_B", variable = c("ind_prod", "cpi", "ib_rate", 
                                                       "m2", "reer", "oil_price"))
-add_23 <- data_frame(var_set = "set_23", variable = c("employment", "ind_prod", "cpi", 
+add_23 <- data_frame(var_set = "set_C", variable = c("employment", "ind_prod", "cpi", 
                                                       "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
                                                       "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                                       "agriculture", "retail", "gov_balance", "export", "import"))
@@ -251,7 +251,7 @@ fit_lam_table
 
 ##### banbura step 4 find optimal lambda ungroup() is needed! otherwise cannot remove
 ##### var_set (active group on var_set)
-fit_goal <- dplyr::filter(fit_inf_table, var_set == "set_03") %>% ungroup() %>% 
+fit_goal <- dplyr::filter(fit_inf_table, var_set == "set_A") %>% ungroup() %>% 
   dplyr::select(-var_set)
 fit_goal
 

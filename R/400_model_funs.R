@@ -21,7 +21,7 @@ library("bvarr")
 # maybe we need to pass actual df for parallel computing
 estimate_model <- function(minfo, 
                            do_log=FALSE, verbose=FALSE, var_set_info, df, deltas,
-                           num_AR_lags, carriero_hack) {
+                           num_AR_lags, carriero_hack, v_prior, keep) {
   model_full_path <- paste0("../estimation/models/",minfo$file)
   
   
@@ -124,7 +124,7 @@ estimate_model <- function(minfo,
 estimate_models <- function(mlist, parallel = c("off","windows","unix"), 
                             no_reestimation=TRUE, ncpu=4, test=FALSE, do_log=FALSE,
                             progress_bar=TRUE, verbose=FALSE, var_set_info, df, deltas,
-                            num_AR_lags, carriero_hack) {
+                            num_AR_lags, carriero_hack, v_prior, keep) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
@@ -145,7 +145,9 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
       model_info <- mlist_todo %>% dplyr::filter(id==i)
       status <- estimate_model(model_info, do_log=do_log, verbose=verbose,
                                var_set_info = var_set_info, df = df, deltas = deltas,
-                               num_AR_lags = num_AR_lags, carriero_hack = carriero_hack)
+                               num_AR_lags = num_AR_lags, 
+                               carriero_hack = carriero_hack,
+                               v_prior = v_prior, keep = keep)
       mlist$status[mlist$id==i] <- status
     }
     stopCluster(cl)
@@ -160,7 +162,9 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
       model_info <- mlist_todo %>% dplyr::filter(id==i)
       status <- estimate_model(model_info, do_log=do_log, verbose=verbose,
                                var_set_info = var_set_info, df = df, deltas = deltas,
-                               num_AR_lags = num_AR_lags, carriero_hack = carriero_hack)
+                               num_AR_lags = num_AR_lags, 
+                               carriero_hack = carriero_hack, v_prior = v_prior,
+                               keep = keep)
       mlist$status[mlist$id==i] <- status
     }
     stopCluster(cl)
@@ -174,7 +178,9 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
         model_info <- mlist_todo %>% dplyr::filter(id==model_ids[i])
         status <- estimate_model(model_info, do_log=do_log, verbose=verbose,
                                  var_set_info = var_set_info, df = df, deltas = deltas, 
-                                 num_AR_lags = num_AR_lags, carriero_hack = carriero_hack)
+                                 num_AR_lags = num_AR_lags, 
+                                 carriero_hack = carriero_hack, v_prior = v_prior,
+                                 keep = keep)
         mlist$status[mlist$id==i] <- status
         
         if (progress_bar) setTxtProgressBar(pb, i)
@@ -196,8 +202,8 @@ estimate_models <- function(mlist, parallel = c("off","windows","unix"),
 # function to make forecast of one model for one dataset
 # pred_info - one line describing desired forecast
 # mlist - list of all models
-forecast_model <- function(pred_info, mlist, do_log=FALSE, verbose=FALSE, 
-                           var_set_info, df) {
+forecast_model <- function(pred_info, mlist, do_log=FALSE, verbose=FALSE,
+                           var_set_info, df, fast_forecast) {
   
   
   # get info about model:
@@ -344,7 +350,7 @@ forecast_model <- function(pred_info, mlist, do_log=FALSE, verbose=FALSE,
 forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"), 
                             ncpu=4, do_log=FALSE,
                             progress_bar=TRUE, verbose=FALSE,
-                            var_set_info, df) {
+                            var_set_info, df, fast_forecast) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
@@ -357,7 +363,8 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
     if (progress_bar) pb <- txtProgressBar(min = 1, max = nrow(plist), style = 3)
     for (i in 1:nrow(plist)) {
       all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log,
-                                      var_set_info = var_set_info, df = df)
+                                      var_set_info = var_set_info, df = df, 
+                                      fast_forecast = fast_forecast)
                                       
       if (progress_bar) setTxtProgressBar(pb, i)
     }
@@ -373,7 +380,8 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
     
     foreach(i=1:nrow(plist), .packages=requested_packages) %dopar% {
       all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log,
-                                      var_set_info = var_set_info, df = df)
+                                      var_set_info = var_set_info, df = df,
+                                      fast_forecast = fast_forecast)
     }
     stopCluster(cl)
   }
@@ -383,7 +391,8 @@ forecast_models <- function(plist, mlist, parallel = c("off","windows","unix"),
     registerDoParallel(cl)
     foreach(i=1:nrow(plist), .packages=requested_packages) %dopar% {
       all_data[[i]] <- forecast_model(plist[i,],mlist=mlist, verbose=verbose, do_log=do_log,
-                                      var_set_info = var_set_info, df = df)
+                                      var_set_info = var_set_info, df = df,
+                                      fast_forecast = fast_forecast)
     }
     stopCluster(cl)
   }

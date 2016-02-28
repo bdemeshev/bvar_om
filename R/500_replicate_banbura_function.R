@@ -13,7 +13,8 @@
 #' @param ncpu number of cpu for parallel computations, ignored if parallel=='off'
 #' @param h_max maximum forecast horizont for VAR and BVAR 
 #' @param fast_forecast TRUE/FALSE. TRUE means that posterior means of coefficients are used for forecast
-#' @param keep number of simulations from posterior (used only if fast_forecast is FALSE)
+#' @param keep number of simulations from posterior (used only if fast_forecast is FALSE). 
+#' keep is automatically set to zero if fast_forecast is TRUE
 #' @param verbose turn on/off messages from functions 
 #' @param testing_mode TRUE/FALSE. If TRUE then less lambdas are estimated, see 400_model_lists.R
 #' @param carriero_hack FALSE/TRUE. If TRUE then we use wrong formulas from carriero code 
@@ -29,6 +30,8 @@
 #' If is numeric then delta is equal for stationary and non-stationary series
 #' @param num_AR_lags number of NULL (by default). Number of lags in AR() model used to estimate sigma^2 
 #' If NULL then p will be used
+#' @param T_common <- 120 # число наблюдений для которых строится прогнозы внутри выборки
+#' @param p_max <- 12 # для выравнивания первого внутривыборочного прогноза
 replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -42,7 +45,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
                                         "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
                                         "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                         "agriculture", "retail", "gov_balance", "export", "import"),
-                              v_prior = "m+2") {
+                              v_prior = "m+2",
+                              T_common = 120, p_max = 12) {
   
   ########################################
   ########################## begin set-up part #######################
@@ -57,7 +61,9 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   
   T_available <- nrow(df)  # number of observations
   
-
+  if (fast_forecast) {
+    keep <- 0
+  }
 
   
   ############################################
@@ -137,18 +143,20 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   deltas  # 
   
   # estimate all RW and WN models
-  rwwn_list <- create_rwwn_list()
+  rwwn_list <- create_rwwn_list(p_max = p_max, T_common = T_common)
   message("Estimate RW and WN")
   rwwn_list <- estimate_models(rwwn_list, parallel = parallel, verbose = verbose,
                                var_set_info = var_set_info, df = df, 
                                deltas = deltas, num_AR_lags = num_AR_lags,
-                               carriero_hack = carriero_hack)
+                               carriero_hack = carriero_hack,
+                               v_prior = v_prior, keep = keep)
   
   # forecast all RW and WN models
   rwwn_forecast_list <- data_frame(model_id = c(1, 2), h = NA, type = "in-sample")
   message("Forecast RW and WN")
   rwwn_forecasts <- forecast_models(rwwn_forecast_list, rwwn_list, verbose = verbose,
-                                    var_set_info = var_set_info, df = df)
+                                    var_set_info = var_set_info, df = df,
+                                    fast_forecast = fast_forecast)
   
   # calculate all msfe-0 two ways to calculate msfe (we use b) a) use all available
   # predictions for each model b) use only common available predictions for all
@@ -173,18 +181,20 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   ##### banbura step 2
   
   # estimate VAR
-  var_list <- create_var_list()
+  var_list <- create_var_list(T_common = T_common, p_max = p_max)
   message("Estimating VAR")
   var_list <- estimate_models(var_list, parallel = parallel, verbose = verbose,
                               var_set_info = var_set_info, df = df, 
                               deltas = deltas, num_AR_lags = num_AR_lags,
-                              carriero_hack = carriero_hack)
+                              carriero_hack = carriero_hack,
+                              v_prior = v_prior, keep = keep)
   
   # forecast VAR
   var_forecast_list <- data_frame(model_id = var_list$id, h = NA, type = "in-sample")
   message("Forecasting VAR")
   var_forecasts <- forecast_models(var_forecast_list, var_list, verbose = verbose,
-                                   var_set_info = var_set_info, df = df)
+                                   var_set_info = var_set_info, df = df,
+                                   fast_forecast = fast_forecast)
   
   
   # calculate msfe-inf
@@ -220,7 +230,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   ##### banbura step 3 goal: calculate fit-lam
   
   # create model list to find optimal lambda
-  bvar_list_ <- create_bvar_banbura_list(testing_mode = testing_mode)
+  bvar_list_ <- create_bvar_banbura_list(testing_mode = testing_mode,
+                                         T_common = T_common, p_max = p_max)
   # write_csv(bvar_list, path = '../estimation/bvar_list.csv')
   
   # estimate models from list bvar_list <- read_csv('../estimation/bvar_list.csv')
@@ -228,14 +239,16 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   bvar_list <- estimate_models(bvar_list_, parallel = parallel, ncpu = ncpu, verbose = verbose,
                                var_set_info = var_set_info, df = df, 
                                deltas = deltas, num_AR_lags = num_AR_lags,
-                               carriero_hack = carriero_hack)  # status and filename are updated
+                               carriero_hack = carriero_hack,
+                               v_prior = v_prior, keep = keep)  # status and filename are updated
   # write_csv(bvar_list, path = '../estimation/bvar_list.csv')
   
   # forecast BVAR
   bvar_forecast_list <- data_frame(model_id = bvar_list$id, h = NA, type = "in-sample")
   message("Forecasting BVAR in-sample")
   bvar_forecasts <- forecast_models(bvar_forecast_list, bvar_list, verbose = verbose,
-                                    var_set_info = var_set_info, df = df)
+                                    var_set_info = var_set_info, df = df,
+                                    fast_forecast = fast_forecast)
   message("Forecasting BVAR in-sample ok")
   
   
@@ -307,7 +320,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   
   # create best models lists with correct time spec we need to keep fit_set
   # variable for further comparison
-  bvar_out_list <- create_bvar_out_list(best_lambda)
+  bvar_out_list <- create_bvar_out_list(best_lambda, T_available = T_available,
+                                        T_common = T_common, p_max = p_max)
   # best_lambda table should have: var_set, n_lag, l_1, l_const, l_io, l_power,
   # l_sc, fit_set
   
@@ -315,7 +329,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   bvar_out_list <- estimate_models(bvar_out_list, parallel = parallel, verbose = verbose,
                                    var_set_info = var_set_info, df = df, 
                                    deltas = deltas, num_AR_lags = num_AR_lags,
-                                   carriero_hack = carriero_hack)
+                                   carriero_hack = carriero_hack,
+                                   v_prior = v_prior, keep = keep)
   # write_csv(bvar_out_list, path = '../estimation/bvar_out_list.csv')
   
   # forecast BVAR check structure
@@ -329,7 +344,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   # a lot of forecasts WARNING: maybe too many observations!!!
   message("Forecasting rolling BVAR, out-of-sample")
   bvar_out_forecasts <- forecast_models(bvar_out_forecast_list, bvar_out_list, verbose = verbose,
-                                        var_set_info = var_set_info, df = df)
+                                        var_set_info = var_set_info, df = df,
+                                        fast_forecast = fast_forecast)
   message("Forecasting rolling BVAR out-of-sample ok")
   
   omsfe_bvar_table <- get_msfe(bvar_out_forecasts, actual_obs, 
@@ -346,13 +362,15 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   rwwn_var_unique_list <- bind_rows(var_list, rwwn_list)  # %>% mutate_each('as.numeric', n_lag, T_in, T_start)
   
   # every model should be rolled
-  rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list) %>% 
+  rwwn_var_out_list <- rolling_model_replicate(rwwn_var_unique_list, T_available = T_available,
+                                               T_common = T_common, p_max = p_max) %>% 
     mutate(file = paste0(type, "_", id, "_T_", T_start, "_", T_in, "_", var_set, "_lags_", n_lag, ".Rds"))
   message("Estimating rolling rw/wn/var models")
   rwwn_var_out_list <- estimate_models(rwwn_var_out_list, parallel = parallel, verbose = verbose,
                                        var_set_info = var_set_info, df = df, 
                                        deltas = deltas, num_AR_lags = num_AR_lags,
-                                       carriero_hack = carriero_hack)  # takes some minutes
+                                       carriero_hack = carriero_hack,
+                                       v_prior = v_prior, keep = keep)  # takes some minutes
   
   rwwn_var_out_forecast_list <- rwwn_var_out_list %>% rowwise() %>% 
     mutate(model_id = id, h = min(h_max, T_available - T_start - T_in + 1)) %>% 
@@ -364,7 +382,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   message("Forecasting rolling rw/wn/var models, out-of-sample")
   rwwn_var_out_forecasts <- forecast_models(rwwn_var_out_forecast_list, rwwn_var_out_list, 
                                             verbose = verbose, 
-                                            var_set_info = var_set_info, df = df)
+                                            var_set_info = var_set_info, df = df,
+                                            fast_forecast = fast_forecast)
   
   
   

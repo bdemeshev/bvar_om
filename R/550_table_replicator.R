@@ -44,7 +44,7 @@ for (analysed_variable in all_vars) {
   
   
   temp_data <- replicate_banbura(set_A = set_A, set_B = set_B, set_C = set_C)
-
+  temp_data$analysed <- analysed_variable
   
   all_results <- dplyr::bind_rows(all_results, temp_data)
   saveRDS(all_results, file = data_for_tables_file)

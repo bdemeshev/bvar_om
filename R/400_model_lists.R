@@ -39,7 +39,7 @@ p_max <- 12 # для выравнивания первого внутривыб�
 # 
 
 # this list is for testing purposes only, it is not used in Banbura procedure
-create_model_list <- function() {
+create_model_list <- function(T_common, p_max) {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_A", "set_B", "set_C"),
@@ -72,7 +72,7 @@ create_model_list <- function() {
 
 
 
-create_rwwn_list <- function() {
+create_rwwn_list <- function(T_common, p_max) {
   # в столбце value получаем тип character
   mlist <- data_frame(type=c("rw","wn"),
                    var_set="set_C",
@@ -94,7 +94,7 @@ create_rwwn_list <- function() {
 
 
 
-create_var_list <- function() {
+create_var_list <- function(T_common, p_max) {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
                     var_set=c("set_A","set_B"), # no set 23 in var
@@ -113,7 +113,8 @@ create_var_list <- function() {
   return(mlist)
 }
 
-create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max = 24) {
+create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), 
+                                 lag.max = 24, T_common) {
   criterion <- match.arg(criterion)
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
@@ -149,7 +150,7 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
 
 
 
-create_bvar_banbura_list <- function(testing_mode = FALSE) {
+create_bvar_banbura_list <- function(testing_mode = FALSE, T_common, p_max) {
   # в столбце value получаем тип character
   list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf)
   if (testing_mode) list_of_lambdas <- c(1,Inf)
@@ -190,7 +191,7 @@ create_bvar_banbura_list <- function(testing_mode = FALSE) {
 }
 
 
-create_mdd_list <- function(testing_mode = FALSE) {
+create_mdd_list <- function(testing_mode = FALSE, T_common, p_max) {
   # в столбце value получаем тип character
   list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5)
   list_of_sets <- c("set_A","set_B","set_C")
@@ -239,7 +240,7 @@ create_mdd_list <- function(testing_mode = FALSE) {
 
 
 # add for each model all possible shifts for T_in
-rolling_model_replicate <- function(mlist_small) {
+rolling_model_replicate <- function(mlist_small, T_available, T_common, p_max) {
   # we need mlist_small with n_lag
   
   # add starting time:
@@ -261,7 +262,7 @@ rolling_model_replicate <- function(mlist_small) {
 }
 
 
-create_bvar_out_list <- function(best_lambda) {
+create_bvar_out_list <- function(best_lambda, T_available, T_common, p_max) {
   # ungroup and clear junk variables from data.frame:
   # we need to keep fit_set variable for further comparison 
   mlist <- ungroup(best_lambda) %>% select(var_set, n_lag, l_1, l_const, l_io, l_power, l_sc, fit_set)
@@ -269,7 +270,8 @@ create_bvar_out_list <- function(best_lambda) {
   mlist <- mutate(mlist, status = "not estimated", type = "conjugate", 
                seed=13, T_in = n_lag + T_common )
   
-  mlist_big <- rolling_model_replicate(mlist) 
+  mlist_big <- rolling_model_replicate(mlist, T_available = T_available,
+                                       T_common = T_common, p_max = p_max) 
   
   mlist_big <- mlist_big %>% mutate(file=paste0(type,"_",id,"_T_",T_start,"_",T_in,"_",
                                   var_set,"_lags_",n_lag,
