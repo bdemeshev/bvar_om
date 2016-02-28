@@ -42,7 +42,7 @@ p_max <- 12 # для выравнивания первого внутривыб�
 create_model_list <- function() {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="conjugate", 
-                    var_set=c("set_03","set_06","set_23"),
+                    var_set=c("set_A", "set_B", "set_C"),
                     n_lag=12,
                     l_1=c(0.01,0.1,1,2,5,10),
                     l_power=1,
@@ -75,7 +75,7 @@ create_model_list <- function() {
 create_rwwn_list <- function() {
   # в столбце value получаем тип character
   mlist <- data_frame(type=c("rw","wn"),
-                   var_set="set_23",
+                   var_set="set_C",
                    n_lag=c(1,0),
                    T_start=c(p_max,p_max+1), T_in=c(T_common + 1, T_common),
                    status="not estimated")
@@ -97,7 +97,7 @@ create_rwwn_list <- function() {
 create_var_list <- function() {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
-                    var_set=c("set_03","set_06"), # no set 23 in var
+                    var_set=c("set_A","set_B"), # no set 23 in var
                     n_lag= 1:12, # c(1,6,12),
                     status="not estimated")
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
@@ -117,7 +117,7 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
   criterion <- match.arg(criterion)
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
-                    var_set=c("set_03","set_06"), # no set 23 in var
+                    var_set=c("set_A","set_B"), # no set 23 in var
                     n_lag=NA, # will fill them automatically! :)
                     status="not estimated")
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
@@ -149,13 +149,13 @@ create_best_var_list <- function(criterion = c("AIC","HQ","SC","FPE"), lag.max =
 
 
 
-create_bvar_banbura_list <- function() {
+create_bvar_banbura_list <- function(testing_mode = FALSE) {
   # в столбце value получаем тип character
   list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5,Inf)
   if (testing_mode) list_of_lambdas <- c(1,Inf)
   
   mlist <- expand.grid(type="conjugate", 
-                    var_set=c("set_03","set_06","set_23"),
+                    var_set=c("set_A","set_B","set_C"),
                     n_lag= 1:12, # c(1,6,12),
                     l_1=list_of_lambdas,
                     l_power=1,
@@ -190,14 +190,14 @@ create_bvar_banbura_list <- function() {
 }
 
 
-create_mdd_list <- function() {
+create_mdd_list <- function(testing_mode = FALSE) {
   # в столбце value получаем тип character
   list_of_lambdas <- c(0.01,0.025,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1,2,5)
-  list_of_sets <- c("set_03","set_06","set_23")
+  list_of_sets <- c("set_A","set_B","set_C")
   
   if (testing_mode) {
     list_of_lambdas <- c(1,10)
-    list_of_sets <- c("set_06")
+    list_of_sets <- c("set_B")
   }
   
   mlist <- expand.grid(type="conjugate", 
