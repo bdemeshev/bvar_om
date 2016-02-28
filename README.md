@@ -4,6 +4,6 @@ bvar with om
 
 Репликация:
 
-1. Запуск `500_replicate_banbura.R` /23.02.2016/
+1. Запуск `550_table_replicator.R` /23.02.2016/
 
 

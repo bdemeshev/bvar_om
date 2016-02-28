@@ -1,18 +1,12 @@
-# 500_replicate_banbura.R
+# 500_replicate_banbura_function.R
 
 # input: '../data/df_2015_final.csv' output:
 
-source("400_model_funs.R")
-source("400_model_lists.R")
-source("500_banbura_funs.R")
-
-# need to run only once
-source("200_load_after_eviews.R")
 
 ########################################
 ########################## begin set-up part #######################
 
-df <- read_csv("../data/df_2015_final.csv")
+df <- readr::read_csv("../data/df_2015_final.csv")
 
 # subset t:
 df <- tail(df, -12)

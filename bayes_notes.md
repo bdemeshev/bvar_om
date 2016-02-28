@@ -278,3 +278,20 @@ https://github.com/FK83/bvarsv
 # v_R --- значение статистики
 # MCS_R --- ???
 # Loss -- это средний лось модели
+
+
+репликация таблицы от экселевского файла до цветастой таблицы:
+1. отрыли файл для переменной var
+2. нашли эту переменную var
+3. в подтаблице для данной var и выбранной h (в прямоугольном участке) выбрали наименьшее число
+4. откопировали это число цветастую таблицу
+
+# if ind_prod/cpi/ib_rate - nothing to change
+# if var \in set_6, but not var \in set_3 - add var to set_3
+# if var \in set_23, but not var \in set_6 - add var to set_3 and set_6
+
+
+
+
+
+

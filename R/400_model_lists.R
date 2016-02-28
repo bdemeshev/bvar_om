@@ -98,7 +98,7 @@ create_var_list <- function() {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
                     var_set=c("set_03","set_06"), # no set 23 in var
-                    n_lag=c(1,6,12),
+                    n_lag= 1:12, # c(1,6,12),
                     status="not estimated")
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
   mlist <- mlist %>% mutate(id=row_number())
@@ -156,7 +156,7 @@ create_bvar_banbura_list <- function() {
   
   mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_03","set_06","set_23"),
-                    n_lag=c(1,6,12),
+                    n_lag= 1:12, # c(1,6,12),
                     l_1=list_of_lambdas,
                     l_power=1,
                     l_const=Inf,
