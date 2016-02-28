@@ -444,8 +444,8 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
                                            n_lag %in% desired_n_lag, fit_set %in% desired_fit_set)
   
   # show columns in order
-  res <- some_rmsfe_wide %>% 
-    select(h, variable, set_03_var, set_03_bvar, set_06_var, set_06_bvar, set_23_bvar)
+  # res <- some_rmsfe_wide %>% 
+  #  select(h, variable, set_03_var, set_03_bvar, set_06_var, set_06_bvar, set_23_bvar)
   
-  return(res)
+  return(some_rmsfe_wide)
 }
