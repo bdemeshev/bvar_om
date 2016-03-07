@@ -76,10 +76,10 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   fit_set_info
   
   # a lot of models are estimated but only some are reported
-  desired_fit_set <- "ind+cpi+rate"
-  desired_n_lag <- 1:12 # c(6, 12)
-  desired_h <- c(1, 3, 6, 9, 12) # c(1, 3, 6, 12)
-  desired_variable <- c("cpi", "ib_rate", "ind_prod")
+  # desired_fit_set <- "ind+cpi+rate"
+  # desired_n_lag <- 1:12 # c(6, 12)
+  # desired_h <- c(1, 3, 6, 9, 12) # c(1, 3, 6, 12)
+  # desired_variable <- c("cpi", "ib_rate", "ind_prod")
   
   # desired_variable <- c("construction", "cpi", "employment", "export", "gas_price", 
   #                       "gov_balance", "ib_rate", "import", "ind_prod", "labor_request", "lend_rate", 
@@ -440,12 +440,12 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   rmsfe_wide <- left_join(rmsfe_wide_bvar, rmsfe_wide_var, by = c("h", "variable", 
                                                                   "n_lag"))
   
-  some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h, variable %in% desired_variable, 
-                                           n_lag %in% desired_n_lag, fit_set %in% desired_fit_set)
+  # some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h, variable %in% desired_variable, 
+  #                                         n_lag %in% desired_n_lag, fit_set %in% desired_fit_set)
   
   # show columns in order
   # res <- some_rmsfe_wide %>% 
   #  select(h, variable, set_03_var, set_03_bvar, set_06_var, set_06_bvar, set_23_bvar)
   
-  return(some_rmsfe_wide)
+  return(rmsfe_wide)
 }

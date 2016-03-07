@@ -291,7 +291,15 @@ https://github.com/FK83/bvarsv
 # if var \in set_23, but not var \in set_6 - add var to set_3 and set_6
 
 
+02 марта 2016
 
+Парадокс Штейна сотоварищи:
+
+* https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1494.pdf?25ce6d8d23d4553229cfec7f729e00e0
+* http://web.missouri.edu/~nix/paper35.pdf
+* http://onlinelibrary.wiley.com/doi/10.1111/1467-9574.00125/abstract
+* http://www.stat.washington.edu/people/pdhoff/courses/581/LectureNotes/shrinkage.pdf
+* http://econpapers.repec.org/article/eeejmvana/v_3a97_3ay_3a2006_3ai_3a9_3ap_3a1984-1996.htm
 
 
 
