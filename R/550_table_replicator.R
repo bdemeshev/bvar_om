@@ -5,7 +5,7 @@
 
 dir.create("../estimation/tables_rmsfe/")
 # will throw warning if the folder exists
-data_for_tables_file <- "../estimation/tables_rmsfe/tables_rmsfe_raw.Rds"
+data_for_tables_file <- "../estimation/tables_rmsfe/tables_rmsfe_raw_2.Rds"
 # we overwrite file after each variable
 
 
@@ -21,6 +21,8 @@ source("200_load_after_eviews.R")
 # if ind_prod/cpi/ib_rate - nothing to change
 # if var \in set_6, but not var \in set_3 - add var to set_3
 # if var \in set_23, but not var \in set_6 - add var to set_3 and set_6
+
+df <- readr::read_csv("../data/df_2015_final.csv")
 
 base_set_A <- c("ind_prod", "cpi", "ib_rate")
 base_set_B <- c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price")
@@ -51,7 +53,9 @@ for (analysed_variable in all_vars) {
   
   
   set.seed(36)
-  temp_data <- replicate_banbura(set_A = set_A, set_B = set_B, set_C = set_C)
+  temp_data <- replicate_banbura(df, set_A = set_A, set_B = set_B, set_C = set_C, 
+                                 set_delta_by = "AR1", num_AR_lags = 1)
+  
   temp_data$analysed <- analysed_variable
   
   all_results <- dplyr::bind_rows(all_results, temp_data)

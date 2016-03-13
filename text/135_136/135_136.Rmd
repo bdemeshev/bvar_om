@@ -1,0 +1,78 @@
+---
+title: "135_136"
+date: "8 March 2016"
+output: pdf_document
+lang: russian
+---
+
+
+## Using lags:
+
+Step 1. Use lags:
+
+\[
+\tilde \lambda_t = \varepsilon_t + \gamma \varepsilon_{t-1} + \gamma^2 \varepsilon_{t-2} + \ldots = (1 + \gamma L + \gamma^2 L^2 + \ldots ) \varepsilon_t
+= \frac{1}{1-\gamma L} \varepsilon_t
+\]
+
+
+Step 2. More
+\[
+\tilde K_{t+1} = a L \tilde K_{t+1} + b \gamma L \frac{1}{1-\gamma L} \varepsilon_t + b \varepsilon_t = \\
+b \frac{1}{1-a L} \frac{1}{1-\gamma L} \varepsilon_t
+\]
+
+
+
+Step 3. Go back to sums 
+\[
+\tilde K_{t+1} = b ( 1 + aL + a^2L^2 + \ldots )(1 + \gamma L + \gamma^2 L^2 + \ldots ) \varepsilon_t
+\]
+
+
+Step 4. What will be the coefficients before $\varepsilon_{t-i}$?
+
+\[
+(a^i + a^{i-1}\gamma^1 + a^{i-2}\gamma^{2} + \ldots + \gamma^i) = \sum_{j=0}^{i}a^{j}\gamma^{i-j}
+\]
+
+Finally 
+\[
+\tilde K_{t+1} = b \sum_{i=0}^{\infty} \left(\sum_{j=0}^{i}a^{j}\gamma^{i-j} \right) \varepsilon_{t-i}
+\]
+
+
+\newpage
+## Without lags:
+
+Step 1. Without lags --- nothing to do :)
+
+\[
+\tilde \lambda_t = \varepsilon_t + \gamma \varepsilon_{t-1} + \gamma^2 \varepsilon_{t-2} + \ldots
+\]
+
+
+Step 2. More (without lags)
+\[
+\tilde K_{t+1} = a \tilde K_{t} + b \gamma ( \varepsilon_{t-1} + \gamma \varepsilon_{t-2} + \gamma^2 \varepsilon_{t-3} + \ldots) + b \varepsilon_t = a \tilde K_{t} + b ( \varepsilon_t + \gamma \varepsilon_{t-1} + \gamma^2 \varepsilon_{t-2} + \ldots) = a\tilde K_t + b\sum_{r=0}^{\infty} \gamma^r \varepsilon_{t-r}
+\]
+
+Step 3. Without lags. Just substitute previous $\tilde K_t$, $\tilde K_{t-1}$, \ldots
+
+\[
+\tilde K_{t+1} = b\sum_{r=0}^{\infty} \gamma^r \varepsilon_{t-r} + a b\sum_{r=0}^{\infty} \gamma^r \varepsilon_{t-1-r} + a^2 b\sum_{r=0}^{\infty} \gamma^r \varepsilon_{t-2-r} + \ldots 
+\]
+
+
+
+Step 4. What will be the coefficients before $\varepsilon_{t-i}$?
+
+\[
+(a^i + a^{i-1}\gamma^1 + a^{i-2}\gamma^{2} + \ldots + \gamma^i) = \sum_{j=0}^{i}a^{j}\gamma^{i-j}
+\]
+
+Finally 
+\[
+\tilde K_{t+1} = b \sum_{i=0}^{\infty} \left(\sum_{j=0}^{i}a^{j}\gamma^{i-j} \right) \varepsilon_{t-i}
+\]
+

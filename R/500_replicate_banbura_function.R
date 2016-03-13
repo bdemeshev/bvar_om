@@ -27,12 +27,12 @@
 #' This influences the delta hyper-parameter in priors.
 #' "AR1" --- AR(1) is estimated using only observations for estimated model
 #' "global AR1" --- AR(1) is estimated using all available observations (does not depend on the model)
-#' If is numeric then delta is equal for stationary and non-stationary series
-#' @param num_AR_lags number of NULL (by default). Number of lags in AR() model used to estimate sigma^2 
+#' If it is numeric then delta is equal for stationary and non-stationary series
+#' @param num_AR_lags number or NULL (by default). Number of lags in AR() model used to estimate sigma^2 
 #' If NULL then p will be used
-#' @param T_common <- 120 # число наблюдений для которых строится прогнозы внутри выборки
-#' @param p_max <- 12 # для выравнивания первого внутривыборочного прогноза
-replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
+#' @param T_common (by default 120) number of observations for in-sample forecast
+#' @param p_max (by default 12) maximum number of lags
+replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
                               verbose = FALSE, testing_mode = FALSE,
@@ -53,11 +53,13 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   
   parallel <- match.arg(parallel)
 
-  
-  df <- readr::read_csv("../data/df_2015_final.csv")
+
   
   # subset t:
-  df <- tail(df, -12)
+  df <- tail(df, p_max)
+  if (p_max != 12) {
+    message("Function has not been tested for p_max != 12. Maybe 12 is still hardcoded somewhere")
+  }
   
   T_available <- nrow(df)  # number of observations
   
@@ -102,7 +104,7 @@ replicate_banbura <- function(parallel = c("off", "unix", "windows"), ncpu = 30,
   
   var_set_info <- dplyr::bind_rows(add_A, add_B, add_C)
   
-  saveRDS(var_set_info, "temp.Rds")
+  # saveRDS(var_set_info, "temp.Rds")
   
   # write_csv(var_set_info,'../data/var_set_info.csv')
   

@@ -1,12 +1,12 @@
 # model lists
 # this script creates model lists
 
-T_common <- 120 # число наблюдений для которых строится прогнозы внутри выборки
+# T_common <- 120 # число наблюдений для которых строится прогнозы внутри выборки
 # WN модель будет оцениваться по T_in <- T_common наблюдениям
 # RW модель будет оцениваться по T_in <- T_common + 1 наблюдению, чтобы 
 # получить ровно T_common прогнозов
 # VAR(p), BVAR(p) будут оцениваться по T_in <- T_common + p наблюдениям
-p_max <- 12 # для выравнивания первого внутривыборочного прогноза
+# p_max <- 12 # для выравнивания первого внутривыборочного прогноза
 # T_start <- p_max + 1 - n_lag
 # при p_max=n_lag на вход модели будут подаваться наблюдения начиная с первого 
 
@@ -43,7 +43,7 @@ create_model_list <- function(T_common, p_max) {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_A", "set_B", "set_C"),
-                    n_lag=12,
+                    n_lag=p_max,
                     l_1=c(0.01,0.1,1,2,5,10),
                     l_power=1,
                     l_const=1,
@@ -98,7 +98,7 @@ create_var_list <- function(T_common, p_max) {
   # в столбце value получаем тип character
   mlist <- expand.grid(type="var", 
                     var_set=c("set_A","set_B"), # no set 23 in var
-                    n_lag= 1:12, # c(1,6,12),
+                    n_lag= 1:p_max, # c(1,6,12),
                     status="not estimated")
   mlist <- mlist %>% mutate_each("as.character",type, status, var_set) 
   mlist <- mlist %>% mutate(id=row_number())
@@ -157,7 +157,7 @@ create_bvar_banbura_list <- function(testing_mode = FALSE, T_common, p_max) {
   
   mlist <- expand.grid(type="conjugate", 
                     var_set=c("set_A","set_B","set_C"),
-                    n_lag= 1:12, # c(1,6,12),
+                    n_lag= 1:p_max, # c(1,6,12),
                     l_1=list_of_lambdas,
                     l_power=1,
                     l_const=Inf,
@@ -203,7 +203,7 @@ create_mdd_list <- function(testing_mode = FALSE, T_common, p_max) {
   
   mlist <- expand.grid(type="conjugate", 
                        var_set=list_of_sets,
-                       n_lag=1:12, # c(1,6,12),
+                       n_lag=1:p_max, # c(1,6,12),
                        l_1=list_of_lambdas,
                        l_power=1,
                        l_const=Inf,
