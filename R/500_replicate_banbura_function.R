@@ -32,6 +32,7 @@
 #' If NULL then p will be used
 #' @param T_common (by default 120) number of observations for in-sample forecast
 #' @param p_max (by default 12) maximum number of lags
+#' @param save_forecasts (NULL by default) filename to save forecasts RDS
 replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -46,7 +47,8 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                                         "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                         "agriculture", "retail", "gov_balance", "export", "import"),
                               v_prior = "m+2",
-                              T_common = 120, p_max = 12) {
+                              T_common = 120, p_max = 12,
+                              save_forecasts = NULL) {
   
   ########################################
   ########################## begin set-up part #######################
@@ -164,9 +166,9 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   # predictions for each model b) use only common available predictions for all
   # models
   
-  rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start = min(t), Tf_end = max(t))
+  # rwwn_forecasts %>% group_by(model_id) %>% summarise(Tf_start = min(t), Tf_end = max(t))
   
-  plot_forecast(rwwn_forecasts, var_name = "m2", mod_id = 2, actual_obs = actual_obs)
+  # plot_forecast(rwwn_forecasts, var_name = "m2", mod_id = 2, actual_obs = actual_obs)
   
   
   # build table with corresponding msfe-0 (RW or WN)
@@ -448,6 +450,16 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   # show columns in order
   # res <- some_rmsfe_wide %>% 
   #  select(h, variable, set_03_var, set_03_bvar, set_06_var, set_06_bvar, set_23_bvar)
+  
+  if (!is.null(save_forecasts)) {
+    all_forecasts <- list(actual_obs = actual_obs,
+                          rwwn_forecasts = rwwn_forecasts, 
+                          var_forecasts = var_forecasts,
+                          bvar_forecasts = bvar_forecasts, # bvar in-sample
+                          bvar_out_forecasts = bvar_out_forecasts,
+                          rwwn_var_out_forecasts = rwwn_var_out_forecasts)
+    saveRDS(all_forecasts, file = save_forecasts)
+  }
   
   return(rmsfe_wide)
 }

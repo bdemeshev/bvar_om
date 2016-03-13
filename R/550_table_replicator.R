@@ -3,9 +3,14 @@
 # this file should be in /R subfolder
 # Session - Set wd - To source file location
 
-dir.create("../estimation/tables_rmsfe/")
+
+working_folder <- "../estimation/tables_rmsfe/"
+data_for_tables_file_short <- "tables_rmsfe_raw_2.Rds"
+forecast_filename_prefix <- "forecasts_" # name of analysed variable will be added automatically
+
+dir.create(working_folder)
 # will throw warning if the folder exists
-data_for_tables_file <- "../estimation/tables_rmsfe/tables_rmsfe_raw_2.Rds"
+data_for_tables_file <- paste0(working_folder, data_for_tables_file_short)
 # we overwrite file after each variable
 
 
@@ -52,9 +57,11 @@ for (analysed_variable in all_vars) {
   message("Calculating RMSFE for variable: ", analysed_variable)
   
   
+  forecast_filename <- paste0(working_folder, forecast_filename_prefix, analysed_variable, ".Rds")
   set.seed(36)
   temp_data <- replicate_banbura(df, set_A = set_A, set_B = set_B, set_C = set_C, 
-                                 set_delta_by = "AR1", num_AR_lags = 1)
+                                 set_delta_by = "AR1", num_AR_lags = 1, 
+                                 save_forecasts = forecast_filename)
   
   temp_data$analysed <- analysed_variable
   
