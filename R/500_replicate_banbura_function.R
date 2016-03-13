@@ -56,7 +56,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
 
   
   # subset t:
-  df <- tail(df, p_max)
+  df <- tail(df, -p_max)
   if (p_max != 12) {
     message("Function has not been tested for p_max != 12. Maybe 12 is still hardcoded somewhere")
   }
