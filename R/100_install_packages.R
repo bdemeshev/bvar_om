@@ -22,6 +22,9 @@ install.packages("RcppArmadillo")
 install.packages("R.matlab")
 
 
+source("http://bioconductor.org/biocLite.R")
+biocLite(c("graph", "Rgraphviz"))
+
 install.packages("MSBVAR")
 
 devtools::install_github("bdemeshev/bvarr")

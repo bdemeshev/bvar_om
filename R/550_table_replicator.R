@@ -53,8 +53,9 @@ for (analysed_variable in all_vars) {
   if (!analysed_variable %in% base_set_B) {
     set_B <- c(base_set_B, analysed_variable)
   }
-  
+  message("---------------------------------------------------")
   message("Calculating RMSFE for variable: ", analysed_variable)
+  message("---------------------------------------------------")
   
   
   forecast_filename <- paste0(working_folder, forecast_filename_prefix, analysed_variable, ".Rds")
