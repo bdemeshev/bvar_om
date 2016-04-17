@@ -7,6 +7,8 @@
 working_folder <- "../estimation/tables_rmsfe/"
 data_for_tables_file_short <- "tables_rmsfe_raw_2.Rds"
 forecast_filename_prefix <- "forecasts_" # name of analysed variable will be added automatically
+model_info_filename_prefix <- "model_info_" # name of analysed variable will be added automatically
+
 
 dir.create(working_folder)
 # will throw warning if the folder exists
@@ -59,10 +61,13 @@ for (analysed_variable in all_vars) {
   
   
   forecast_filename <- paste0(working_folder, forecast_filename_prefix, analysed_variable, ".Rds")
+  model_info_filename <- paste0(working_folder, model_info_filename_prefix, analysed_variable, ".Rds")
+  
   set.seed(36)
   temp_data <- replicate_banbura(df, set_A = set_A, set_B = set_B, set_C = set_C, 
                                  set_delta_by = "AR1", num_AR_lags = 1, 
-                                 save_forecasts = forecast_filename)
+                                 save_forecasts = NULL,
+                                 save_model_info = model_info_filename)
   
   temp_data$analysed <- analysed_variable
   

@@ -33,6 +33,7 @@
 #' @param T_common (by default 120) number of observations for in-sample forecast
 #' @param p_max (by default 12) maximum number of lags
 #' @param save_forecasts (NULL by default) filename to save forecasts RDS
+#' @param save_model_info (NULL by default) filename to save model info RDS
 replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -48,7 +49,8 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                                         "agriculture", "retail", "gov_balance", "export", "import"),
                               v_prior = "m+2",
                               T_common = 120, p_max = 12,
-                              save_forecasts = NULL) {
+                              save_forecasts = NULL,
+                              save_model_info = NULL) {
   
   ########################################
   ########################## begin set-up part #######################
@@ -460,6 +462,26 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                           rwwn_var_out_forecasts = rwwn_var_out_forecasts)
     saveRDS(all_forecasts, file = save_forecasts)
   }
+  
+  if (!is.null(save_model_info)) {
+    all_model_info <- list(fit_set_info = fit_set_info,
+                           var_set_info = var_set_info,
+                           deltas = deltas,
+                           rwwn_list = rwwn_list,
+                           rwwn_forecast_list = rwwn_forecast_list,
+                           var_list = var_list,
+                           var_forecast_list = var_forecast_list,
+                           bvar_list = bvar_list,
+                           bvar_list_ = bvar_list_,
+                           bvar_forecast_list = bvar_forecast_list,
+                           fit_lam_table = fit_lam_table,
+                           bvar_out_list = bvar_out_list,
+                           bvar_out_forecast_list = bvar_out_forecast_list,
+                           rwwn_var_out_list = rwwn_var_out_list,
+                           rwwn_var_out_forecast_list = rwwn_var_out_forecast_list)
+    saveRDS(all_model_info, file = save_model_info)
+  }
+  
   
   return(rmsfe_wide)
 }
