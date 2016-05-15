@@ -98,3 +98,14 @@ text/bvar_mapping/bvar_mapping.fls
 text/bvar_mapping/bvar_mapping.log
 
 text/forecasting_eng/text_BVAR_forecasting.run.xml
+
+
+estimation/tables_rmsfe/forecasts*.Rds
+estimation/tables_rmsfe/best*.Rds
+estimation/tables_rmsfe/loss*.Rds
+estimation/tables_rmsfe/model_info*.Rds
+
+
+estimation/tables_rmsfe/tables_rmsfe_raw.Rds
+
+estimation/tables_rmsfe/tables_rmsfe_raw.Rds
