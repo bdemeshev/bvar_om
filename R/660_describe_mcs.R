@@ -15,7 +15,7 @@ all_variables <- c("employment", "ind_prod", "cpi",
 h <- 2
 analysed_variable <- "ind_prod"
 
-mcs_folder <- "../best_models_all/"
+mcs_folder <- "../estimation/tables_rmsfe/"
 
 
 # b_x_y_z - BVAR
