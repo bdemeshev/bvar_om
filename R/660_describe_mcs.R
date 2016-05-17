@@ -5,6 +5,15 @@ library("ggplot2")
 library("MCS")
 library("reshape2")
 library("tidyr")
+library("scales")
+
+
+base_set_A <- c("ind_prod", "cpi", "ib_rate")
+base_set_B <- c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price")
+base_set_C <- c("employment", "ind_prod", "cpi", 
+                "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
+                "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
+                "agriculture", "retail", "gov_balance", "export", "import")
 
 all_h <- 1:12
 all_variables <- c("employment", "ind_prod", "cpi", 
@@ -110,3 +119,27 @@ margin_var_wide <- dcast (margin_variable,variable ~ name, value.var = "ratio_su
 
 margin_h <- group_by(all_grouped, h, name) %>% summarise(ratio_survived =  round(sum(n_survived)/(23*12),2))
 margin_h_wide <- dcast (margin_h,h ~ name, value.var ="ratio_survived")
+
+
+
+# some plots
+one_selection <- all_grouped %>% filter(h == 5, variable == "ind_prod")
+
+one_histo <- ggplot(data = one_selection) + 
+  geom_bar(aes(x = name, y = n_survived), stat = "identity") +
+  scale_y_continuous(breaks = seq(from = 2, to = 12, by = 2), 
+                     labels = seq(from = 2, to = 12, by = 2)) 
+one_histo
+
+
+all_selection <- all_grouped %>% filter(h %in% c(1, 3, 6, 9, 12),
+                                        variable %in% base_set_B)
+all_histo <- ggplot(data = all_selection) + 
+  geom_bar(aes(x = name, y = n_survived), stat = "identity") +
+  scale_y_continuous(breaks = seq(from = 2, to = 12, by = 2), 
+                     labels = seq(from = 2, to = 12, by = 2)) +
+  facet_grid(variable ~ h)
+all_histo
+
+
+
