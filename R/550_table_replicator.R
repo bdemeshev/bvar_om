@@ -42,7 +42,7 @@ base_set_C <- c("employment", "ind_prod", "cpi",
 
 all_vars <- base_set_C
 
-all_results <- NULL
+all_rmsfe_results <- NULL
 
 for (analysed_variable in all_vars) {
   set_A <- base_set_A
@@ -55,24 +55,35 @@ for (analysed_variable in all_vars) {
   if (!analysed_variable %in% base_set_B) {
     set_B <- c(base_set_B, analysed_variable)
   }
+  
+  part_A <- data_frame(var_set = "set_A", variable = set_A)
+  part_B <- data_frame(var_set = "set_B", variable = set_B)
+  part_C <- data_frame(var_set = "set_C", variable = set_C)
+  var_set_info <- bind_rows(part_A, part_B, part_C)
+  
+  
   message("---------------------------------------------------")
   message("Calculating RMSFE for variable: ", analysed_variable)
   message("---------------------------------------------------")
   
   
-  forecast_filename <- paste0(working_folder, forecast_filename_prefix, analysed_variable, ".Rds")
-  model_info_filename <- paste0(working_folder, model_info_filename_prefix, analysed_variable, ".Rds")
   
   set.seed(36)
-  temp_data <- replicate_banbura(df, set_A = set_A, set_B = set_B, set_C = set_C, 
-                                 set_delta_by = "AR1", num_AR_lags = 1, 
-                                 save_forecasts = forecast_filename,
-                                 save_model_info = model_info_filename)
+  banbura_data <- replicate_banbura(df, var_set_info = var_set_info, 
+                                 set_delta_by = "AR1", num_AR_lags = 1)
   
-  temp_data$analysed <- analysed_variable
+  # saving useful info:
+  rmsfe_one_variable <- banbura_data$rmsfe_wide
+  rmsfe_one_variable$analysed <- analysed_variable
+  all_rmsfe_results <- dplyr::bind_rows(all_rmsfe_results, rmsfe_one_variable)
+  saveRDS(all_rmsfe_results, file = data_for_tables_file)
   
-  all_results <- dplyr::bind_rows(all_results, temp_data)
-  saveRDS(all_results, file = data_for_tables_file)
+  forecast_filename <- paste0(working_folder, forecast_filename_prefix, analysed_variable, ".Rds")
+  saveRDS(banbura_data$forecasts, file = forecast_filename)
+  
+  model_info_filename <- paste0(working_folder, model_info_filename_prefix, analysed_variable, ".Rds")
+  saveRDS(banbura_data$model_info, file = model_info_filename)
+  
 }
 
 

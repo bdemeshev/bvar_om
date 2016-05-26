@@ -52,8 +52,6 @@ create_fit_set_info <- function() {
 #' If NULL then p (number of lags in VAR/BVAR) will be used
 #' @param T_common (by default 120) number of observations for in-sample forecast
 #' @param p_max (by default 12) maximum number of lags
-#' @param save_forecasts (NULL by default) filename to save forecasts RDS
-#' @param save_model_info (NULL by default) filename to save model info RDS
 #' @param target_var_set variable set serving as a base to calculate lambda
 #' @param var_set_info data.fram with `var_set` and `variable` columns
 #' @param fit_set_info data.fram with `fit_set` and `variable` columns
@@ -68,16 +66,16 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                               fit_set_info = create_fit_set_info(),
                               target_var_set = "set_A",
                               v_prior = "m+2",
-                              T_common = 120, p_max = 12,
-                              save_forecasts = NULL,
-                              save_model_info = NULL) {
+                              T_common = 120, p_max = 12) {
   
   ########################################
   ########################## begin set-up part #######################
   
   parallel <- match.arg(parallel)
 
-
+  if (!target_var_set %in% var_set_info$var_set) {
+    stop("Target var_set = '", target_var_set, "'. This var_set is not described in var_set_info.")
+  }
   
   # subset t:
   df <- tail(df, -p_max)
@@ -91,9 +89,6 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
     keep <- 0
   }
 
-  
-  ############################################
-  #### create fit_set_info describe which msfe ratios are averaged in fit
   
 
   
@@ -429,35 +424,30 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   rmsfe_wide <- left_join(rmsfe_wide_bvar, rmsfe_wide_var, by = c("h", "variable", 
                                                                   "n_lag"))
   
-  if (!is.null(save_forecasts)) {
-    all_forecasts <- list(actual_obs = actual_obs,
-                          rwwn_forecasts = rwwn_forecasts, 
-                          var_forecasts = var_forecasts,
-                          bvar_forecasts = bvar_forecasts, # bvar in-sample
-                          bvar_out_forecasts = bvar_out_forecasts,
-                          rwwn_var_out_forecasts = rwwn_var_out_forecasts)
-    saveRDS(all_forecasts, file = save_forecasts)
-  }
+  all_forecasts <- list(actual_obs = actual_obs,
+                        rwwn_forecasts = rwwn_forecasts, 
+                        var_forecasts = var_forecasts,
+                        bvar_forecasts = bvar_forecasts, # bvar in-sample
+                        bvar_out_forecasts = bvar_out_forecasts,
+                        rwwn_var_out_forecasts = rwwn_var_out_forecasts)
   
-  if (!is.null(save_model_info)) {
-    all_model_info <- list(fit_set_info = fit_set_info,
-                           var_set_info = var_set_info,
-                           deltas = deltas,
-                           rwwn_list = rwwn_list,
-                           rwwn_forecast_list = rwwn_forecast_list,
-                           var_list = var_list,
-                           var_forecast_list = var_forecast_list,
-                           bvar_list = bvar_list,
-                           bvar_list_ = bvar_list_,
-                           bvar_forecast_list = bvar_forecast_list,
-                           fit_lam_table = fit_lam_table,
-                           bvar_out_list = bvar_out_list,
-                           bvar_out_forecast_list = bvar_out_forecast_list,
-                           rwwn_var_out_list = rwwn_var_out_list,
-                           rwwn_var_out_forecast_list = rwwn_var_out_forecast_list)
-    saveRDS(all_model_info, file = save_model_info)
-  }
+  all_model_info <- list(fit_set_info = fit_set_info,
+                         var_set_info = var_set_info,
+                         deltas = deltas,
+                         rwwn_list = rwwn_list,
+                         rwwn_forecast_list = rwwn_forecast_list,
+                         var_list = var_list,
+                         var_forecast_list = var_forecast_list,
+                         bvar_list = bvar_list,
+                         bvar_list_ = bvar_list_,
+                         bvar_forecast_list = bvar_forecast_list,
+                         fit_lam_table = fit_lam_table,
+                         bvar_out_list = bvar_out_list,
+                         bvar_out_forecast_list = bvar_out_forecast_list,
+                         rwwn_var_out_list = rwwn_var_out_list,
+                         rwwn_var_out_forecast_list = rwwn_var_out_forecast_list)
   
+  banbura_res <- list(rmsfe_wide = rmsfe_wide, forecasts = all_forecasts, model_info = all_model_info)
   
-  return(rmsfe_wide)
+  return(banbura_res)
 }

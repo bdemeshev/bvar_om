@@ -1,3 +1,5 @@
+# перевод файла /data/usa_data.mat -> /data/usa_carriero.csv
+
 library("R.matlab")
 library("bvarr")
 all <- readMat("../data/usa_data.mat")

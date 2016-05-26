@@ -1,4 +1,4 @@
-# test bvarr-v02
+# 900_test_bvarr_v02.R
 
 devtools::install_github("bdemeshev/bvarr")
 
