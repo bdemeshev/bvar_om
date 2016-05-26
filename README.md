@@ -180,7 +180,15 @@ Todo: при каком варианте гиперпараметров дела
 
 - `/data/usa_carriero.csv`
 
-#### 3. Репликация banbura на американских данных в R, `/R/500_banbura_usa_data.R`
+
+#### 3. Оценка конкретной модели, `/R/500_one_model_estimator.R`
+
+На входе:
+
+- `/data/usa_carriero.csv`
+
+
+#### 4. Репликация banbura на американских данных в R, `/R/500_banbura_usa_data.R`
 
 Для работы нужны:
 
