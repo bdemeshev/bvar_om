@@ -1,6 +1,6 @@
+# 350_matlab_carriero_test
 # read data from Carriero
 
-# не рабочий скрипт
 
 library("R.matlab")
 library("bvarr")
@@ -14,9 +14,9 @@ str(usa_data)
 # У Карьеро --- независимое Нормальное Уишарта ???
 
 priors <- Carriero_priors(Y_in = usa_data, p = 4, s2_lag = 1, 
-                          lambdas = c(0.2,,))
-model <- bvar_conjugate0(priors=priors)
-forecasts <- forecast_conjugate(model, h=12)
+                          lambdas = c(0.2, 1, 1, 1, 100, 100))
+model <- bvar_conjugate0(priors = priors)
+forecasts <- forecast_conjugate(model, h = 12)
 
 ?Carriero_priors
 ?forecast_conjugate

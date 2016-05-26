@@ -29,7 +29,7 @@
 #' "global AR1" --- AR(1) is estimated using all available observations (does not depend on the model)
 #' If it is numeric then delta is equal for stationary and non-stationary series
 #' @param num_AR_lags number or NULL (by default). Number of lags in AR() model used to estimate sigma^2 
-#' If NULL then p will be used
+#' If NULL then p (number of lags in VAR/BVAR) will be used
 #' @param T_common (by default 120) number of observations for in-sample forecast
 #' @param p_max (by default 12) maximum number of lags
 #' @param save_forecasts (NULL by default) filename to save forecasts RDS

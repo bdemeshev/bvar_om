@@ -57,6 +57,23 @@
 - `/data/df_2015_sa.csv`
 
 
+#### Для загрузки ряда gas на www.seasonal.website
 
+1. Отбираем нужное, `R/301_gas_problem.R`
 
+На входе:
+
+- `/data/data_2015.csv`
+
+На выходе:
+
+- `/data/gas_only.csv`
+
+#### Попытка сравнения с carriero
+
+1. Оцениваем нашим способом. Похоже параметры не те, `/R/350_matlab_carriero_test.R`
+
+На входе:
+
+- `/data/usa_data.mat`
 
