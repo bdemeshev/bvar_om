@@ -14,9 +14,11 @@ mlist <- create_model_list()
 write_csv(mlist, path = "../estimation/mlist_test.csv")
 
 mlist <- read_csv("../estimation/mlist_test.csv")
+
+var_set_info <- read_csv('../data/var_set_info.csv')
 model_info <- mlist %>% filter(id == 3)
 model_info
-estimate_model(model_info)
+estimate_model(model_info, df = df, var_set_info = var_set_info)
 
 #### test 2: estimate big model (23 vars, 12 lags) without pairs of variables
 

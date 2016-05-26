@@ -34,6 +34,7 @@
 #' @param p_max (by default 12) maximum number of lags
 #' @param save_forecasts (NULL by default) filename to save forecasts RDS
 #' @param save_model_info (NULL by default) filename to save model info RDS
+#' @param target_var_set variable set serving as a base to calculate lambda
 replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -47,6 +48,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                                         "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
                                         "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                         "agriculture", "retail", "gov_balance", "export", "import"),
+                              target_var_set = "set_A",
                               v_prior = "m+2",
                               T_common = 120, p_max = 12,
                               save_forecasts = NULL,
@@ -290,7 +292,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   
   ##### banbura step 4 find optimal lambda ungroup() is needed! otherwise cannot remove
   ##### var_set (active group on var_set)
-  fit_goal <- dplyr::filter(fit_inf_table, var_set == "set_A") %>% ungroup() %>% 
+  fit_goal <- dplyr::filter(fit_inf_table, var_set == target_var_set) %>% ungroup() %>% 
     dplyr::select(-var_set)
   fit_goal
   

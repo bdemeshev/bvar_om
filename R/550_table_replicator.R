@@ -66,7 +66,7 @@ for (analysed_variable in all_vars) {
   set.seed(36)
   temp_data <- replicate_banbura(df, set_A = set_A, set_B = set_B, set_C = set_C, 
                                  set_delta_by = "AR1", num_AR_lags = 1, 
-                                 save_forecasts = NULL,
+                                 save_forecasts = forecast_filename,
                                  save_model_info = model_info_filename)
   
   temp_data$analysed <- analysed_variable

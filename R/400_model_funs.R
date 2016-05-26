@@ -24,13 +24,13 @@ library("bvarr")
 #' @param keep (100 by default for fast testing) number of simulations from posterior distribution
 #' @param verbose (logical) whether to print some diagnostic messages
 #' @param do_log (logical) whether to log actions in text file
-#' @param var_set_info ???
-#' @param deltas ???
+#' @param var_set_info data.frame with `var_set` and `variable` columns
+#' @param deltas data.frame with `variable` and `delta` columns
 #' @param num_AR_lags number or NULL (by default). Number of lags in AR() model used to estimate sigma^2 
 #' If NULL then p (number of lags in VAR/BVAR) will be used
 #' @param v_prior constant, (NULL means number of variables + 2) by default
 estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info, 
-                           df, deltas, num_AR_lags, carriero_hack = FALSE, v_prior = NULL, keep = 100)
+                           df, deltas = NULL, num_AR_lags = NULL, carriero_hack = FALSE, v_prior = NULL, keep = 100)
 {
   model_full_path <- paste0("../estimation/models/", minfo$file)
   
@@ -55,6 +55,9 @@ estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info,
   v_set <- minfo$var_set
   variables <- filter(var_set_info, var_set == v_set)$variable
   
+  # !!! sort is important !!! otherwise deltas may be in wrong order !!!
+  variables <- sort(variables)
+  
   D <- df[T_start:T_end, variables]
   
   if (minfo$type == "conjugate")
@@ -73,15 +76,24 @@ estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info,
     l_exo <- 1  # does not matter as we don't have exo variables
     n_lag <- as.numeric(minfo$n_lag)
     
-    deltas_table_part <- filter(deltas, variable %in% variables)
-    
+    if (is.null(deltas)) {
+      delta_vector <- "AR1"
+    } else {
+      # !!! arrange is important !!! otherwise deltas may be in wrong order !!!
+      deltas_table_part <- filter(deltas, variable %in% variables) %>% arrange(variable)
+      delta_vector <- deltas_table_part$delta
+    }
     
     n_variables <- length(variables) # number of variables
     if (is.null(v_prior)) {
       v_prior <- n_variables + 2
     }
     
-    setup <- bvar_conj_setup(D, p = n_lag, v_prior = v_prior, delta = deltas_table_part$delta, 
+    if (is.null(num_AR_lags)) {
+      num_AR_lags <- n_lag
+    }
+    
+    setup <- bvar_conj_setup(D, p = n_lag, v_prior = v_prior, delta = delta_vector, 
                              lambda = c(l_1, l_power, l_sc, l_io, l_const, l_exo), s2_lag = num_AR_lags, 
                              carriero_hack = carriero_hack)
     
@@ -151,14 +163,14 @@ estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info,
 #' @param verbose (logical) whether to print some diagnostic messages
 #' @param do_log (logical) whether to log actions in text file
 #' @param progress_bar whether to show progress bar on screen
-#' @param var_set_info ???
-#' @param deltas ???
+#' @param var_set_info data.frame with `var_set` and `variable` columns
+#' @param deltas data.frame with `variable` and `delta` columns
 #' @param num_AR_lags number or NULL (by default). Number of lags in AR() model used to estimate sigma^2 
 #' If NULL then p (number of lags in VAR/BVAR) will be used
 #' @param v_prior constant, (NULL means number of variables + 2) by default
 estimate_models <- function(mlist, parallel = c("off", "windows", "unix"), 
                             no_reestimation = TRUE, ncpu = 4, do_log = FALSE, progress_bar = TRUE, 
-                            verbose = FALSE, var_set_info, df, deltas, num_AR_lags, 
+                            verbose = FALSE, var_set_info, df, deltas = NULL, num_AR_lags = NULL, 
                             carriero_hack = FALSE, 
                             v_prior = NULL, keep = 100)
 {
@@ -249,14 +261,14 @@ estimate_models <- function(mlist, parallel = c("off", "windows", "unix"),
 # one line describing desired forecast mlist - list of all models
 #' @param df multivariate time series
 #' @param mlist data.frame with list of estimated model
-#' @param fast_forecast (logical) whether to use posterior expected value for forecasting. 
+#' @param fast_forecast (logical, TRUE by default) whether to use posterior expected value for forecasting. 
 #' If FALSE then we need simulated posterior parameters.
 #' @param verbose (logical) whether to print some diagnostic messages
 #' @param do_log (logical) whether to log actions in text file
 #' @param pred_info ???
-#' @param var_set_info ???
+#' @param var_set_info data.frame with `var_set` and `variable` columns
 forecast_model <- function(pred_info, mlist, do_log = FALSE, verbose = FALSE, 
-                           var_set_info, df, fast_forecast)
+                           var_set_info, df, fast_forecast = TRUE)
 {
   
   
@@ -424,13 +436,13 @@ forecast_model <- function(pred_info, mlist, do_log = FALSE, verbose = FALSE,
 #' @param verbose (logical) whether to print some diagnostic messages
 #' @param do_log (logical) whether to log actions in text file
 #' @param progress_bar whether to show progress bar on screen
-#' @param fast_forecast (logical) whether to use posterior expected value for forecasting. 
+#' @param fast_forecast (logical, TRUE by default) whether to use posterior expected value for forecasting. 
 #' If FALSE then we need simulated posterior parameters.
-#' @param var_set_info ???
+#' @param var_set_info data.frame with `var_set` and `variable` columns
 forecast_models <- function(plist, mlist, parallel = c("off", "windows", 
                                                        "unix"), ncpu = 4, 
                             do_log = FALSE, progress_bar = TRUE, verbose = FALSE, 
-                            var_set_info, df, fast_forecast)
+                            var_set_info, df, fast_forecast = TRUE)
 {
   start_time <- Sys.time()
   
