@@ -1,4 +1,4 @@
-# test for replicate banbura function
+#### test for replicate banbura function
 
 
 source("400_model_funs.R")
@@ -16,7 +16,7 @@ temp_data <- replicate_banbura(df)
 
 
 
-# to step inside replicate_banbura() in case of fail:
+#### to step inside replicate_banbura() in case of fail:
 
 parallel = "off" # c("off", "unix", "windows")
 ncpu = 30

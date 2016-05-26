@@ -265,7 +265,10 @@ estimate_models <- function(mlist, parallel = c("off", "windows", "unix"),
 #' If FALSE then we need simulated posterior parameters.
 #' @param verbose (logical) whether to print some diagnostic messages
 #' @param do_log (logical) whether to log actions in text file
-#' @param pred_info ???
+#' @param pred_info data.frame with one observation
+#' `model_id` id of forecasted model 
+#' `h` number of steps ahead to forecast
+#' `type` maybe `in-sample` or `out-of-sample`
 #' @param var_set_info data.frame with `var_set` and `variable` columns
 forecast_model <- function(pred_info, mlist, do_log = FALSE, verbose = FALSE, 
                            var_set_info, df, fast_forecast = TRUE)
@@ -430,7 +433,10 @@ forecast_model <- function(pred_info, mlist, do_log = FALSE, verbose = FALSE,
 # function to make forecasts of many model for many datasets
 #' @param df multivariate time series
 #' @param mlist data.frame with list of estimated model
-#' @param plist ???
+#' @param plist_info data.frame with columns:
+#' `model_id` id of forecasted model 
+#' `h` number of steps ahead to forecast
+#' `type` maybe `in-sample` or `out-of-sample`
 #' @param parallel: off - no parallel execution, windows - for windows, unix - macos or linux
 #' @param ncpu (default 4) number of cpu to use if parallel is not "off"
 #' @param verbose (logical) whether to print some diagnostic messages

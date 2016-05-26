@@ -7,8 +7,28 @@
 # source("400_model_lists.R")
 # source("500_banbura_funs.R")
 
+create_var_set_info <- function() {
+  add_A <- dplyr::data_frame(var_set = "set_A", variable = c("ind_prod", "cpi", "ib_rate"))
+  add_B <- dplyr::data_frame(var_set = "set_B", variable = c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
+  add_C <- dplyr::data_frame(var_set = "set_C", variable = c("employment", "ind_prod", "cpi", 
+                                                             "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
+                                                             "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
+                                                             "agriculture", "retail", "gov_balance", "export", "import"))
+  
+  var_set_info <- dplyr::bind_rows(add_A, add_B, add_C)
+  
+  return(var_set_info)
+}
 
 
+create_fit_set_info <- function() {
+  fit_set_2vars <- dplyr::data_frame(variable = c("ind_prod", "cpi"), fit_set = "ind+cpi")
+  fit_set_3vars <- dplyr::data_frame(variable = c("ind_prod", "cpi", "ib_rate"), fit_set = "ind+cpi+rate")
+  
+  fit_set_info <- dplyr::bind_rows(fit_set_2vars, fit_set_3vars)
+  return(fit_set_info)
+}
+  
 #' @param parallel either off/unix/windows
 #' @param ncpu number of cpu for parallel computations, ignored if parallel=='off'
 #' @param h_max maximum forecast horizont for VAR and BVAR 
@@ -35,6 +55,8 @@
 #' @param save_forecasts (NULL by default) filename to save forecasts RDS
 #' @param save_model_info (NULL by default) filename to save model info RDS
 #' @param target_var_set variable set serving as a base to calculate lambda
+#' @param var_set_info data.fram with `var_set` and `variable` columns
+#' @param fit_set_info data.fram with `fit_set` and `variable` columns
 replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -42,12 +64,8 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                               carriero_hack = FALSE, num_AR_lags = NULL,
                               set_delta_by = "KPSS",
                               c_0 = 0.5, c_1 = 1,
-                              set_A = c("ind_prod", "cpi", "ib_rate"),
-                              set_B = c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"),
-                              set_C = c("employment", "ind_prod", "cpi", 
-                                        "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
-                                        "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
-                                        "agriculture", "retail", "gov_balance", "export", "import"),
+                              var_set_info = create_var_set_info(),
+                              fit_set_info = create_fit_set_info(),
                               target_var_set = "set_A",
                               v_prior = "m+2",
                               T_common = 120, p_max = 12,
@@ -77,42 +95,8 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   ############################################
   #### create fit_set_info describe which msfe ratios are averaged in fit
   
-  fit_set_2vars <- dplyr::data_frame(variable = c("ind_prod", "cpi"), fit_set = "ind+cpi")
-  fit_set_3vars <- dplyr::data_frame(variable = c("ind_prod", "cpi", "ib_rate"), fit_set = "ind+cpi+rate")
+
   
-  fit_set_info <- dplyr::bind_rows(fit_set_2vars, fit_set_3vars)
-  fit_set_info
-  
-  # a lot of models are estimated but only some are reported
-  # desired_fit_set <- "ind+cpi+rate"
-  # desired_n_lag <- 1:12 # c(6, 12)
-  # desired_h <- c(1, 3, 6, 9, 12) # c(1, 3, 6, 12)
-  # desired_variable <- c("cpi", "ib_rate", "ind_prod")
-  
-  # desired_variable <- c("construction", "cpi", "employment", "export", "gas_price", 
-  #                       "gov_balance", "ib_rate", "import", "ind_prod", "labor_request", "lend_rate", 
-  #                       "m2", "ner", "nfa_cb", "ppi", "real_income", "real_investment", "reer", "retail", 
-  #                       "unemp_rate", "wage", "agriculture")
-  # 'oil_price',
-  
-  
-  ################################################ create var_set_info describe which variables are included in each set
-  ################################################ dput(colnames(df))
-  
-  add_A <- dplyr::data_frame(var_set = "set_A", variable = set_A)
-  add_B <- dplyr::data_frame(var_set = "set_B", variable = set_B)
-  add_C <- dplyr::data_frame(var_set = "set_C", variable = set_C)
-  
-  # if ind_prod/cpi/ib_rate - nothing to change
-  # if var \in set_6, but not var \in set_3 - add var to set_3
-  # if var \in set_23, but not var \in set_6 - add var to set_3 and set_6
-  
-  
-  var_set_info <- dplyr::bind_rows(add_A, add_B, add_C)
-  
-  # saveRDS(var_set_info, "temp.Rds")
-  
-  # write_csv(var_set_info,'../data/var_set_info.csv')
   
   #############################################################
   ##### end set-up part #########################
@@ -184,8 +168,6 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   
   msfe0 <- left_join(deltas, msfe0_all, by = c(variable = "variable", rw_wn = "type"))
   
-  msfe0
-  
   ##### banbura step 2
   
   # estimate VAR
@@ -211,8 +193,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                             msfe_name = "msfe_Inf")
   
   
-  msfe_Inf_info %>% head()
-  
+
   # join msfe0
   msfe_0_Inf <- left_join(msfe_Inf_info, msfe0 %>% select(msfe, rw_wn, variable) %>% 
                             rename(msfe0 = msfe), by = "variable")
@@ -447,13 +428,6 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   
   rmsfe_wide <- left_join(rmsfe_wide_bvar, rmsfe_wide_var, by = c("h", "variable", 
                                                                   "n_lag"))
-  
-  # some_rmsfe_wide <- rmsfe_wide %>% filter(h %in% desired_h, variable %in% desired_variable, 
-  #                                         n_lag %in% desired_n_lag, fit_set %in% desired_fit_set)
-  
-  # show columns in order
-  # res <- some_rmsfe_wide %>% 
-  #  select(h, variable, set_03_var, set_03_bvar, set_06_var, set_06_bvar, set_23_bvar)
   
   if (!is.null(save_forecasts)) {
     all_forecasts <- list(actual_obs = actual_obs,

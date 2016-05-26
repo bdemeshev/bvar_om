@@ -157,9 +157,11 @@ Todo: при каком варианте гиперпараметров дела
 
 ### Эксперименты с model selection set
 
-1. Параллельные вычисления для model selection set, `/R/610_mcs_parallel.R`
+1. Первые шаги с model selection set, `/R/600_mcs.R`. 
 
-2. Зависит ли model selection set от третьих альтернатив и как у него с ростом врени, `/R/610_mcs_3_alternative.R`
+2. Параллельные вычисления для model selection set, `/R/610_mcs_parallel.R`
+
+3. Зависит ли model selection set от третьих альтернатив и как у него с ростом врени, `/R/610_mcs_3_alternative.R`
 
 Увы: зависит от третьих альтернатив. Увы: время растёт квадратично по числу моделей.
 
