@@ -6,6 +6,7 @@ library("MCS")
 library("reshape2")
 library("tidyr")
 library("scales")
+library("xtable")
 
 
 base_set_A <- c("ind_prod", "cpi", "ib_rate")
@@ -25,6 +26,7 @@ h <- 2
 analysed_variable <- "ind_prod"
 
 mcs_folder <- "../estimation/tables_rmsfe/"
+
 
 
 # b_x_y_z - BVAR
@@ -79,7 +81,7 @@ rw_table <- dcast(data = random_walks, variable ~ h, fun.aggregate = length)
 rw_table
  
 white_noises <- all_survived %>% filter(model == "v_3_3_0")
-wn_table <- dcast(data = white_noises, variable~h, fun.aggregate = length)
+wn_table <- dcast(data = white_noises, variable ~ h, fun.aggregate = length)
 wn_table
 
 all_survived_sep <- all_survived %>%
@@ -115,12 +117,12 @@ all_grouped <- bind_rows(table_b1_grouped, table_b2_grouped, table_b3_grouped, t
 all_wide <- dcast(all_grouped, variable ~ h + name, fill = 0, value.var = "n_survived")
 
 margin_variable <- group_by(all_grouped, variable, name) %>% summarise(ratio_survived =  round(sum(n_survived)/(12*12),2))
-margin_var_wide <- dcast (margin_variable,variable ~ name, value.var = "ratio_survived")
+margin_var_wide <- dcast (margin_variable, variable ~ name, value.var = "ratio_survived")
 
 margin_h <- group_by(all_grouped, h, name) %>% summarise(ratio_survived =  round(sum(n_survived)/(23*12),2))
-margin_h_wide <- dcast (margin_h,h ~ name, value.var ="ratio_survived")
-
-
+margin_h_wide <- dcast(margin_h,h ~ name, value.var = "ratio_survived")
+margin_h_wide
+xtable(margin_h_wide) # transform to Latex
 
 # some plots
 one_selection <- all_grouped %>% filter(h == 5, variable == "ind_prod")

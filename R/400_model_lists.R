@@ -131,7 +131,8 @@ create_best_var_list <- function(df, var_set_info, criterion = c("AIC",
 #' @param l_io lambda for initial observation, NA means no initial observations
 #' @param seed (13 by default) good luck, mcmc!
 # в столбце value получаем тип character
-create_bvar_banbura_list <- function(testing_mode = FALSE, T_common = 120, 
+create_bvar_banbura_list <- function(testing_mode = FALSE, 
+                                     T_common = 120, 
                                      p_max = 12) {
   list_of_lambdas <- c(0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 
                        0.35, 0.4, 0.45, 0.5, 0.75, 1, 2, 5, Inf)
