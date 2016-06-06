@@ -27,7 +27,7 @@ add_13 <- data_frame(var_set = "set_13", variable = c("var1",
                                                  "var12", 
                                                  "var13") )
 
-var_set_info <- bind_rows(add_3,add_6,add_13)
+var_set_info <- bind_rows(add_3, add_6, add_13)
 
 fit_set_2vars <- data_frame(variable = c("var1", "var2"), fit_set = "var1+var2")
 fit_set_3vars <- data_frame(variable = c("var1", "var2", "var3"), fit_set = "var1+var2+var3")

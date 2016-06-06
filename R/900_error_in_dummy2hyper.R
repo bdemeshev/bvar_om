@@ -10,8 +10,11 @@ prior <- bvar_conj_dummy2hyper(model$Y_plus, model$X_plus)
 prior
 X_star <- model$X_plus
 Y_star <- model$Y_plus
+X_star
+Y_star
 
 
+# to step into bvar_conj_mdd
 
 Z_in = NULL 
 constant = TRUE
