@@ -49,7 +49,7 @@ setup <- bvar_conj_setup(D, p = n_lag, v_prior = v_prior,
                          s2_lag = num_AR_lags,
                          carriero_hack = carriero_hack)
 
-model <- bvar_conj_estimate(setup = setup, verbose=verbose, keep=keep)
+model <- bvar_conj_estimate(setup = setup, verbose = verbose, keep = keep)
 bvar_conj_summary(model)
 forecasts <- bvar_conj_forecast(model, out_of_sample = TRUE, h = 1)
 forecasts

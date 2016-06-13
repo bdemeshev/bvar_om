@@ -6,8 +6,17 @@ library("BMR")
 # delta=c_1 for stationary for ADF all three types are supported for
 # KPSS only trend and constant c_0=0 value for stationary series c_1=1
 # value for non-stationary series alpha=5%
-delta_i_prior <- function(df_ts, varset = colnames(df_ts), test = c("ADF", 
-                                                                    "KPSS"), type = c("trend", "constant", "neither"), c_0 = 0, c_1 = 1, 
+#' @param df_ts multivariate timeseries
+#' @param varset character vector of time series names that will be tested
+#' @param remove_vars character vecto of time series names that will not be tested
+#' @param test either ADF or KPSS
+#' @param type either trend, constant or neither
+#' @param c_0 value for stationary series
+#' @param c_1 value for non-stationary series
+delta_i_prior <- function(df_ts, varset = colnames(df_ts), 
+                          test = c("ADF",  "KPSS"), 
+                          type = c("trend", "constant", "neither"), 
+                          c_0 = 0, c_1 = 1, 
                           remove_vars = NULL) {
   varset <- setdiff(varset, remove_vars)
   
@@ -75,7 +84,7 @@ get_msfe <- function(forecasts, actuals, models = NULL, plus_group_vars = NULL,
   
   # joining forecast and actual observations
   for_and_act <- left_join(forecasts, actuals, by = c("t", "variable"))
-  for_and_act <- mutate(for_and_act, sq_error = (forecast - actual)^2)
+  for_and_act <- mutate(for_and_act, sq_error = (forecast - actual) ^ 2)
   
   # join info from model list
   
@@ -107,22 +116,34 @@ get_msfe <- function(forecasts, actuals, models = NULL, plus_group_vars = NULL,
   return(msfes)
 }
 
-#' @param bvar_list
+#' @param parallel either off/unix/windows
+#' @param ncpu number of cpu for parallel computations, ignored if parallel=='off'
+#' @param bvar_list the list of bvar models to calculate marginal data density
+#' @param Should contain `file` column with filename.
 #' @return bvar_list augmented with mdd variable
 calculate_mdd <- function(bvar_list, parallel = c("off", "windows", "unix"), 
-                          ncpu = 4, test = FALSE, do_log = FALSE, progress_bar = TRUE, verbose = FALSE) {
+                          ncpu = 4, progress_bar = TRUE, verbose = FALSE) {
   start_time <- Sys.time()
   
   parallel <- match.arg(parallel)
   
+  bvar_list$mdd <- NA
+  
+  if (!parallel == "off") {
+    parallel <- "off"
+    message("Only parallel == off is implemented :)")
+  }
+  
   if (parallel == "off") {
-    bvar_list$mdd <- NA
     
     if (progress_bar) {
       pb <- txtProgressBar(min = 1, max = nrow(bvar_list), style = 3)
     }
     for (i in 1:nrow(bvar_list)) {
       file_wpath <- paste0("../estimation/models/", bvar_list$file[i])
+      if (verbose) {
+        message("Reading file ", bvar_list$file[i])
+      }
       model <- readRDS(file_wpath)
       if (verbose) {
         message(bvar_list$file[i])

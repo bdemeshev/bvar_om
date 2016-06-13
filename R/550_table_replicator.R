@@ -30,6 +30,7 @@ source("200_load_after_eviews.R")
 # if var \in set_23, but not var \in set_6 - add var to set_3 and set_6
 
 df <- readr::read_csv("../data/df_2015_final.csv")
+df <- dplyr::select(df, -time_y)
 
 base_set_A <- c("ind_prod", "cpi", "ib_rate")
 base_set_B <- c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price")

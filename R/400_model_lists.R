@@ -58,26 +58,25 @@ create_model_list <- function(T_common = 120, p_max = 12) {
 
 create_rwwn_list <- function(T_common = 120, p_max = 12) {
   # в столбце value получаем тип character
-  mlist <- data_frame(type = c("rw", "wn"), var_set = "set_C", n_lag = c(1, 
-                                                                         0), T_start = c(p_max, p_max + 1), T_in = c(T_common + 1, T_common), 
+  mlist <- data_frame(type = c("rw", "wn"), var_set = NA, 
+                      n_lag = c(1, 0), T_start = c(p_max, p_max + 1), 
+                      T_in = c(T_common + 1, T_common), 
                       status = "not estimated")
   mlist <- mlist %>% mutate_each("as.character", type, status, var_set)
   mlist <- mlist %>% mutate(id = row_number())
   mlist <- mlist %>% mutate(file = paste0(type, "_", id, "_T_", T_start, 
                                           "_", T_in, "_", var_set, ".Rds"))
-  # mlist <- mlist %>% mutate_each('as.factor',type, status, var_set)
-  
-  # mlist <- reshape2::melt(mlist, id.vars='id') %>% arrange(id) %>%
-  # mutate(variable=as.character(variable))
   
   return(mlist)
 }
 
 
-# no set 23 in var
-create_var_list <- function(T_common = 120, p_max = 12) {
+
+
+# normally no set 23 in var
+create_var_list <- function(T_common = 120, p_max = 12, var_sets) {
   # в столбце value получаем тип character
-  mlist <- expand.grid(type = "var", var_set = c("set_A", "set_B"), n_lag = 1:p_max, 
+  mlist <- expand.grid(type = "var", var_set = var_sets, n_lag = 1:p_max, 
                        status = "not estimated")
   mlist <- mlist %>% mutate_each("as.character", type, status, var_set)
   mlist <- mlist %>% mutate(id = row_number())
@@ -93,11 +92,14 @@ create_var_list <- function(T_common = 120, p_max = 12) {
 }
 
 # no set 23 in var will fill n_lag automatically! :)
-create_best_var_list <- function(df, var_set_info, criterion = c("AIC", 
-                                                                 "HQ", "SC", "FPE"), lag.max = 24, T_common = 120, p_max = 12) {
+create_best_var_list <- function(df, var_set_info, 
+                                 criterion = c("AIC", "HQ", "SC", "FPE"), 
+                                 lag.max = 24, 
+                                 T_common = 120, 
+                                 p_max = 12, var_sets) {
   criterion <- match.arg(criterion)
   # в столбце value получаем тип character
-  mlist <- expand.grid(type = "var", var_set = c("set_A", "set_B"), n_lag = NA, 
+  mlist <- expand.grid(type = "var", var_set = var_sets, n_lag = NA, 
                        status = "not estimated")
   mlist <- mlist %>% mutate_each("as.character", type, status, var_set)
   mlist <- mlist %>% mutate(id = row_number())
@@ -128,19 +130,17 @@ create_best_var_list <- function(df, var_set_info, criterion = c("AIC",
   return(mlist)
 }
 
+
 #' @param l_io lambda for initial observation, NA means no initial observations
 #' @param seed (13 by default) good luck, mcmc!
 # в столбце value получаем тип character
-create_bvar_banbura_list <- function(testing_mode = FALSE, 
-                                     T_common = 120, 
-                                     p_max = 12) {
-  list_of_lambdas <- c(0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 
-                       0.35, 0.4, 0.45, 0.5, 0.75, 1, 2, 5, Inf)
-  if (testing_mode) 
-    list_of_lambdas <- c(1, Inf)
+create_bvar_banbura_list <- function(T_common = 120, 
+                                     list_of_lambdas = c(0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 
+                                                          0.35, 0.4, 0.45, 0.5, 0.75, 1, 2, 5, Inf),
+                                     p_max = 12, var_sets) {
+
   
-  mlist <- expand.grid(type = "conjugate", var_set = c("set_A", "set_B", 
-                                                       "set_C"), n_lag = 1:p_max, l_1 = list_of_lambdas, l_power = 1, 
+  mlist <- expand.grid(type = "conjugate", var_set = var_sets, n_lag = 1:p_max, l_1 = list_of_lambdas, l_power = 1, 
                        l_const = Inf, l_io = c(1, NA), seed = 13, status = "not estimated")
   
   # add no sc dummy and l_sc=10*l_1
@@ -164,18 +164,16 @@ create_bvar_banbura_list <- function(testing_mode = FALSE,
   return(mlist)
 }
 
+var_sets = c("set_A", "set_B", "set_C")
 # в столбце value получаем тип character
-create_mdd_list <- function(testing_mode = FALSE, T_common = 120, p_max = 12) {
-  list_of_lambdas <- c(0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 
-                       0.35, 0.4, 0.45, 0.5, 0.75, 1, 2, 5)
-  list_of_sets <- c("set_A", "set_B", "set_C")
+create_mdd_list <- function(T_common = 120, p_max = 12, 
+            list_of_lambdas = 
+            c(0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.75, 1, 2, 5),
+            var_sets) {
   
-  if (testing_mode) {
-    list_of_lambdas <- c(1, 10)
-    list_of_sets <- c("set_B")
-  }
+
   
-  mlist <- expand.grid(type = "conjugate", var_set = list_of_sets, n_lag = 1:p_max, 
+  mlist <- expand.grid(type = "conjugate", var_set = var_sets, n_lag = 1:p_max, 
                        l_1 = list_of_lambdas, l_power = 1, l_const = Inf, l_io = c(1, 
                                                                                    NA), seed = 13, status = "not estimated")
   
@@ -245,13 +243,7 @@ create_bvar_out_list <- function(best_lambda, T_available, T_common = 120,
                                                   T_start, "_", T_in, "_", var_set, "_lags_", n_lag, "_lams_", round(100 * 
                                                                                                                        l_1), "_sc_", round(100 * l_sc), "_io_", round(100 * l_io), 
                                                   "_pow_", round(100 * l_power), "_cst_", round(100 * l_const), ".Rds"))
-  # mlist <- mlist %>% mutate_each('as.factor',type, status, var_set)
-  
-  # mlist_big <- mlist_big %>% select(-rownum, -T_start_min,
-  # -T_start_max, -T_start_amount)
-  
-  # mlist_melted <- reshape2::melt(mlist_big, id.vars='id') %>%
-  # arrange(id) %>% mutate(variable=as.character(variable))
+
   
   return(mlist_big)
 }

@@ -28,6 +28,21 @@ create_fit_set_info <- function() {
   fit_set_info <- dplyr::bind_rows(fit_set_2vars, fit_set_3vars)
   return(fit_set_info)
 }
+
+#' Returns the use of variable sets. The smallest variable set will be market as
+#' `target`, BVAR will be estimated for all var-sets, VAR only for these with 
+#' 10 variables or less.
+#' @param var_set_info data.frame with `var_set` and `variable` columns 
+create_var_set_use <- function(var_set_info) {
+  var_set_use <- dplyr::group_by(var_set_info, var_set) %>%
+    dplyr::summarise(n_vars = n())
+  var_set_use$estimate_bvar <- TRUE
+  var_set_use <- dplyr::mutate(var_set_use, estimate_var = (n_vars <= 10))
+  var_set_use <- dplyr::arrange(var_set_use, n_vars)
+  var_set_use$target <- FALSE
+  var_set_use$target[1] <- TRUE
+  return(var_set_use)
+}
   
 #' @param parallel either off/unix/windows
 #' @param ncpu number of cpu for parallel computations, ignored if parallel=='off'
@@ -52,9 +67,12 @@ create_fit_set_info <- function() {
 #' If NULL then p (number of lags in VAR/BVAR) will be used
 #' @param T_common (by default 120) number of observations for in-sample forecast
 #' @param p_max (by default 12) maximum number of lags
-#' @param target_var_set variable set serving as a base to calculate lambda
-#' @param var_set_info data.fram with `var_set` and `variable` columns
-#' @param fit_set_info data.fram with `fit_set` and `variable` columns
+#' @param 
+#' @param var_set_info data.frame with `var_set` and `variable` columns
+#' @param fit_set_info data.frame with `fit_set` and `variable` columns
+#' @param var_set_use data.frame with `var_set`, `n_vars`, `estimate_bvar`, `estimate_var`, `target` columns.
+#' The `estimate_bvar`, `estimate_var`, `target` columns are TRUE/FALSE. Unique TRUE in `target` column is required.
+#' This unique `target` var_set serves as a base to calculate lambda.
 replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu = 30,
                               h_max = 12,
                               fast_forecast = TRUE, keep = 5000,
@@ -64,7 +82,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
                               c_0 = 0.5, c_1 = 1,
                               var_set_info = create_var_set_info(),
                               fit_set_info = create_fit_set_info(),
-                              target_var_set = "set_A",
+                              var_set_use = create_var_set_use(var_set_info),
                               v_prior = "m+2",
                               T_common = 120, p_max = 12) {
   
@@ -72,24 +90,24 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   ########################## begin set-up part #######################
   
   parallel <- match.arg(parallel)
-
-  if (!target_var_set %in% var_set_info$var_set) {
-    stop("Target var_set = '", target_var_set, "'. This var_set is not described in var_set_info.")
-  }
   
-  # subset t:
-  df <- tail(df, -p_max)
+  if ("t" %in% colnames(df)) {
+    message("Data set contains the variable named `t`, it will be overwritten.")
+  }
+
   if (p_max != 12) {
     message("Function has not been tested for p_max != 12. Maybe 12 is still hardcoded somewhere")
   }
+  
+  # subset t:
+  # df <- tail(df, -p_max) ### ????????????????
+
   
   T_available <- nrow(df)  # number of observations
   
   if (fast_forecast) {
     keep <- 0
   }
-
-  
 
   
   
@@ -107,17 +125,17 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   # set delta (prior hyperparameter)
   
   if (set_delta_by %in% c("ADF", "KPSS")) {
-    deltas <- delta_i_prior(df, test = set_delta_by, remove_vars = c("time_y", "t"), 
+    deltas <- delta_i_prior(df, test = set_delta_by, remove_vars = "t", 
                             c_0 = c_0, c_1 = c_1)
   }
   
   if (set_delta_by == "global AR1") {
-    deltas <- delta_i_from_ar1(df, remove_vars = c("time_y", "t"))
+    deltas <- delta_i_from_ar1(df, remove_vars = "t")
   }
   
   if ((set_delta_by == "AR1") | is.finite(set_delta_by)) {
     # if 'AR1' then will be calculated automatically by bvar_conj_setup
-    deltas <- data_frame(variable = setdiff(colnames(df), c("t", "time_y")), delta = set_delta_by)
+    deltas <- data_frame(variable = setdiff(colnames(df), "t"), delta = set_delta_by)
   }
   
   
@@ -127,7 +145,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   
   # always compare with Random Walk:
   deltas <- mutate(deltas, rw_wn = "rw", variable = as.character(variable))
-  deltas  # 
+
   
   # estimate all RW and WN models
   rwwn_list <- create_rwwn_list(p_max = p_max, T_common = T_common)
@@ -166,7 +184,8 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   ##### banbura step 2
   
   # estimate VAR
-  var_list <- create_var_list(T_common = T_common, p_max = p_max)
+  VAR_variable_sets <- var_set_use$var_set[var_set_use$estimate_var]
+  var_list <- create_var_list(T_common = T_common, p_max = p_max, var_sets = VAR_variable_sets)
   message("Estimating VAR")
   var_list <- estimate_models(var_list, parallel = parallel, verbose = verbose,
                               var_set_info = var_set_info, df = df, 
@@ -214,8 +233,9 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   ##### banbura step 3 goal: calculate fit-lam
   
   # create model list to find optimal lambda
-  bvar_list_ <- create_bvar_banbura_list(testing_mode = testing_mode,
-                                         T_common = T_common, p_max = p_max)
+  BVAR_variable_sets <- var_set_use$var_set[var_set_use$estimate_bvar]
+  bvar_list_ <- create_bvar_banbura_list(T_common = T_common, p_max = p_max, 
+                                         var_sets = BVAR_variable_sets)
   # write_csv(bvar_list, path = '../estimation/bvar_list.csv')
   
   # estimate models from list bvar_list <- read_csv('../estimation/bvar_list.csv')
@@ -268,6 +288,7 @@ replicate_banbura <- function(df, parallel = c("off", "unix", "windows"), ncpu =
   
   ##### banbura step 4 find optimal lambda ungroup() is needed! otherwise cannot remove
   ##### var_set (active group on var_set)
+  target_var_set <- dplyr::filter(var_set_use, target == TRUE)[["var_set"]]
   fit_goal <- dplyr::filter(fit_inf_table, var_set == target_var_set) %>% ungroup() %>% 
     dplyr::select(-var_set)
   fit_goal

@@ -74,15 +74,53 @@ for (analysed_variable in all_variables) {
 surv <- all_survived %>% filter(h == 3, variable == "ind_prod")
 surv
 
-random_walks <- all_survived %>% filter(model == "v_1_3_1")
-random_walks
 
-rw_table <- dcast(data = random_walks, variable ~ h, fun.aggregate = length)
+
+### get survived random walks
+full_table <- expand.grid(h = 1:12, variable = base_set_C, stringsAsFactors = FALSE)
+
+
+random_walks <- all_survived %>% filter(model == "v_1_3_1")
+random_walks$survived <- 1
+
+dead_rw <- anti_join(full_table, random_walks, by = c("h", "variable"))
+dead_rw$survived <- 0
+
+random_walks <- bind_rows(random_walks, dead_rw)
+
+rw_table <- dcast(data = random_walks, variable ~ h, value.var = "survived")
 rw_table
- 
+
+
+### get survived white noises
+full_table <- expand.grid(h = 1:12, variable = base_set_C, stringsAsFactors = FALSE)
+
 white_noises <- all_survived %>% filter(model == "v_3_3_0")
-wn_table <- dcast(data = white_noises, variable ~ h, fun.aggregate = length)
+white_noises$survived <- 1
+
+dead_wn <- anti_join(full_table, white_noises, by = c("h", "variable"))
+dead_wn$survived <- 0
+
+white_noises <- bind_rows(white_noises, dead_wn)
+
+wn_table <- dcast(data = white_noises, variable ~ h, value.var = "survived")
 wn_table
+
+
+### joint rw+wn table
+
+wn_table_4join <- dplyr::select(white_noises, h, variable, wn_survived = survived)
+rw_table_4join <- dplyr::select(random_walks, h, variable, rw_survived = survived)
+rwwn_table <- dplyr::left_join(wn_table_4join, rw_table_4join, by = c("h", "variable"))
+
+rwwn_table <- mutate(rwwn_table, 
+                     wn_letter = ifelse(wn_survived == 1, "WN", ""),
+                     rw_letter = ifelse(rw_survived == 1, "RW", ""),
+                     label = paste0(rw_letter, wn_letter)
+                     )
+
+
+### percentage of survived models
 
 all_survived_sep <- all_survived %>%
   separate(model, into = c("model_type", "code1", "code2", "lag"), sep = "_")
@@ -133,15 +171,35 @@ one_histo <- ggplot(data = one_selection) +
                      labels = seq(from = 2, to = 12, by = 2)) 
 one_histo
 
+### all histo at once
+selected_h <- c(1, 3, 6, 9, 12)
+selected_variables <- setdiff(base_set_B, "m2")
 
-all_selection <- all_grouped %>% filter(h %in% c(1, 3, 6, 9, 12),
-                                        variable %in% base_set_B)
+all_selection <- all_grouped %>% filter(h %in% selected_h,
+                                        variable %in% selected_variables)
+
+# remove small BVAR as it is equal to VAR:
+all_selection <- filter(all_selection, !name == "b1")
+
+
+
 all_histo <- ggplot(data = all_selection) + 
   geom_bar(aes(x = name, y = n_survived), stat = "identity") +
   scale_y_continuous(breaks = seq(from = 2, to = 12, by = 2), 
                      labels = seq(from = 2, to = 12, by = 2)) +
   facet_grid(variable ~ h)
 all_histo
+
+# add rwwn tag in the right corner 
+rwwn_table_selection <- rwwn_table %>% filter(h %in% selected_h,
+                                              variable %in% selected_variables)
+rwwn_table_selection <- mutate(rwwn_table_selection, x = Inf, y = Inf)
+# x = Inf and y = Inf means right corner
+
+all_histo_rwwn <- all_histo + 
+              geom_text(aes(x, y, label = label), data = rwwn_table_selection, 
+              hjust = 1, vjust = 1, size = 4)
+all_histo_rwwn
 
 
 

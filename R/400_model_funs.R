@@ -53,10 +53,16 @@ estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info,
   
   # select variables
   v_set <- minfo$var_set
-  variables <- filter(var_set_info, var_set == v_set)$variable
+  if (is.na(v_set)) {
+    # case of RW and WN
+    variables <- variables <- setdiff(colnames(df), "t")
+  } else {
+    # case of BVAR and VAR
+    variables <- filter(var_set_info, var_set == v_set)$variable
   
-  # !!! sort is important !!! otherwise deltas may be in wrong order !!!
-  variables <- sort(variables)
+    # !!! sort is important !!! otherwise deltas may be in wrong order !!!
+    variables <- sort(variables)
+  }
   
   D <- df[T_start:T_end, variables]
   
@@ -122,18 +128,18 @@ estimate_model <- function(minfo, do_log = FALSE, verbose = FALSE, var_set_info,
   
   if (minfo$type == "wn")
   {
-    model_vector <- c(t(apply(D, MARGIN = 2, mean)))  # just sample means of variables
-    model <- data_frame(variables = variables)
-    model$coef <- model_vector
+    model_vector <- unname(apply(D, MARGIN = 2, mean))  # just sample means of variables
+    model <- data_frame(variables = variables, coef = model_vector)
     status <- "estimated"
   }
   
   if (minfo$type == "rw")
   {
     # just mean growth rate
-    model_vector <- c(t((tail(D, 1) - head(D, 1))/(nrow(D) - 1)))
-    model <- data_frame(variables = variables)
-    model$coef <- model_vector
+    diff_D <- apply(D, 2, diff)
+    
+    model_vector <- unname(apply(diff_D, MARGIN = 2, mean))
+    model <- data_frame(variables = variables, coef = model_vector)
     status <- "estimated"
   }
   
@@ -288,7 +294,13 @@ forecast_model <- function(pred_info, mlist, do_log = FALSE, verbose = FALSE,
   
   # select variables
   v_set <- minfo$var_set
-  variables <- filter(var_set_info, var_set == v_set)$variable
+  if (is.na(v_set)) {
+    # case of RW and WN
+    variables <- setdiff(colnames(df), "t")
+  } else {  
+    # case of BVAR and VAR
+    variables <- filter(var_set_info, var_set == v_set)$variable
+  }
   n_vars <- length(variables)
   D <- df[, variables]
   
