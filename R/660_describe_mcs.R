@@ -183,12 +183,37 @@ all_selection <- filter(all_selection, !name == "b1")
 
 
 
+
+model_transform <- function(x) {
+  
+  model_names <- list(
+    'b2' = 'BVAR6/7',
+    'b3' = 'BVAR23',
+    'v1' = 'VAR3/4',
+    'v2' = 'VAR6/7' 
+  )
+  
+  return(unname(unlist(model_names[x])))
+}
+
+
+all_selection$name <- model_transform(all_selection$name)
+
+
+h_labeller <- as_labeller(c('1' = 'h = 1',
+                            '3' = 'h = 3',
+                            '6' = 'h = 6',
+                            '9' = 'h = 9',
+                            '12' = 'h = 12'))
+
 all_histo <- ggplot(data = all_selection) + 
   geom_bar(aes(x = name, y = n_survived), stat = "identity") +
   scale_y_continuous(breaks = seq(from = 2, to = 12, by = 2), 
                      labels = seq(from = 2, to = 12, by = 2)) +
-  facet_grid(variable ~ h)
-all_histo
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  facet_grid(variable ~ h,  labeller = labeller(h = h_labeller)) + 
+  ylab("Number of survived models") + xlab("")
+all_histo 
 
 # add rwwn tag in the right corner 
 rwwn_table_selection <- rwwn_table %>% filter(h %in% selected_h,
@@ -200,6 +225,9 @@ all_histo_rwwn <- all_histo +
               geom_text(aes(x, y, label = label), data = rwwn_table_selection, 
               hjust = 1, vjust = 1, size = 4)
 all_histo_rwwn
+
+
+
 
 
 
