@@ -8,6 +8,9 @@ library("tidyr")
 library("scales")
 library("xtable")
 
+best_model_prefix <- "best_models_TR_"
+# best_model_prefix <- "best_models_"
+
 
 base_set_A <- c("ind_prod", "cpi", "ib_rate")
 base_set_B <- c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price")
@@ -61,7 +64,7 @@ mcs_folder <- "../estimation/tables_rmsfe/"
 all_survived <- NULL
 for (analysed_variable in all_variables) {
   for (h in all_h) {
-    filename <- paste0(mcs_folder, "best_models_", analysed_variable, "_", h, ".Rds" )
+    filename <- paste0(mcs_folder, best_model_prefix, analysed_variable, "_", h, ".Rds" )
 
     mcs <- readRDS(filename)
     survived <- data.frame(model = rownames(mcs@show), mcs@show) 

@@ -6,6 +6,9 @@ library("MCS")
 library("reshape2")
 library("parallel")
 
+statistic <- "TR" # we've done with "Tmax"
+best_model_prefix <- "best_models_TR_"
+
 working_folder <- "../estimation/tables_rmsfe/"
 forecast_filename_prefix <- "forecasts_"
 model_info_filename_prefix <- "model_info_"
@@ -84,11 +87,11 @@ for (analysed_variable in all_vars) {
     
     n_cores <- detectCores()
     cluster <- makeCluster(n_cores)
-    best_models <- MCSprocedure(loss, cl = cluster)
+    best_models <- MCSprocedure(loss, cl = cluster, statistic = statistic)
     stopCluster(cluster)
-    filename <- paste0(working_folder, "loss_", analysed_variable, "_", hh,".Rds")
+    filename <- paste0(working_folder, "loss_", analysed_variable, "_", hh, ".Rds")
     saveRDS(loss, file = filename)
-    filename <- paste0(working_folder, "best_models_", analysed_variable, "_", hh,".Rds")
+    filename <- paste0(working_folder, best_model_prefix, analysed_variable, "_", hh, ".Rds")
     saveRDS(best_models, file = filename)
     diff <- best_models@Info$elapsed.time
     message("time = ", diff, " ", attr(diff, "units"))
