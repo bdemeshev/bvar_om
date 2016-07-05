@@ -6,14 +6,17 @@ library("MCS")
 library("reshape2")
 library("parallel")
 
+statistic <- "TR" # we've done with "Tmax"
+best_model_prefix <- "best_models_TR_"
+
 working_folder <- "../estimation/tables_rmsfe/"
 forecast_filename_prefix <- "forecasts_"
 model_info_filename_prefix <- "model_info_"
 
 all_vars <- c("employment", "ind_prod", "cpi", 
-                "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
-                "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
-                "agriculture", "retail", "gov_balance", "export", "import")
+              "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
+              "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
+              "agriculture", "retail", "gov_balance", "export", "import")
 
 #analysed_variable <- all_vars[2]
 for (analysed_variable in all_vars) {
@@ -83,12 +86,12 @@ for (analysed_variable in all_vars) {
     loss <- (all_wide - all_wide_actual) ^ 2
     
     n_cores <- detectCores()
-    cluster <- makeCluster(35) #
-    best_models <- MCSprocedure(loss, cl = cluster)
+    cluster <- makeCluster(n_cores)
+    best_models <- MCSprocedure(loss, cl = cluster, statistic = statistic)
     stopCluster(cluster)
-    filename <- paste0(working_folder, "loss_", analysed_variable, "_", hh,".Rds")
+    filename <- paste0(working_folder, "loss_", analysed_variable, "_", hh, ".Rds")
     saveRDS(loss, file = filename)
-    filename <- paste0(working_folder, "best_models_", analysed_variable, "_", hh,".Rds")
+    filename <- paste0(working_folder, best_model_prefix, analysed_variable, "_", hh, ".Rds")
     saveRDS(best_models, file = filename)
     diff <- best_models@Info$elapsed.time
     message("time = ", diff, " ", attr(diff, "units"))
