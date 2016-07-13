@@ -1,0 +1,56 @@
+---
+title: 'Mapping of Bayesian Vector Autoregressions: the Great Grimpen Mire'
+author: "Boris Demeshev, Oxana Malakhovskaya"
+output: pdf_document
+fontsize: 12pt
+---
+
+In this study we review the theory of bayesian vector autoregressions (BVARs) without stochastic volatility and without time-varying parameters. 
+
+
+1. We propose a clear classification of the most popular prior distributions. 
+
+Our classification explicitely specifies particular cases and answers to the question whether some classes of BVARs do overlap or not. In many articles authors do not use the same terminology or use non-precise terminology that creates barriers for understanding. We use consistent and precise terminology. Basically there are two classes of BVAR priors: 
+
+- independent normal-inverse Wishart;
+- conjugate normal-inverse Wishart. 
+These two classes of BVAR priors do overlap. 
+
+2. We discuss two approaches for specifying prior distribution for conjugate normal-inverse Wishart BVARs.
+
+These two ways are:
+
+- Clearly state all the priors;
+- Apply standard OLS formulas to data augmented with additional observations.
+
+The first approach is easier to understand but is more difficult to work with. We present the standard structure of the prior covariance matrix and standard ways of data augmentation. The correspondance between the two approaches in not one-to-one. There are many ways of data augmentation that correspond to the same prior. We provide this correspondance and an algorithm to create additional observations for an arbitrary conjugate normal-inverse Wishart prior. We also interpret prior and posterior hyperparameters in terms of OLS applied to augmented data. It is hard to visualise such complex priors and posteriors, but we present some ideas.
+
+3. We discuss sampling techniques for each prior distribution. 
+
+We try to provide the quickest estimation technique. Whenever is possible, we describe direct sampling from a posterior distribution, otherwise we construct a Gibbs sampler. Here we pay attention to practical problems of sampling. The biggest problem that arises during the estimation of large BVARs is the unavoidable multicollinearity. So we describe how to avoid inverting the ill-conditioned cross-covariance matrice of regressors. 
+
+\newpage
+4. We outline two possible strategies for choosing hyperparameters.
+
+The most natural question in the bayesian approach is how to choose priors. Here we consider two strategies:
+
+- Banbura's regularisation strategy; 
+- Cross validation of hyperparameters using a one-period forecast.
+
+In the Banbura's regulatisation strategy the complexity of a large BVAR is measured by hyperparameter $\lambda$. Loosely speaking, this $\lambda$ is chosen to make the large BVAR as complex as a frequentist VAR model with a fixed number of variables. 
+
+Cross validation is done with the help of the posterior predictive density. The optimal value of $\lambda$ may be chosen to maximize the posterior predictive density. 
+
+5. We discuss how to evaluate the performance of forecasts.
+
+The evaluation of performance is much easier for point forecasts than for density forecasts. However even for point forecasts in the case of multivariate time series the researcher should clearly understand which univariate forecasts are more important. Otherwise more volatile time series will determine the performance of forecasts. For example, for the evaluation of density forecasts the researcher may use  two techniques:
+
+- Probability integral transform;
+- Predictive density score. 
+
+Probability integral transform exploits the simple fact: if we plug any random number in its distribution function we will obtain uniform distribution. This technique tests whether actual forecast distribution and supposed forecast distribution do match. However, even if the model is wrong, it may be useful and may produce good forecasts. The technique of calculating scores ignores the theoretical assumptions behind the model and simply calculates the sum of posterior log densities at actual values.
+
+
+6. We present our new R-package `bvarr`.
+
+During our studies we have created an R package `bvarr`. It is very flexible for estimating BVARs with conjugate normal-inverse Wishart prior. There are some other R packages that can be used to estimate BVARs, but they either do not allow estimation of conjugate normal-inverse Wishart BVARs, or they are not so flexible and robust as our new package. The package contains a standard manual, and our article may be used as an extended documentation or "vignette" for the package.  
