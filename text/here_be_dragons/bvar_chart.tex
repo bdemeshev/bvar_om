@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{amsmath} % Математические окружения AMS
+\usepackage{amsfonts} % Шрифты AMS
+\usepackage{amssymb} % Символы AMS
+
+
+\usepackage[utf8]{inputenc}         % кодировка исходного текста
+% \usepackage{cmap}          % русский поиск в pdf
+\usepackage[russian, english]{babel} % локализация и переносы
+
+\usepackage{mathptmx} % шрифт похожий на генерального прокурора (на Times New Roman)
+
+%\usepackage{fontspec}
+%\usepackage{polyglossia}
+
+%\setmainlanguage{russian}
+%\setotherlanguages{english}
+
+% download "Linux Libertine" fonts:
+% http://www.linuxlibertine.org/index.php?id=91&L=1
+%\setmainfont{Arial} % or Helvetica, Arial, Cambria
+% why do we need \newfontfamily:
+% http://tex.stackexchange.com/questions/91507/
+%\newfontfamily{\cyrillicfonttt}{Arial}
+
+%\usepackage{tikz}
+\usepackage{tikz-cd}
+
+\newcommand{\prior}{\underline}
+\newcommand{\post}{\overline}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+%\begin{tikzcd}
+%A \arrow[r, "\phi"] \arrow[d, red]
+%& B \arrow[d, "\psi" red] \\
+%C \arrow[r, red, "\eta" blue]
+%& D
+%\end{tikzcd}
+
+%\begin{tikzcd}
+%z_i \arrow[r] & x_i  \arrow[r, "\phi"]              & y_i \\
+%              & e_i \arrow[u] \arrow[ur]   & \\
+%\end{tikzcd}
+
+% \prior S = (\prior v - m - 1)\Sigma, \prior v \to \infty
+
+
+
+\begin{tikzcd}
+Minnesota \arrow{rrrr}{\prior \Xi = \Sigma \otimes \prior \Omega} & &       &   & Minnesota-\otimes       \\
+iN-IW
+\arrow{u}{\prior S = (\prior v - m - 1)\Sigma, \; \prior v \to \infty}
+\arrow{d}[swap]{\prior S = \prior v^{1/m} I, \; \prior v \to 0}
+&            &       &                     &
+cN-IW
+\arrow{u}[swap]{\prior S = (\prior v - m - 1)\Sigma, \; \prior v \to \infty}
+\arrow{d}{\prior S = \prior v^{1/m} I, \; \prior v \to 0}
+\\
+iN-J    \arrow{rr}{\prior\phi = 0, \; \prior \Omega = aI, \; a\to \infty}                &            & D-J &                   &
+cN-J \arrow{ll}[swap]{\prior\phi = 0, \; \prior \Omega = aI, \; a\to \infty}  \\
+\end{tikzcd}
+
+\end{document}

@@ -1,0 +1,13 @@
+.reveal section p {
+  /* 
+  color: blue;
+  */
+  text-align: left;
+}
+
+.reveal section img { 
+  /* http://stackoverflow.com/questions/23082660/ */
+  background:none; 
+  border:none; 
+  box-shadow:none; 
+}
