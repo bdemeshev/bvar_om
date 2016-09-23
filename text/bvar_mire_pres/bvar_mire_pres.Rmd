@@ -289,7 +289,6 @@ qplot(rnorm(100)) + xlab("Привет, Ира!")
 ```
 -->
 
-
 ## Plug-and-play!
 
 1. Install
