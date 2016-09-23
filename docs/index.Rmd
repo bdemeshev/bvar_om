@@ -1,0 +1,6 @@
+---
+title: "BVARs for fun"
+output: html_document
+---
+
+[BVARs: Great Grimpen Mire](bvar_mire_pres.html) presentation in NN
