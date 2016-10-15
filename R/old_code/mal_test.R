@@ -5,7 +5,7 @@ message("The user name is '",Sys.info()[7],"'")
 if (Sys.info()[7]=="boris") {
   Sys.setenv(X13_PATH ="/usr/local/bin/x13tramo")
   setwd("~/Documents/bvar/mal_art")
-} 
+}
 
 if (Sys.info()[7]=="Oxana") {
   Sys.setenv(X13_PATH="D:/Oxana/Science/Projects/ProjectXIV/x13as/")
@@ -35,7 +35,7 @@ df_omit <- df_log %>% na.omit()
 df_notime <- dplyr::select(df_omit,-time)
 df_ts <- ts(df_notime, start=c(1995,9), frequency = 12)
 to_adjust <- c("empl_manuf", "cpi", "ppi", "industry_prod",
-               "real_income", "unempl_rate", "inv_index", "real_wage", 
+               "real_income", "unempl_rate", "inv_index", "real_wage",
                "construct") # list of series to seasonally adjust
 df_sa <- seas_adjust(df_ts, to_adjust )
 
@@ -48,12 +48,14 @@ plot(df_sa[,11:14])
 
 
 ## ----, "unit root table", results='asis'---------------------------------
+df_st_test <- df_ts[1:185, ]
 non_station <- data_frame(var=colnames(df_ts),
-                          kpss_t=bvarm_prior(df_ts,test="KPSS",type="trend"),
-                          kpss_nt=bvarm_prior(df_ts,test="KPSS",type="constant"),
-                          adf_t=bvarm_prior(df_ts,test="ADF",type="trend"),
-                          adf_c=bvarm_prior(df_ts,test="ADF",type="constant"),
-                          adf_0=bvarm_prior(df_ts,test="ADF",type="neither"))
+                          kpss_t=bvarm_prior(df_st_test,test="KPSS",type="trend"),
+                          kpss_nt=bvarm_prior(df_st_test,test="KPSS",type="constant"),
+                          adf_t=bvarm_prior(df_st_test,test="ADF",type="trend"),
+                          adf_c=bvarm_prior(df_st_test,test="ADF",type="constant"),
+                          adf_0=bvarm_prior(df_st_test,test="ADF",type="neither"))
+non_station
 pander(non_station)
 
 
@@ -76,8 +78,8 @@ lag_table <- NULL
 for (i in all_sets) {
   vars <- dplyr::filter(varset_table, set==i)$var
   best_lag <- VARselect(df_ts[,vars])
-  
-  lag_table <- rbind(lag_table, best_lag$selection)  
+
+  lag_table <- rbind(lag_table, best_lag$selection)
 }
 colnames(lag_table) <- c("AIC","HQ","SC","FPE")
 lag_table <- data.frame(lag_table)
@@ -87,7 +89,7 @@ lag_table
 
 ## ----, "table of models"-------------------------------------------------
 #### describe all models in one table (mod_table)
-# p - число лагов 
+# p - число лагов
 # v, lambda - параметры из работы
 # m - число рядов, считается само
 # t_for - длина прогнозного периода
@@ -104,7 +106,7 @@ p_all <- 1:5
 v_all = c(0.25, 0.5, 0.75, 1)
 
 # names of sets should be real! see build_varset function
-bvarm_models <- bvarm_block(lambda=lambda_all, v=v_all, p=p_all, t_for=24, 
+bvarm_models <- bvarm_block(lambda=lambda_all, v=v_all, p=p_all, t_for=24,
                             varset=all_sets)
 cvar_models <- cvar_block(p=p_all,varset=all_sets)
 
@@ -116,7 +118,7 @@ cvar_models <- cvar_block(p=p_all,varset=all_sets)
 # only through add_models() function
 
 
-add_models(bvarm_models) 
+add_models(bvarm_models)
 # rbind(bvarm_models,cvar_models)
 # no need to consider cvar_models --- they are just lambda=inf models
 
@@ -125,7 +127,7 @@ add_models(bvarm_models)
 ## как поняли где лежат оптимальные лямбда
 
 lambda_all <- seq(0.01,2,by=0.01)
-bvarm_new <- bvarm_block(lambda=lambda_all, v=1, p=5, t_for=24, 
+bvarm_new <- bvarm_block(lambda=lambda_all, v=1, p=5, t_for=24,
                             varset=c("set_5","set_6","set_14"))
 add_models(bvarm_new)
 
@@ -155,16 +157,16 @@ for (file in files) {
   cat("calculate msfe for: ", save_msfe, "\n")
   cat("file: ", file, "\n")
   model <- readRDS(file=paste0("./estimation/models/",file))
-  
+
   id <- fname2id(file)
   p <- dplyr::filter(mod_table, model_id==id)$p
-  
-  df_for <- forinsample(model) 
+
+  df_for <- forinsample(model)
   df_test <- model$data[-(1:p),]
-  
+
   msfe_model <- fmeasure(df_for, df_test, measure="mse", vars=save_msfe)
   msfe_add <- data_frame(msfe=msfe_model, var=save_msfe, model_id=id)
-  
+
   msfe_table <- rbind(msfe_table, msfe_add)
 }
 saveRDS(msfe_table, "./estimation/msfe_table.Rds")
@@ -185,18 +187,18 @@ mod_0 <- dplyr::filter(mod_small, lambda==eps)
 # mod_Inf <- dplyr::filter(mod_small, lambda==Inf)
 
 fit_table <- left_join(x=mod_small, y=mod_0, by=c("p","v","varset"))
-fit_table <- mutate(fit_table, 
+fit_table <- mutate(fit_table,
                     fit2 = 1/2*(industry_prod.x/industry_prod.y+cpi.x/cpi.y),
                     fit3 = 1/3*(industry_prod.x/industry_prod.y+cpi.x/cpi.y+ib_rate.x/ib_rate.y))
 saveRDS(fit_table, file="./estimation/fit_table.Rds")
 
 
 ## ----, eval=FALSE--------------------------------------------------------
-## 
+##
 ## id <- 22 # 22: lambda=0, 28: lambda=Inf
 ## model <- readRDS(paste0("./estimation/models/",id2fname(id)))
 ## p <- dplyr::filter(mod_table, model_id==7)$p
-## 
+##
 ## df_data <- model$data
 ## model_var <- VAR(df_data,type = "const")
 ## # summary(model_var)
@@ -209,7 +211,7 @@ saveRDS(fit_table, file="./estimation/fit_table.Rds")
 ## ------------------------------------------------------------------------
 fit_table <- readRDS(file="./estimation/fit_table.Rds")
 
-fit_inf <- fit_table %>% dplyr::filter(v==1, lambda.x==Inf, varset=="set_3") %>% 
+fit_inf <- fit_table %>% dplyr::filter(v==1, lambda.x==Inf, varset=="set_3") %>%
   dplyr::select( p,  fit2, fit3)
 
 # add columns with target fit_inf
@@ -231,7 +233,7 @@ best2u <- best2 %>% group_by(v, p, varset) %>% filter(lambda.x==max(lambda.x)) %
   dplyr::select(p,v,varset,best_lam2=lambda.x)
 best3u <- best3 %>% group_by(v, p, varset) %>% filter(lambda.x==max(lambda.x)) %>%
   dplyr::select(p,v,varset,best_lam3=lambda.x)
-best <- left_join(x=best2u, y=best3u, by=c("p","v","varset")) 
+best <- left_join(x=best2u, y=best3u, by=c("p","v","varset"))
 
 best <- mutate(best, modsize=mod_size(varset))
 
@@ -298,12 +300,12 @@ saveRDS(romsfe_table, "./estimation/romsfe_table.Rds")
 
 ## ------------------------------------------------------------------------
 romsfe_table <- readRDS("./estimation/romsfe_table.Rds")
-romsfe_rw <- dplyr::select(romsfe_table, -omsfe_zero, 
+romsfe_rw <- dplyr::select(romsfe_table, -omsfe_zero,
                               -omsfe_inf, -omsfe, -varset, -var_romsfe, -lambda)
 bandura_t_rw <- dcast(data = romsfe_rw, formula = var+h~modsize, value.var = "rw_romsfe")
 bandura_t_rw
 
-romsfe_var <- dplyr::select(romsfe_table, -omsfe_zero, 
+romsfe_var <- dplyr::select(romsfe_table, -omsfe_zero,
                               -omsfe_inf, -omsfe, -varset, -rw_romsfe, -lambda)
 bandura_t_var <- dcast(data = romsfe_var, formula = var+h~modsize, value.var = "var_romsfe")
 bandura_t_var
