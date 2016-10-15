@@ -1,7 +1,7 @@
 # makefile: Rnw -> tex -> pdf
 # v 2.0
 # .Rnw extension is automatically added
-file_name = bvar_mapping_venezia_poster
+file_name = bvar_forecasting_venezia_poster
 
 $(file_name).pdf: $(file_name).tex
 	# protection against biber error
