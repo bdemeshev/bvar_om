@@ -1,11 +1,11 @@
 % !TEX TS-program = pdflatex
 % !TEX encoding = UTF-8 Unicode
 
-\documentclass[12pt]{article} % use larger type; default would be 10pt
+\documentclass[11pt]{article} % use larger type; default would be 10pt
 
 
 %%% PAGE DIMENSIONS
-\usepackage[left=3cm,right=1.5cm,top=2cm,bottom=2cm]{geometry} % to change the page dimensions
+\usepackage{geometry} % to change the page dimensions
 \geometry{a4paper} % or letterpaper (US) or a5paper or\ldots .
 % \geometry{margin=2in} % for example, change the margins to 2 inches all round
 % \geometry{landscape} % set up the page for landscape
@@ -29,7 +29,7 @@
 %%% HEADERS & FOOTERS
 %\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
 %\pagestyle{fancy} % options: empty , plain , fancy
-\setcounter{page}{3}
+
 
 
 
@@ -102,29 +102,30 @@
 
 %%% The "real" document content comes below\ldots
 
-\title{Forecasting Russian macroeconomic indicators with BVAR\footnote{The authors are grateful to Svetlana Bryzgalova (Stanford University), Dean Fantazzini (MSU),  Hubert Kempf (ENS de Cachan), Sergey Pekarsky (NRU HSE) and all participants of \textit{II International Conference: Modern Econometric Tools and Applications.} for valuable comments, questions and discussion. All remaining errors are authors’ responsibility.}\footnote{The study was implemented in the framework of the Basic Research Program at the National Research University Higher School of Economics in 2015.
+\title{Forecasting Russian macroeconomic indicators with BVAR\footnote{The authors are grateful to Svetlana Bryzgalova (Stanford University), Dean Fantazzini (MSU),  Hubert Kempf (ENS de Cachan), Sergey Pekarsky (NRU HSE) and all participants of \textit{II International Conference: Modern Econometric Tools and Applications.} for valuable comments, questions and discussion. All remaining errors are authors’ responsibility.}\footnote{The study was implemented in the framework of the Basic Research Program at the National Research University Higher School of Economics in 2016.
 }}
-\author{Boris Demeshev,$^{1}$   Oxana Malakhovskaya$^{1}$\\
+\author{Boris Demeshev,$^{1}$   Oxana Malakhovskaya$^{1,2}$\\
 \\
 \normalsize{$^{1}$National Research University Higher School of Economics}\\
+\normalsize{$^{2}$University of Paris-Saclay}\\
 }
 \date{}
 
 \begin{document}
 
 
-%\maketitle
+\maketitle
 
 
 
-%\begin{abstract}
-%This paper evaluates the forecast performance of Bayesian vector autoregressions (BVARs) on Russian data. We estimate BVARs of different sizes and compare the accuracy of their out-of-sample forecasts with those obtained with unrestricted vector autoregressions and random walk with drift. We show that many Russian macroeconomic indicators can be forecast by BVARs more accurately than by competing models. However, contrary to several other studies, we do not confirm that the relative forecast error monotonically decreases with increasing the cross-sectional dimension of the sample. In half of those cases where a BVAR appears to be the most accurate model, a small-dimensional BVAR outperforms its high-dimensional counterpart.
-%\end{abstract}
+\begin{abstract}
+This paper evaluates the forecast performance of Bayesian vector autoregressions (BVARs) on Russian data. We estimate BVARs of different sizes and compare the accuracy of their out-of-sample forecasts with those obtained with unrestricted vector autoregressions and random walk with drift. We show that many Russian macroeconomic indicators can be forecast by BVARs more accurately than by competing models. However, contrary to several other studies, we do not confirm that the relative forecast error monotonically decreases with increasing the cross-sectional dimension of the sample. In half of those cases where a BVAR appears to be the most accurate model, a small-dimensional BVAR outperforms its high-dimensional counterpart.
+\end{abstract}
 
-%\smallskip
-%\noindent JEL-Classification: C11, C13, C53\\
-%\smallskip
-%\noindent Keywords: VAR, forecasting, Bayesian estimation
+\smallskip
+\noindent JEL-Classification: C11, C13, C53\\
+\smallskip
+\noindent Keywords: VAR, forecasting, Bayesian estimation
 
 \section{Introduction}
 
@@ -431,7 +432,7 @@ BVAR23&$Y$ includes all 23 variables from the dataset\\
 
 For every variable and every forecasting horizon we find a model with the lowest RMSFE. We compare 60 specifications for each variable and each forecasting horizon as we have 5 models (a VAR and a BVAR with 3 or 4 variables, a VAR and a BVAR with 6 or 7 variables, and a BVAR with 23 variables) and 12 lags for each of them.
 We visualize our results with color tables (Figures \ref{fig:rmsfe1}-\ref{fig:rmsfe2} ).
-The two tables in these Figures differ by the hyperparameter sets used for the BVAR priors. For models depicted in Figure \ref{fig:rmsfe1}  we take $\delta_i =1$ for nonstationary series and $\delta_i =0.5$ for stationary series while constructing the prior. We use the KPSS test to split the series into two groups. The parameters $\sigma_i$ are taken to be equal to the standard deviations of the residuals in the univariate $AR(p)$ model. This hyperparapeter set will be referenced as set A in what follows. Figure \ref{fig:rmsfe2} is related to BVARs with the prior determined by the univariate $AR(1)$ model. We take $\delta_i$ as equal to the OLS estimates of the first lag parameter and  $\sigma_i$ as equal to the standard deviations of residuals in AR(1) models. This set will be referenced as set B.
+The two tables in these Figures differ by the hyperparameter sets used for the BVAR priors. For models depicted in Figure 1  we take $\delta_i =1$ for nonstationary series and $\delta_i =0.5$ for stationary series while constructing the prior. We use the KPSS test to split the series into two groups. The parameters $\sigma_i$ are taken to be equal to the standard deviations of the residuals in the univariate $AR(p)$ model. This hyperparapeter set will be referenced as set A in what follows. Figure 2 is related to BVARs with the prior determined by the univariate $AR(1)$ model. We take $\delta_i$ as equal to the OLS estimates of the first lag parameter and  $\sigma_i$ as equal to the standard deviations of residuals in AR(1) models. This set will be referenced as set B.
 
 
 \begin{figure}[!h]
@@ -446,7 +447,7 @@ The two tables in these Figures differ by the hyperparameter sets used for the B
 %\begin{figure}
 \begin{center}
 \includegraphics[scale=0.80]{hyper4.jpg}
-\caption{RMSFE of the best forecasting accuracy models, parameter set B: $\sigma_i$ are std of $AR(1)$ residuals, $\delta_i$ are first lag $AR(1)$ estimates}
+\caption{RMSFE of the best forecasting accuracy models, parameter set B: $\sigma_i$ are std of $AR(1)$ residuals, $\delta_i=1$ are first lag $AR(1)$ estimates}
 \label{fig:rmsfe2}
 \end{center}
 \end{figure}
@@ -465,10 +466,71 @@ Second, among all cases where BVARs show their forecasting accuracy, a high-dime
 
 Third, for some variables and some forecasting horizons neither unrestricted VARs nor BVARs outperform  the random walk. For example, in all specifications we consider the nominal exchange rate cannot be forecast by either VARs or BVARs better than by the random walk, and it is a long-held consensus in economics remounting to \cite{meese_rogoff_1983}. However, we question another wide-spread belief that the price of oil is a random walk process. We show that the oil price index can be forecasted by BVARs much better than by the random walk and the result is robust for different prior settings.
 
+\section{Robustness check: the MCS algorithm}
+
+
+The method of choosing the best model laid out in the previous section has an evident drawback. We choose just an only one model for each variable and each forecasting horizon - called «the first best» - with the lowest RMSE whereas the difference between «the first best» and «the second best» (or even some nth best for $n>2$) models might be insignificantly low. To check this option we employ the model confidence set procedure (MCS) proposed by \cite{hansen_al_2011}.
+This procedure encompasses the series of tests that results in a confidence set, that is a set of models for which the hypothesis of equal predictive ability cannot be rejected at a certain confidence level.
+Let $M$ be an initial set of models of dimension $m$, and each model gives the certain loss (a function of a prediction error) for each observation that we denote by $l$. We use a quadratic loss function:
+
+\begin{equation}
+l_{var,t}^i=(y_{var,t|t-h}^{i}-y_{var,t})^2\quad i=1,\ldots,m,
+\end{equation}
+
+where $y_{var,t|t-h}^{i}$ is an $h$-step forecast of a variable $var$ made for the period $t$ with a model $i$;  $y_{var,t}$ is an observed value of the variable, and $l^i_{var,t}$ is a loss given for a variable $var$ for the period $t$ with a model $i$.
+
+Loss differential, denoted by $d_{ij,t}$, is calculated for all pairs of models:
+\begin{equation}
+d_{ij,t}=l_{i,t}-l_{j,t},\quad i,j=1,\ldots, m
+\end{equation}
+
+The average loss of a model $i$ with respect to a particular model $j$ is calculated as:
+ \begin{equation}
+d_{ij}=\frac{1}{T}\sum_{t} d_{ij,t}\quad i=1,\ldots ,m,\quad j\ne i
+\end{equation}
+
+The average loss of a model $i$ with respect to all other competitor models is calculated also for all $i$:
+
+\begin{equation}
+d_i=\frac{1}{m-1}\sum_{j\in M} d_{ij}\quad i=1,\ldots ,m,\quad j\ne i
+\end{equation}
+
+
+Two intermediate statistics, $t_{i}$ and  $t_{ij}$ are calculated in the following way:
+\begin{equation}
+t_i = \frac{d_i}{se(d_i)}\qquad t_{ij}=\frac{d_{ij}}{se(d_{ij})},
+\end{equation}
+where $se$ is the standard error estimate calculated with a block-bootstrap procedure. The statistics $t_i$ is interpreted as an indicator of the average inferiority of a model with respect to all the other models in question.  The statistic $t_{ij}$ is interpreted as an indicator of the inferiority of a model with respect to a specific model $j$.
+
+As discussed in \cite{hansen_al_2011}, the statistics used for testing the hypothesis of the equal predictive ability are calculated as:
+\begin{equation}
+T_{R} = max_{i,j\in M}|t_{ij}|\qquad T_{max}=max_{i\in M} t_i
+\end{equation}
+The statistic $T_{R}$ is an indicator of the difference between the losses of the most and the least accurate models, and $T_{max}$ is an indicator of the difference between the loss of the least accurate model and the loss  of other competing models on average.
+Both statistics have non-standard distributions.
+As it was said before, the MCS procedure goes as follows. First of all, a hypothesis about equal forecasting accuracy of all models in the set is tested. If the hypothesis is rejected than the worst model is eliminated from the set and the hypothesis is tested again for a smaller set.
+As a result, implementing the MCS procedure delivers a set of superior models with equal (insignificantly different) predictive accuracy.
+
+\begin{figure}[!h]
+%\begin{figure}
+\begin{center}
+\includegraphics[scale=0.40]{histo_with_names.jpeg}
+\caption{Robustness check with MCS algorithm}
+\label{fig:mcs}
+\end{center}
+\end{figure}
+
+Figure \ref{fig:mcs} represents the confidence sets for five principal variables and five forecast horizons. We demonstrate the number of specifications that are included in the confidence set if we rely on $T_{max}$ statistics.\footnote{The results for all 23 variables as well as the results obtained when using $T_{R}$ statistics are available upon request.} For every VAR or BVAR model the maximum number of specifications that might be included in the set is equal to 12 as we estimate models with all possible lags up to 12.  Forecasts made with BVAR3/4 models  necessarily coincide by construction with those made with VAR3/4 so we do not display the same columns twice. The figure shows that the BVAR columns are regularly higher than the VAR columns. It means that the confidence set encompasses BVAR models more often than VAR models. This confirms our previous claim that on a general basis the BVARs demonstrate better forecasting performance than VARs, though there are usually at least several VAR specifications whose forecasting performance is not significantly inferior to that of BVARs. However, it is necessary to mention that in most cases the RW is included in the confidence set as well. Therefore, even if a BVAR specification gives a more accurate forecast in terms of RMSFE, the difference in accuracy of this specification with the simple RW is not significantly different. Among five principal variables shown in the Figure\ref{fig:mcs} the only exception is the price index. For this variable the RW model is not included in the confidence set. This variable is also an exception in another aspect: the VAR3/4 model with all possible lags  under consideration is included in the confidence set for all forecasting horizons. For interbank interest rate, even the WN model is included in the confidence set at longer forecasting horizons.
+
+
+
+
 \section{Conclusion}
 
 This paper evaluates the forecasting performance of BVARs on Russian data. We estimate BVARs of different sizes and compare the accuracy of their out-of-sample forecasts with those obtained with unrestricted VARs and random walk.   Our sample consists of 23 variables and we forecast at 5 different horizons up to 12 months. We show that for the majority of the variables  BVARs  outperform the competing models in terms of forecasting accuracy.
-However, we cannot confirm the conclusion drawn in some other studies (for example, \cite{bloor_matheson_2010}, \cite{banbura_al_2010}), where Bayesian methods were applied to data from developed countries, claiming that high-dimensional BVARs forecast better than low-dimensional models. Our results implies that a 23-variable BVAR performs most accurately in only about a half of cases where a BVAR is considered as a better forecasting tool with respect to its competitors. For the rest of those cases a BVAR with a relatively small size (6 or 7 variables in our case)  can outperform a 23-variable BVAR in terms of forecasting accuracy.
+However, we cannot confirm the conclusion drawn in some other studies (for example, \cite{bloor_matheson_2010}, \cite{banbura_al_2010}), where Bayesian methods were applied to data from developed countries, claiming that high-dimensional BVARs forecast better than low-dimensional models. Our results imply that a 23-variable BVAR performs most accurately in only about a half of the cases where a BVAR is considered as a better forecasting tool with respect to its competitors. For the rest of those cases a BVAR with a relatively small size (6 or 7 variables in our case)  can outperform a 23-variable BVAR in terms of forecasting accuracy.
+
+Our robustness check results are mixed. On one hand, the BVAR specifications are included in the superior set more often than the VAR specifications. On the other hand, for most of the variables and forecasting horizons the forecasting performance of the RW model is not significantly inferior to that of BVARs according to the MCS procedure.
 
 
 \newpage
