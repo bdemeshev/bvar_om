@@ -508,5 +508,21 @@ X_b'y_b \\
     - сначала применить формулу для $\Var(\hat\alpha)$ и потом убить нулями элементы вне диагональных блоков (так сделано в коде, нули вне диагонали убивает цикл).
     - сначала убить нулями внедиагольные элементы $\Sigma$, потом применить формулу $\Var(\hat\alpha)$.
 
+# 20 февраля 2017
 
+* Ruth Follet, Bayesian modelling multivariate macro data, thesis,
+[http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157](http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157)
 
+* Jim Savage, Hierarchical BVAR в STAN, [https://rpubs.com/jimsavage/hierarchical_var](https://rpubs.com/jimsavage/hierarchical_var)
+
+* Jim Savage, [blog](http://modernstatisticalworkflow.blogspot.com), [вкусности на rpubs](https://rpubs.com/jimsavage), [github](https://github.com/khakieconomics?tab=repositories).
+
+* [BVAR questions for STAN](https://groups.google.com/forum/#!topic/stan-users/8RerHVzxjUQ)
+
+* Ссылки по bsts
+    - [Sorry, Arima](http://multithreaded.stitchfix.com/blog/2016/04/21/forget-arima/)
+    - [Predicting the present with BSTS](people.ischool.berkeley.edu/~hal/Papers/2013/pred-present-with-bsts.pdf)
+    - [Predicting the present - presentation](https://pdfs.semanticscholar.org/2547/1816a77ba05f7cd9ee7831d3b7993c8d91ea.pdf)
+    - [Scott, short course on bsts](https://sites.google.com/site/stevethebayesian/googlepageforstevenlscott/course-and-seminar-materials/bsts-bayesian-structural-time-series)
+    
+  
