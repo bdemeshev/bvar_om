@@ -471,10 +471,10 @@ A</code></pre>
 ## [3,]    5    6    1</code></pre>
 <pre class="r"><code>coef(reg_2_1)</code></pre>
 <pre><code>##    u[, 1] 
-## -1.997622</code></pre>
+## -1.996379</code></pre>
 <pre class="r"><code>coef(reg_3_12)</code></pre>
 <pre><code>##    u[, 1]    u[, 2] 
-## -5.002827 -6.000702</code></pre>
+## -5.009304 -6.004123</code></pre>
 <p><strong>Ошибка 1</strong>: Однако в matlab-коде kolb оценки из регрессий на -1 не домножаются!!!!</p>
 <p><strong>Ошибка 2</strong>: В описании-klob написано, что строятся две отдельные регрессии <span class="math inline">\(\hat u^{(3)}\)</span> на <span class="math inline">\(\hat u^{(2)}\)</span> и <span class="math inline">\(\hat u^{(3)}\)</span> на <span class="math inline">\(\hat u^{(1)}\)</span>. На самом деле правильно (и в коде — ок) множественную одну.</p>
 <p>Кроме того, в matlab коде используется трюк: kolb строит вместо нескольких регрессий одну. Трюк идейно такой (на примере одной объясняющей):</p>
@@ -553,7 +553,7 @@ X_b'y_b \\
 <div id="-2017-3" class="section level1">
 <h1>20 февраля 2017</h1>
 <ul>
-<li><p>Ruth Follet, Bayesian modelling multivariate macro data, thesis, <a href="http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157" class="uri">http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157</a></p></li>
+<li><p>Ruth Follet, Bayesian modelling multivariate macro data, thesis, <a href="http://lib.dr.iastate.edu/etd/15150/" class="uri">http://lib.dr.iastate.edu/etd/15150/</a></p></li>
 <li><p>Jim Savage, Hierarchical BVAR в STAN, <a href="https://rpubs.com/jimsavage/hierarchical_var" class="uri">https://rpubs.com/jimsavage/hierarchical_var</a></p></li>
 <li><p>Jim Savage, <a href="http://modernstatisticalworkflow.blogspot.com">blog</a>, <a href="https://rpubs.com/jimsavage">вкусности на rpubs</a>, <a href="https://github.com/khakieconomics?tab=repositories">github</a>.</p></li>
 <li><p><a href="https://groups.google.com/forum/#!topic/stan-users/8RerHVzxjUQ">BVAR questions for STAN</a></p></li>

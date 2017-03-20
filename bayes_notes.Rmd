@@ -511,7 +511,7 @@ X_b'y_b \\
 # 20 февраля 2017
 
 * Ruth Follet, Bayesian modelling multivariate macro data, thesis,
-[http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157](http://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=6157)
+[http://lib.dr.iastate.edu/etd/15150/](http://lib.dr.iastate.edu/etd/15150/)
 
 * Jim Savage, Hierarchical BVAR в STAN, [https://rpubs.com/jimsavage/hierarchical_var](https://rpubs.com/jimsavage/hierarchical_var)
 
@@ -524,5 +524,67 @@ X_b'y_b \\
     - [Predicting the present with BSTS](people.ischool.berkeley.edu/~hal/Papers/2013/pred-present-with-bsts.pdf)
     - [Predicting the present - presentation](https://pdfs.semanticscholar.org/2547/1816a77ba05f7cd9ee7831d3b7993c8d91ea.pdf)
     - [Scott, short course on bsts](https://sites.google.com/site/stevethebayesian/googlepageforstevenlscott/course-and-seminar-materials/bsts-bayesian-structural-time-series)
-    
+* [http://stats.stackexchange.com/questions/140990/using-kalman-filters-to-impute-missing-values-in-time-series](http://stats.stackexchange.com/questions/140990/using-kalman-filters-to-impute-missing-values-in-time-series).
+Хорошо изложен Фильтр Калмана. 
+
+# 22 февраля 2017
+
+* Код kolb: 
+
+В коде $Hpr$ — это априорное $E(H_0)$, оно отличается от статьи Primiceri множителем $0.5$. Похоже, что $VHpr$ — это априорная $\Var(H_0)$ — у Primiceri и kolb — $I$. Опечатка! стр.3: Чтобы всё сошлось надо считать, что
+$H_t = \log \sigma_t$, а не квадрата. И более того, $H_t$ должно быть вектором :)
   
+* [Bayesian Inference for a Covariance Matrix](https://arxiv.org/pdf/1408.4050.pdf):
+
+Для обратного Уишарта $C \sim IW(C_0, \nu)$.
+
+Если $\nu = p + 2$, то $E(C)=C_0$.
+
+Если $\nu = p + 1$, то $E(C)$ не существует, но частное распределение корреляций оказывается равномерным на $[-1;1]$.
+
+* В коде kolb: почему-то в матрице $Sig$ нет первой дисперсии. Это матрица $\Sigma_t$. И она захардкожена под размер $Sig_{2\times 2}$
+
+* Ошибки со знаком априорного распределения $A_0$ нет, так как при инициализации домножено на $(-1)$, строки ~201-203
+
+* В коде kolb: $Alt$ вместо трёх-мерного массива записаны одна под одной для каждого $t$.
+
+* условное многомерное нормальное, http://stats.stackexchange.com/questions/30588/deriving-the-conditional-distributions-of-a-multivariate-normal-distribution
+
+# 1 марта 2017
+
+* В обозначениях Kim, Nelson "State space models" (стр. 190 и далее): $\beta_t$ — состояние (вектор), 
+$\tilde \beta_t$ — вектор состояний $\beta_1, \beta_2, \ldots, \beta_t$.
+
+* Carter-Kohn. Цель: сгенерировать $\tilde \beta_t$ зная $\tilde y_t$  и гиперпараметры модели.
+
+В силу марковости:
+
+Шаг 1. Генерируем $\beta_T |\tilde y_T \sim \cN(\beta_{T|T}, P_{T|T})$.
+
+Шаг 2. Затем генерируем всё более ранние $\beta_t$, сначала $\beta_{T-1}$, затем $\beta_{T-2}$ и далее до $\beta_1$, а именно: $\beta_t | \tilde y_t, \beta_{t+1} \sim \cN(\beta_{t|t,\beta}, P_{t|t,\beta})$.
+
+
+Для генерации нужно посчитать кучу матриц. Здесь $h$ — хз какая функция:
+\[
+\beta_{t|t}=h(\beta_{t|t-1}, P_{t|t-1}, f_{t|t-1}, \eta_{t|t-1}), \quad (3.79, p. 192)
+\]
+\[
+P_{t|t}=h(P_{t|t-1}, f_{t|t-1}), \quad (3.80, p. 192)
+\]
+
+Величины с отстающим индексом находятся из фильтра Калмана:
+\[
+f_{t|t-1} = h(P_{t|t-1}) = HP_{t|t-1}H'+R
+\]
+
+Остались: $\beta_{t|t-1}$, $P_{t|t-1}$, $\eta_{t|t-1}$.
+
+
+Величины с дополнительным $\beta$-индексом считаются так:
+\[
+\beta_{t|t,\beta} = h(\beta_{t|t}, P_{t|t}, \beta_{t+1}), \quad (8.16)
+\]
+\[
+P_{t|t,\beta} = h(P_{t|t}), \quad (8.17)
+\]
+
