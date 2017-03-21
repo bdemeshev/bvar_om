@@ -588,3 +588,38 @@ f_{t|t-1} = h(P_{t|t-1}) = HP_{t|t-1}H'+R
 P_{t|t,\beta} = h(P_{t|t}), \quad (8.17)
 \]
 
+# 21 марта 2017
+* [BigVAR](http://www.wbnicholson.com/BigVAR.pdf)
+
+* [VI for statisticians](https://arxiv.org/pdf/1601.00670.pdf)
+* [ADVI in STAN](https://arxiv.org/pdf/1506.03431.pdf)
+* [VI for VAR(1)](https://theses.ncl.ac.uk/dspace/bitstream/10443/790/1/Houghton09.pdf)
+* [BVAR, Wozniak](http://fbe.unimelb.edu.au/__data/assets/pdf_file/0010/1942966/2021TomaszWozniakBVARs.pdf)
+
+* ADVI with stan:
+```{r, eval=FALSE}
+model <- stan_model(file = "model.stan")
+data <- list(...)
+fit <- sampling(model, data = data, seed = 42)
+fit_advi <- vb(model, data = data, seed = 43, iter = 10000)
+```
+* "ADVI is still an experimental algorithm in that we're
+still working on getting the code right and understanding what
+the algorithm does". Bob Carpenter, 2016-04-27.
+
+* "How do you compute the likelihood?  The lp__ value returned
+is *not* the likelihood (or even th joint or posterior density),
+even in Stan's MCMC.  To compound the confusion, I believe ADVI
+just hacked the lp__ value to be 0 everywhere (and I believe the
+fix for it is in for Stan 2.10)". Bob Carpenter, 2016-04-27.
+
+* "One thing you can try is different starting points.  We’ve had lots of discussions in the stan meeting about ADVI failing in lots and lots of these simple examples, and it’s never clear whether the problem is with the variational solution or with the algorithm not converging.  Our guess is that in these settings the result is highly sensitive to initial values and turning parameters.  We have hopes that ADVI’s tuning can be improved so it will give reasonable answers more reliably.  For now, I think it’s best to be safe and run from multiple inits". Andrew Gelman, 2016-01-15.
+
+* [matlab_stan](http://mc-stan.org/interfaces/matlab-stan)
+
+* [TVP-BVAR, Jouchi Nakajima](http://www.imes.boj.or.jp/research/papers/english/me29-6.pdf)
+
+* [TVP, Cointegration](http://www.economics.uci.edu/files/docs/econoseminar/w10/strachan.pdf)
+
+
+

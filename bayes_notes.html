@@ -471,10 +471,10 @@ A</code></pre>
 ## [3,]    5    6    1</code></pre>
 <pre class="r"><code>coef(reg_2_1)</code></pre>
 <pre><code>##    u[, 1] 
-## -1.996379</code></pre>
+## -1.998785</code></pre>
 <pre class="r"><code>coef(reg_3_12)</code></pre>
 <pre><code>##    u[, 1]    u[, 2] 
-## -5.009304 -6.004123</code></pre>
+## -5.003646 -6.002549</code></pre>
 <p><strong>Ошибка 1</strong>: Однако в matlab-коде kolb оценки из регрессий на -1 не домножаются!!!!</p>
 <p><strong>Ошибка 2</strong>: В описании-klob написано, что строятся две отдельные регрессии <span class="math inline">\(\hat u^{(3)}\)</span> на <span class="math inline">\(\hat u^{(2)}\)</span> и <span class="math inline">\(\hat u^{(3)}\)</span> на <span class="math inline">\(\hat u^{(1)}\)</span>. На самом деле правильно (и в коде — ок) множественную одну.</p>
 <p>Кроме того, в matlab коде используется трюк: kolb строит вместо нескольких регрессий одну. Трюк идейно такой (на примере одной объясняющей):</p>
@@ -564,6 +564,73 @@ X_b'y_b \\
 <li><a href="https://pdfs.semanticscholar.org/2547/1816a77ba05f7cd9ee7831d3b7993c8d91ea.pdf">Predicting the present - presentation</a></li>
 <li><a href="https://sites.google.com/site/stevethebayesian/googlepageforstevenlscott/course-and-seminar-materials/bsts-bayesian-structural-time-series">Scott, short course on bsts</a></li>
 </ul></li>
+<li><p><a href="http://stats.stackexchange.com/questions/140990/using-kalman-filters-to-impute-missing-values-in-time-series" class="uri">http://stats.stackexchange.com/questions/140990/using-kalman-filters-to-impute-missing-values-in-time-series</a>. Хорошо изложен Фильтр Калмана.</p></li>
+</ul>
+</div>
+<div id="-2017-4" class="section level1">
+<h1>22 февраля 2017</h1>
+<ul>
+<li>Код kolb:</li>
+</ul>
+<p>В коде <span class="math inline">\(Hpr\)</span> — это априорное <span class="math inline">\(E(H_0)\)</span>, оно отличается от статьи Primiceri множителем <span class="math inline">\(0.5\)</span>. Похоже, что <span class="math inline">\(VHpr\)</span> — это априорная <span class="math inline">\({\mathbb{V}\mathrm{ar}}(H_0)\)</span> — у Primiceri и kolb — <span class="math inline">\(I\)</span>. Опечатка! стр.3: Чтобы всё сошлось надо считать, что <span class="math inline">\(H_t = \log \sigma_t\)</span>, а не квадрата. И более того, <span class="math inline">\(H_t\)</span> должно быть вектором :)</p>
+<ul>
+<li><a href="https://arxiv.org/pdf/1408.4050.pdf">Bayesian Inference for a Covariance Matrix</a>:</li>
+</ul>
+<p>Для обратного Уишарта <span class="math inline">\(C \sim IW(C_0, \nu)\)</span>.</p>
+<p>Если <span class="math inline">\(\nu = p + 2\)</span>, то <span class="math inline">\(E(C)=C_0\)</span>.</p>
+<p>Если <span class="math inline">\(\nu = p + 1\)</span>, то <span class="math inline">\(E(C)\)</span> не существует, но частное распределение корреляций оказывается равномерным на <span class="math inline">\([-1;1]\)</span>.</p>
+<ul>
+<li><p>В коде kolb: почему-то в матрице <span class="math inline">\(Sig\)</span> нет первой дисперсии. Это матрица <span class="math inline">\(\Sigma_t\)</span>. И она захардкожена под размер <span class="math inline">\(Sig_{2\times 2}\)</span></p></li>
+<li><p>Ошибки со знаком априорного распределения <span class="math inline">\(A_0\)</span> нет, так как при инициализации домножено на <span class="math inline">\((-1)\)</span>, строки ~201-203</p></li>
+<li><p>В коде kolb: <span class="math inline">\(Alt\)</span> вместо трёх-мерного массива записаны одна под одной для каждого <span class="math inline">\(t\)</span>.</p></li>
+<li><p>условное многомерное нормальное, <a href="http://stats.stackexchange.com/questions/30588/deriving-the-conditional-distributions-of-a-multivariate-normal-distribution" class="uri">http://stats.stackexchange.com/questions/30588/deriving-the-conditional-distributions-of-a-multivariate-normal-distribution</a></p></li>
+</ul>
+</div>
+<div id="-2017" class="section level1">
+<h1>1 марта 2017</h1>
+<ul>
+<li><p>В обозначениях Kim, Nelson “State space models” (стр. 190 и далее): <span class="math inline">\(\beta_t\)</span> — состояние (вектор), <span class="math inline">\(\tilde \beta_t\)</span> — вектор состояний <span class="math inline">\(\beta_1, \beta_2, \ldots, \beta_t\)</span>.</p></li>
+<li><p>Carter-Kohn. Цель: сгенерировать <span class="math inline">\(\tilde \beta_t\)</span> зная <span class="math inline">\(\tilde y_t\)</span> и гиперпараметры модели.</p></li>
+</ul>
+<p>В силу марковости:</p>
+<p>Шаг 1. Генерируем <span class="math inline">\(\beta_T |\tilde y_T \sim \cN(\beta_{T|T}, P_{T|T})\)</span>.</p>
+<p>Шаг 2. Затем генерируем всё более ранние <span class="math inline">\(\beta_t\)</span>, сначала <span class="math inline">\(\beta_{T-1}\)</span>, затем <span class="math inline">\(\beta_{T-2}\)</span> и далее до <span class="math inline">\(\beta_1\)</span>, а именно: <span class="math inline">\(\beta_t | \tilde y_t, \beta_{t+1} \sim \cN(\beta_{t|t,\beta}, P_{t|t,\beta})\)</span>.</p>
+<p>Для генерации нужно посчитать кучу матриц. Здесь <span class="math inline">\(h\)</span> — хз какая функция: <span class="math display">\[
+\beta_{t|t}=h(\beta_{t|t-1}, P_{t|t-1}, f_{t|t-1}, \eta_{t|t-1}), \quad (3.79, p. 192)
+\]</span> <span class="math display">\[
+P_{t|t}=h(P_{t|t-1}, f_{t|t-1}), \quad (3.80, p. 192)
+\]</span></p>
+<p>Величины с отстающим индексом находятся из фильтра Калмана: <span class="math display">\[
+f_{t|t-1} = h(P_{t|t-1}) = HP_{t|t-1}H'+R
+\]</span></p>
+<p>Остались: <span class="math inline">\(\beta_{t|t-1}\)</span>, <span class="math inline">\(P_{t|t-1}\)</span>, <span class="math inline">\(\eta_{t|t-1}\)</span>.</p>
+<p>Величины с дополнительным <span class="math inline">\(\beta\)</span>-индексом считаются так: <span class="math display">\[
+\beta_{t|t,\beta} = h(\beta_{t|t}, P_{t|t}, \beta_{t+1}), \quad (8.16)
+\]</span> <span class="math display">\[
+P_{t|t,\beta} = h(P_{t|t}), \quad (8.17)
+\]</span></p>
+</div>
+<div id="-2017-1" class="section level1">
+<h1>21 марта 2017</h1>
+<ul>
+<li><p><a href="http://www.wbnicholson.com/BigVAR.pdf">BigVAR</a></p></li>
+<li><a href="https://arxiv.org/pdf/1601.00670.pdf">VI for statisticians</a></li>
+<li><a href="https://arxiv.org/pdf/1506.03431.pdf">ADVI in STAN</a></li>
+<li><a href="https://theses.ncl.ac.uk/dspace/bitstream/10443/790/1/Houghton09.pdf">VI for VAR(1)</a></li>
+<li><p><a href="http://fbe.unimelb.edu.au/__data/assets/pdf_file/0010/1942966/2021TomaszWozniakBVARs.pdf">BVAR, Wozniak</a></p></li>
+<li><p>ADVI with stan:</p></li>
+</ul>
+<pre class="r"><code>model &lt;- stan_model(file = &quot;model.stan&quot;)
+data &lt;- list(...)
+fit &lt;- sampling(model, data = data, seed = 42)
+fit_advi &lt;- vb(model, data = data, seed = 43, iter = 10000)</code></pre>
+<ul>
+<li><p>“ADVI is still an experimental algorithm in that we’re still working on getting the code right and understanding what the algorithm does”. Bob Carpenter, 2016-04-27.</p></li>
+<li><p>“How do you compute the likelihood? The lp__ value returned is <em>not</em> the likelihood (or even th joint or posterior density), even in Stan’s MCMC. To compound the confusion, I believe ADVI just hacked the lp__ value to be 0 everywhere (and I believe the fix for it is in for Stan 2.10)”. Bob Carpenter, 2016-04-27.</p></li>
+<li><p>“One thing you can try is different starting points. We’ve had lots of discussions in the stan meeting about ADVI failing in lots and lots of these simple examples, and it’s never clear whether the problem is with the variational solution or with the algorithm not converging. Our guess is that in these settings the result is highly sensitive to initial values and turning parameters. We have hopes that ADVI’s tuning can be improved so it will give reasonable answers more reliably. For now, I think it’s best to be safe and run from multiple inits”. Andrew Gelman, 2016-01-15.</p></li>
+<li><p><a href="http://mc-stan.org/interfaces/matlab-stan">matlab_stan</a></p></li>
+<li><p><a href="http://www.imes.boj.or.jp/research/papers/english/me29-6.pdf">TVP-BVAR, Jouchi Nakajima</a></p></li>
+<li><p><a href="http://www.economics.uci.edu/files/docs/econoseminar/w10/strachan.pdf">TVP, Cointegration</a></p></li>
 </ul>
 </div>
 
