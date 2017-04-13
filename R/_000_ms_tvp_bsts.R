@@ -8,16 +8,20 @@ library(BigVAR)
 library(BMR)
 library(tidyverse)
 library(reshape2)
+library(forecastHybrid)
+library(caret)
 
 # load data
 df <- readr::read_csv("../data/df_2015_final.csv")
 df <- dplyr::select(df, -time_y)
 
 # BigVAR
-Model1 <- constructModel(as.matrix(df), p = 12, struct = "OwnOther", gran = c(25, 10),
+Model1 <- constructModel(as.matrix(df), p = 12, struct = "OwnOther", gran = c(100, 5),
                         verbose = TRUE, VARX = list())
 model <- cv.BigVAR(Model1)
 model
+plot(model)
+SparsityPlot.BigVAR.results(model)
 
 predict(model, n.ahead = 1)
 
@@ -98,3 +102,12 @@ str(bvartvptest)
 
 
 # rw
+
+
+# forecast hybrid
+y <- df$ib_rate
+y <- ts(y, frequency = 12, start = c(1990, 1))
+model_h <- hybridModel(y, models = "at")
+forecast(model_h, h = 12)
+
+
