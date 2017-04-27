@@ -15,15 +15,90 @@ library(caret)
 df <- readr::read_csv("../data/df_2015_final.csv")
 df <- dplyr::select(df, -time_y)
 
+
+lala <- model@OptimalLambda
 # BigVAR
-Model1 <- constructModel(as.matrix(df), p = 12, struct = "OwnOther", gran = c(100, 5),
+Model1 <- constructModel(as.matrix(df), p = 2, struct = "OwnOther", 
+                         T1 = 241, T2 = 243, 
+                         gran = lala,
+                         ownlambdas = TRUE,
                         verbose = TRUE, VARX = list())
 model <- cv.BigVAR(Model1)
 model
+
+
+Model1_est <- constructModel(as.matrix(df)[3:243, ], p = 2, struct = "OwnOther", 
+                         gran = lala,
+                         ownlambdas = TRUE,
+                         verbose = TRUE, VARX = list())
+
+model_est <- BigVAR.est(Model1_est)
+model_est
+
+a1 <- model@betaPred
+a2 <- model_est$B[, , 1]
+
+model@LambdaGrid
+model@OptimalLambda
+str(model@betaPred)
+
+# granularity = c(grid depth, number of lambda)
+# lambda_max is calculated automatically (all beta hat = 0)
+# grid depth = lambda_max / lambda_min
+
 plot(model)
 SparsityPlot.BigVAR.results(model)
 
 predict(model, n.ahead = 1)
+
+?constructModel
+
+df_matrix <- as.matrix(df)
+str(df_matrix)
+df_subset <- df_matrix[1:243, ]
+model_opt <- constructModel(df_subset, p = 2, struct = "OwnOther",
+                         T1 = 1,
+                         T2 = 10,
+                         ownlambdas = TRUE,
+                         gran = model@OptimalLambda,
+                         verbose = TRUE, VARX = list())
+
+?BigVAR.est
+one_bigvar <- BigVAR.est(model_opt)
+
+
+all.equal(model@betaPred[, ], one_bigvar$B[, , 1])
+
+# minus one
+
+model_opt_last <- constructModel(df_matrix[1:243, ], p = 2, struct = "OwnOther",
+                            ownlambdas = TRUE,
+                            gran = model@OptimalLambda,
+                            verbose = TRUE, VARX = list())
+
+one_bigvar_last <- BigVAR.est(model_opt_last)
+one_bigvar_last$B[1, 1, 1]
+
+
+for (t_from in 1:4) {
+  for (t_to in 238:239) {
+    model_opt_last <- constructModel(df_matrix[t_from:t_to, ], p = 2, struct = "OwnOther",
+                                     ownlambdas = TRUE,
+                                     gran = lala,
+                                     verbose = TRUE, VARX = list())
+    
+    one_bigvar_last <- BigVAR.est(model_opt_last)
+    message(t_from, "-", t_to, " b[1, 1] = ", one_bigvar_last$B[1, 1, 1])
+  }
+}
+
+
+model@betaPred[1, 1]
+
+
+all.equal(model@betaPred[, ], one_bigvar_last$B[, , 1])
+all.equal(one_bigvar_last$B[, , 1], one_bigvar$B[, , 1])
+
 
 # MSBVAR
 
