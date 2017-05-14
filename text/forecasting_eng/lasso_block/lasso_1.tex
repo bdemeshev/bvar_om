@@ -1,0 +1,140 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass[12pt]{article} % use larger type; default would be 10pt
+
+
+%%% PAGE DIMENSIONS
+\usepackage[left=3cm,right=1.5cm,top=2cm,bottom=2cm]{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or\ldots .
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{url}
+\usepackage{caption}
+\usepackage{soulutf8}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another\ldots
+
+
+%%% HEADERS & FOOTERS
+%\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+%\pagestyle{fancy} % options: empty , plain , fancy
+\setcounter{page}{3}
+
+
+
+%%My Additional Packages
+\usepackage{mathtext}          % русские буквы в формулах
+\usepackage[T2A]{fontenc}            % внутренняя кодировка  TeX
+\usepackage[utf8]{inputenc}         % кодировка исходного текста
+% \usepackage{cmap}          % русский поиск в pdf
+%\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[russian,english]{babel} % локализация и переносы
+
+%\usepackage[english]% локализация и переносы
+
+\usepackage{amsmath} % Математические окружения AMS
+\usepackage{amsfonts} % Шрифты AMS
+\usepackage{amssymb} % Символы AMS
+\usepackage{graphicx} % Вставить pdf- или png-файлы
+
+\usepackage{euscript} % Красивый шрифт
+
+\usepackage{longtable}  % Длинные таблицы
+\usepackage{multirow} % Слияние строк в таблице
+
+\usepackage[colorinlistoftodos]{todonotes} % [colorinlistoftodos,prependcaption,textsize=tiny]
+
+\usepackage{indentfirst} % Отступ в первом абзаце.
+\usepackage{pdflscape} %Переворачивает страницы, удобно для широких таблиц
+
+
+\usepackage{footnote} %сноски в таблицах
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
+
+%\usepackage[backend=biber, style=authoryear, citestyle=authoryear]{biblatex}
+\usepackage[backend=biber, style=bwl-FU, citestyle=bwl-FU]{biblatex}
+%\usepackage{microtype}
+
+\addbibresource{bibliobase2.bib}
+
+\usepackage{wrapfig} % Обтекание рисунков текстом
+
+\usepackage{hyperref} % Гиперссылки
+
+\DeclareMathOperator{\etr}{etr}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Var}{\mathbb{V}\mathrm{ar}}
+\DeclareMathOperator{\chol}{chol}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cIW}{\mathcal{IW}}
+\newcommand{\lag}{\EuScript{L}}
+
+\newcommand{\prior}{\underline}
+\newcommand{\post}{\overline}
+
+\let\vec\relax
+\DeclareMathOperator{\vec}{vec}
+\hyphenation{re-si-du-als}
+
+
+\begin{document}
+
+An alternative procedure allowing an estimation and forecasting VAR models in large data environment is a lasso shrinkage. 
+
+The standard OLS -estimation of a VAR model in a low-dimensional space may be written as follows
+\begin{equation}
+\min_{\Phi_{const, \Phi_j}} ||y_t -\Phi_{const}- \Phi_1 y_{t-1} - \Phi_2 y_{t-2} -\ldots - \Phi_p y_{t-p}||^2_2
+\end{equation}
+
+Lasso shrinkage means taking into account a special penalty function of a certain form:
+ \begin{equation}
+\min_{\Phi_{const, \Phi_j}} ||y_t -\Phi_{const}- \Phi_1 y_{t-1} - \Phi_2 y_{t-2} -\ldots - \Phi_p y_{t-p}||^2_2 +\lambda \left(P_y(\Phi)+P_c(\Phi_{const}) \right),
+\end{equation} 
+where $\lambda$ is a penalty parameter which is selected following a cross-validation procedure, $P_y$ is a penalty function on endogenous coefficients. As for all model coefficients the same penalty parameter is used, all the series under consideration should be on the same scale. Contrary to the standard BVAR which can be estimated with original raw data, the lasso estimation requires the normalization of the series.
+We use three penalty functions that yuild group shrinkage (group lasso) proposed by   \autocite{yuan_lin_2006} for VARX models (see also \autocite{nicholson_al_2017}). 
+Three modifications of group lasso penalty functions that are implemented in the study are lag   penalty, own/other penalty and sparse lag penalty functions: \\
+\textit{Lag penalty function}:  
+\begin{gather}
+P_y(\Phi) = m \left( ||\Phi_1||_{F}+\ldots + ||\Phi_p||_{F} \right) \\
+P_x(\Phi_{const})= \sqrt{m}  \left( ||\Phi_{const,1}||_{F}+\ldots + ||\Phi_{const,m}||_{F} \right)
+\end{gather}
+ This penalty functions splits all the coefficients into $p+1$ groups where $p$ groups consist of lag matrices coefficients $(\Phi_1,\ldots, \Phi_p$) and one group is a vector of constants forming the matrix $\Phi_{const}$.
+The lasso shrinkage with lag penalty function results in a special form of sparsity: some lag matrices are active (i.e their coefficient estimates are not zeros) and others are passive (i.e. all coefficient estimates are zeros) but the sparsity within a group is not allowed.\\
+The lag penalty function weights all the coefficients of the lag matrices symmetrically. In fact sometimes it is logical to assume that the coefficients on the main diagonal of a lag matrix are non-zeros even all other coefficients in the same matrix are zeros. It is the case because a variable is more likely affected by its own lags than by the lags of other variables in a set. This  is the same idea that is incorporated in a traditional Minnesota prior for BVARs. To take this asymmetry into account the own/other group penalty function can be used. \\
+
+\textit{Own/Other penalty function}:  
+
+\begin{gather}
+P_y(\Phi) = \sqrt{m} \left( ||\Phi_1^{on}||_{F}+\ldots + ||\Phi_p^{on}||_{F} \right)+\sqrt{m(m-1)}\left( ||\Phi_1^{off}||_{F}+\ldots + ||\Phi_p^{off}||_{F} \right) \\
+P_x(\Phi_{const})= \sqrt{m}  \left( ||\Phi_{const,1}||_{F}+\ldots + ||\Phi_{const,m}||_{F} \right)
+\end{gather}
+
+The estimation with this penalty function allows not only some separated groups to contain non-zero elements but also groups of lag matrices coefficients with all zero elements besides the elements on the main diagonal. 
+
+In some cases the restrictions imposed by lag group and own/other lasso penalty functions can be too strict. If just one element in the group is non-zero, it is not sensible to require that all other members to be non-zeros as well. 
+Simon et al.(2013) propose a sparse group penalty function that allows that just some elements in an active group are non-zeros.
+In this case a penalty function may be defined as: 
+\textit{Sparse Lag penalty function}:  
+\begin{gather}
+P_y(\Phi) = (1-\alpha) m \left( ||\Phi_1||_{F}+\ldots + ||\Phi_p||_{F}\right)+\alpha||\Phi||_1\\
+P_x(\Phi_{const})= (1-\alpha)\sqrt{m}  \left( ||\Phi_{const,1}||_{F}+\ldots + ||\Phi_{const,m}||_{F} \right)+\alpha ||\Phi_{const}||_1,
+\end{gather}
+where $0\le \alpha \le 1$ is an additional parameter that controls within-group sparsity. Following  \autocite{nicholson_al_2017} we set $\alpha = \frac{1}{k+1}$ 
+
+\end{document}
