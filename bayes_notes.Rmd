@@ -640,3 +640,11 @@ Tibshirani, [Standardization and the group lasso penalty](http://faculty.washing
 
 * Проверить автоматическую нормализацию: если её предварительно сделать, то не должно поменяться оптимальное лямбда
 
+# 10 мая 2017
+
+* Koop, [Bayesian methods for empirical macroeconomics with big data](http://strathprints.strath.ac.uk/id/eprint/60339). Обзор ситуации с большими варами.
+
+* Шевелев, [БАЙЕСОВСКИЙ ПОДХОД К ОЦЕНКЕ ВОЗДЕЙСТВИЯ ВНЕШНИХ ШОКОВ](http://www.nsu.ru/ef/vestnik_ngu_ef/2017_1_03). По России, цитирует нас, функции реакции.
+
+
+
