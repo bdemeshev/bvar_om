@@ -1,6 +1,6 @@
 library(forecast)
 library(vars)
-
+library(tidyverse)
 
 estimate_rw <- function(y, h = 1, ...) {
   return("RW model. Does not need estimation.")
@@ -38,6 +38,12 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
                                T1 = floor(nrow(as.matrix(y)) / 3),
                                T2 = floor(2 * nrow(as.matrix(y)) / 3)) {
   y_matrix <- as.matrix(y)
+  
+  # strange error for time series in BigVAR ?
+  if (is.ts(y_matrix)) {
+    y_matrix <- coredata(y_matrix)
+  }
+
   m <- ncol(y_matrix)
   
   model_spec <- BigVAR::constructModel(y_matrix, p = p, struct = struct, 
@@ -61,9 +67,11 @@ forecast_rw <- function(y, h = 1, ...) {
   
   for (i in 1:m) {
     forecast_data$forecast[[i]] <- forecast::rwf(y_matrix[, i], h = h, ...)
+    forecast_data$forecast[[i]]$series <- colnames(y_matrix)[i]
   }
   
   names(forecast_data$forecast) <- colnames(y_matrix)
+  class(forecast_data) <- "mforecast"
   return(forecast_data)
 }
 
@@ -88,7 +96,8 @@ forecast_var_lasso <- function(y, h = 1,
   }
   
   colnames(forecast_matrix) <- colnames(y_matrix)
-  mforecast <- matrix_to_mforecast(forecast_matrix)
+  mforecast <- matrix_to_mforecast(forecast_matrix, y_matrix, method = "BigVAR")
+  
   return(mforecast)
 }
 
@@ -96,9 +105,7 @@ forecast_var_lasso <- function(y, h = 1,
 
 
 # we return something like mforecast (!)
-forecast_arima <- function(y, h = 1, 
-                           model = NULL, 
-                           ...) {
+forecast_arima <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_arima(y, h, ...)
   }
@@ -110,15 +117,16 @@ forecast_arima <- function(y, h = 1,
   
   for (i in 1:m) {
     forecast_data$forecast[[i]] <- forecast::forecast(model[[i]], h = h)
+    forecast_data$forecast[[i]]$series <- colnames(y_matrix)[i]
   }
   
   names(forecast_data$forecast) <- colnames(y_matrix)
+  
+  class(forecast_data) <- "mforecast"
   return(forecast_data)
 }
 
-forecast_ets <- function(y, h = 1, 
-                           model = NULL, 
-                           ...) {
+forecast_ets <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_ets(y, h, ...)
   }
@@ -130,15 +138,26 @@ forecast_ets <- function(y, h = 1,
   
   for (i in 1:m) {
     forecast_data$forecast[[i]] <- forecast::forecast(model[[i]], h = h)
+    forecast_data$forecast[[i]]$series <- colnames(y_matrix)[i]
   }
   
   names(forecast_data$forecast) <- colnames(y_matrix)
+  class(forecast_data) <- "mforecast"
   return(forecast_data)
 }
 
 scale_series <- function(y) {
+  if (is.ts(y)) {
+    y_freq <- frequency(y)
+    y_start <- start(y)
+  }
   y_matrix <- as.matrix(y)
   y_scaled <- apply(y_matrix, 2, FUN = scale)
+  if (is.ts(y)) {
+    y_scaled <- ts(y_scaled, frequency = y_freq, start = y_start)
+  } else {
+    y_scaled <- ts(y_scaled, frequency = 1, start = 1)
+  }
   return(y_scaled)
 }
 
@@ -156,34 +175,89 @@ mforecast_to_matrix <- function(mforecast) {
   return(forecast_matrix)
 }
 
-matrix_to_mforecast <- function(forecast_matrix) {
+matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified") {
   
   mforecast <- list()
   mforecast$forecast <- list()
-  m <- ncol(forecast_matrix)
+  m <- ncol(forecast_matrix) # m = number of times series
   
   for (i in 1:m) {
     mforecast$forecast[[i]] <- list()
-    mforecast$forecast[[i]]$mean <- forecast_matrix[, i]
+    
+    mforecast$forecast[[i]]$method <- method # method name
+    mforecast$forecast[[i]]$x <- y_before[, i] # actual y before forecast period
+
+    fors_freq <- frequency(y_before[, i])
+    fors_start <- tsp(y_before[, i])[2] + (1 / fors_freq)
+    # forecasts with correct frequency and start:
+    mforecast$forecast[[i]]$mean <- ts(forecast_matrix[, i], start = fors_start, frequency = fors_freq)
+
+    mforecast$forecast[[i]]$series <- colnames(forecast_matrix)[i] # names of series
+    class(mforecast$forecast[[i]]) <- "forecast"
   }
   
   names(mforecast$forecast) <- colnames(forecast_matrix)
+  class(mforecast) <- "mforecast"
   return(mforecast)
 }
 
 # load data
 rus_macro <- readr::read_csv("../data/df_2015_final.csv")
+# head(rus_macro$time_y)
 rus_macro <- dplyr::select(rus_macro, -time_y)
-
+rus_macro <- ts(rus_macro, start = c(1995, 1), frequency = 12)
+head(rus_macro)
+str(rus_macro)
 # test block
 
 
 y <- scale_series(rus_macro)
-fors <- forecast_arima(y, h = 3)
+y_subset <- y[, 1:2]
+fors <- forecast_arima(y_subset, h = 3)
+fors <- forecast_ets(y_subset, h = 3)
+fors_rw <- forecast_rw(y_subset, h = 3)
+fors <- forecast_var_lasso(y_subset, h = 3)
+autoplot(fors)
+autoplot(fors_rw)
+
+future$method
+str(fors$forecast[[1]], max.level = 1)
+
+autoplot(fors$forecast[[2]])
+str(future$forecast[[1]], max.level = 1)
+
+
+library(listviewer)
+jsonedit(fors_rw$forecast[[1]])
+jsonedit(fors$forecast[[1]])
+
+a_rw <- fors_rw$forecast[[1]]
+a_big <- fors$forecast[[1]]
+autoplot(a_rw)
+autoplot(a_big)
+a_rw$model <- NULL
+a_rw$lambda <- NULL
+a_rw$fitted <- NULL
+a_rw$residuals <- NULL
+a_rw$level <- NULL
+a_rw$lower <- NULL
+a_rw$upper <- NULL
+jsonedit(a_rw)
+jsonedit(a_big)
+str(a_rw)
+str(a_big)
+
+str(fors_rw$forecast[[1]])
+
+autoplot(future)
+str(future, max.level = 1)
+str(fors, max.level = 1)
+
 mods <- estimate_ets(y, h = 3)
 fors <- forecast_ets(y, h = 3, model = mods)
 
 fors <- forecast_rw(y, h = 3)
+
 
 
 mforecast_to_matrix(fors)
@@ -225,7 +299,17 @@ a <- tribble(~x, ~y, ~z,
 a
 
 
+# vars format
+library(vars)
+library(forecast)
+model <- VAR(rus_macro[, 1:2], p = 1)
+future <- forecast(model, h = 1)
+future
+str(future, max.level = 1)
 
+autoplot(fors)
+plot(fors)
+plot(future)
 
 
 
