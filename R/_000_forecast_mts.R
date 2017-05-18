@@ -215,101 +215,19 @@ y <- scale_series(rus_macro)
 y_subset <- y[, 1:2]
 fors <- forecast_arima(y_subset, h = 3)
 fors <- forecast_ets(y_subset, h = 3)
-fors_rw <- forecast_rw(y_subset, h = 3)
+fors <- forecast_rw(y_subset, h = 3)
 fors <- forecast_var_lasso(y_subset, h = 3)
 autoplot(fors)
-autoplot(fors_rw)
 
-future$method
-str(fors$forecast[[1]], max.level = 1)
-
-autoplot(fors$forecast[[2]])
-str(future$forecast[[1]], max.level = 1)
 
 
 library(listviewer)
-jsonedit(fors_rw$forecast[[1]])
-jsonedit(fors$forecast[[1]])
-
-a_rw <- fors_rw$forecast[[1]]
-a_big <- fors$forecast[[1]]
-autoplot(a_rw)
-autoplot(a_big)
-a_rw$model <- NULL
-a_rw$lambda <- NULL
-a_rw$fitted <- NULL
-a_rw$residuals <- NULL
-a_rw$level <- NULL
-a_rw$lower <- NULL
-a_rw$upper <- NULL
-jsonedit(a_rw)
-jsonedit(a_big)
-str(a_rw)
-str(a_big)
-
-str(fors_rw$forecast[[1]])
-
-autoplot(future)
-str(future, max.level = 1)
-str(fors, max.level = 1)
-
-mods <- estimate_ets(y, h = 3)
-fors <- forecast_ets(y, h = 3, model = mods)
-
-fors <- forecast_rw(y, h = 3)
+one_ts_forecast <- fors$forecast[[1]]
+jsonedit(one_ts_forecast)
 
 
 
-mforecast_to_matrix(fors)
 
-mods <- estimate_var_lasso(y, h = 3)
-
-fors <- forecast_var_lasso(y, h = 3, model = mods)
-fors
-mforecast_to_matrix(fors)
-
-
-library(tibble)
-help(package = "tibble")
-
-wa <- list(c(x = 1, y = 2), c(z = 4, y = 7))
-wa[[1]]['x']
-testa <- tibble(x = 1:2, y = wa)
-testa
-
-testa$y[[1]]["x"]
-
-wb <- list(list(x = 1, y = 2), list(z = 4, y = 7))
-wb[[1]][['x']]
-testb <- tibble(x = 1:2, y = wb)
-testb
-
-testb$y[[1]][["x"]]
-
-
-library(feather)
-write_feather(testa, path = "testa.feather")
-write_feather(testb, path = "testa.feather")
-
-
-a <- tribble(~x, ~y, ~z,
-       cos, 5, 6,
-       estimate_var_lasso, 7, 8,
-       tan, 9, 10)
-a
-
-
-# vars format
-library(vars)
-library(forecast)
-model <- VAR(rus_macro[, 1:2], p = 1)
-future <- forecast(model, h = 1)
-future
-str(future, max.level = 1)
-
-autoplot(fors)
-plot(fors)
-plot(future)
 
 
 
