@@ -43,8 +43,6 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
   if (is.ts(y_matrix)) {
     y_matrix <- coredata(y_matrix)
   }
-
-  m <- ncol(y_matrix)
   
   model_spec <- BigVAR::constructModel(y_matrix, p = p, struct = struct, 
                            T1 = T1, T2 = T2, 
@@ -52,6 +50,14 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
                            verbose = TRUE, VARX = list())
   
   model <- BigVAR::cv.BigVAR(model_spec)
+  return(model)
+}
+
+
+estimate_tvp_primiceri <- function(y, h = 1, p = 12, nrep = 1000, nburn = 1000, ...) {
+  y_matrix <- as.matrix(y)
+  
+  model <- bvar.sv.tvp(y_matrix, p = p, nrep = nrep, nburn = nburn, ...)
   return(model)
 }
 
@@ -77,9 +83,7 @@ forecast_rw <- function(y, h = 1, ...) {
 
 
 # we return something like mforecast (!)
-forecast_var_lasso <- function(y, h = 1, 
-                           model = NULL, 
-                           ...) {
+forecast_var_lasso <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_var_lasso(y, h, ...)
   }
@@ -97,7 +101,34 @@ forecast_var_lasso <- function(y, h = 1,
   
   colnames(forecast_matrix) <- colnames(y_matrix)
   mforecast <- matrix_to_mforecast(forecast_matrix, y_matrix, method = "BigVAR")
+  mforecast$model <- model
+  return(mforecast)
+}
+
+
+primiceri_draws_to_1d_forecast <- function() {
   
+}
+
+
+# we return something like mforecast (!)
+forecast_tvp_primiceri <- function(y, h = 1, model = NULL, ...) {
+  if (is.null(model)) {
+    model <- estimate_tvp_primiceri(y, h = h, ...)
+  }
+  y_matrix <- as.matrix(y)
+  m <- ncol(y_matrix) # number of series
+  
+  mforecast <- list()
+  mforecast$model <- model
+  
+  mforecast$forecast <- list()
+  
+  for (i in 1:m) {
+    mforecast$forecast[[i]] <- primiceri_draws_to_1d_forecast(model, v = i, h = h, level = c(80, 95))
+  }
+
+  class(mforecast) <- "mforecast"
   return(mforecast)
 }
 
@@ -225,9 +256,9 @@ library(listviewer)
 one_ts_forecast <- fors$forecast[[1]]
 jsonedit(one_ts_forecast)
 
-
-
-
-
+library(vars)
+model_VAR <- VAR(y_subset, p = 1)
+fors_var <- forecast(model_VAR, h = 3)
+jsonedit(fors_var)
 
 
