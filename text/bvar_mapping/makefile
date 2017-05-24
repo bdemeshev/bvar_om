@@ -25,4 +25,4 @@ $(file_name).pdf: $(file_name).tex bibliobase2.bib
 #	Rscript -e "library(knitr); knit('$(file_name).Rnw')"
 
 clean:
-	rm $(file_name).pdf
+	-rm $(file_name).pdf $(file_name).bbl $(file_name).tdo $(file_name).run.xml $(file_name).idx $(file_name).aux $(file_name).out $(file_name).tex.blg $(file_name).log $(file_name).bcf $(file_name).fls $(file_name).fdb_latexmk
