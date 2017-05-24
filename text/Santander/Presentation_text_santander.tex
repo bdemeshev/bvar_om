@@ -1,0 +1,121 @@
+\documentclass[12pt,a4paper,english,fleqn,oneside,openany]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+%\usepackage{natbib}
+\usepackage{tikz}
+\usepackage{euscript}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{pdflscape}
+\usepackage[toc,page]{appendix}
+\pagestyle{plain}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\e}{\EuScript{E}}
+\renewcommand{\P}{\EuScript{P}}
+\renewcommand{\L}{\EuScript{L}}
+
+
+ \usepackage{verbatim}
+
+%\usepackage[update,prepend]{epstopdf} % EPS-рисунки конвертируются в PDF
+%\usepackage{wrapfig} % Обтекание рисунков текстом
+
+\usepackage{hyperref} % Гиперссылки
+
+\DeclareMathOperator{\E}{\mathbb{E}}
+\let\vec\relax
+\DeclareMathOperator{\vec}{vec}
+\DeclareMathOperator{\diag}{diag}
+
+\DeclareMathOperator{\Var}{\mathbb{V}\mathrm{ar}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\lag}{\EuScript{L}}
+
+\usepackage[backend=biber, style=bwl-FU, citestyle=bwl-FU]{biblatex}
+\addbibresource{bibliobase2.bib}
+
+
+\begin{document}
+
+\title{Forecasting Russian Macroeconomic Indicators with BVAR}
+
+%\author{Boris Demeshev and Oxana Malakhovskaya}
+
+%\date{}
+\maketitle
+
+Slide 2
+
+Accurate macroeconomic forecasts are extremely important for policy making. Time lags are inevitable attributes of any policy, therefore, policy makers should rely on the models with the best possible forecasting performance. Moreover, it is well known that central banks monitor a large set of macroeconomic indicators to determine the policy (\cite{beckner_1996}, \cite{bernanke_boivin_2003}). So the model used for forecasting purposes must be suitable for samples with large cross-sectional dimension to avoid a potential loss of relevant information.  It explains the recent resurgence of interest of academics, central bankers and private experts for macroeconomic forecasting in data-rich environment.
+
+Slide 3
+
+For the last 30 years, vector autoregressions (introduced by \cite{sims_1980}) have become a  widely-used tool for forecasting. However, it is well known that unrestricted VARs bear the risk of overparametrization even for samples of moderate size. The risk stems from the fact that the number of parameters to be estimated increases nonlinearly with the number of equations. For this reason, in economic applications unrestricted VARs usually contain up to eight variables that may potentially lead  to unfavourable consequences both for forecast accuracy and impulse response functions in case of structural analysis.
+
+One of the solutions for this problem is Bayesian shrinkage. The shrinkage is done by imposing restrictions on parameters in the form of prior distributions. At the moment, there exist several papers showing evidence that in terms of forecasting accuracy, medium and large BVAR outperform their small dimensional counterparts. All the empirical applications in these papers were fulfilled on data from developed countries. Application of Bayesian econometrics on Russian data is extremely scarce so far. We decided to fill this gap and forecast Russian macroeconomic indicators with Bayesian VAR. Our special interest is medium size BVAR. 
+
+Slide 4
+
+So we have two objectives in the paper. They are: (1) forecasting of macroeconomic indicators for Russian economy with BVARs of different size and (2) comparing their forecasting accuracy with  competing  models (Random walk and unrestricted VARs)     
+We have two underlying hypotheses. Firstly, we suppose that BVARs outperform the competing models in terms of forecasting accuracy and, secondly, we think that high-dimensional BVARs  can have  better forecasting performance than low-dimensional
+ones.
+
+
+
+
+Slide 6
+Our baseline specification is a standard BVAR with a conjugate Normal-inverted Wishart prior. On this slide you see a general notation of a vector auroregression model in reduced form that also can be written in a compact way.
+
+%. Our vector of variables is denoted $y$ with dimension $m$.
+%Another matrix notation of VAR is formed by groping vectors $y$, $x$,$\phi$ and $\epsilon$ in matrix capital $Y$, capital $X$,capital $Phi$ and capital $E$, respectively. I will use matrix of parameters capital $\Phi$ in what follows. 
+Slide 7 
+
+We complement our otherwise standard conjugate normal - inverted wishart prior with two different priors that, according to some studies, may potentially increase the forecasting performance of the model. They are sum-of-coefficient and dummy initial observation priors. Sum-of-coefficients prior constrains the sum of coefficients and may be interpreted as "inexact differencing". Dummy initial observation prior expresses a belief that variables can have a common stochastic trend. These priors depend on several additional hyperparameters.
+
+Slide 8
+Our dataset consists of 23 monthly data series and runs from January 1996 to April 2015. We adjust series demonstrating seasonal fluctuations and apply logarithms to most of the series, with the exception of those already expressed in rates.
+
+Slide 9
+We estimate several models of different cross-sectional dimension. Industrial production index, CPI and interbank rate are forecast with 3-variable, 6-variable and 23 variables models. Monetary aggregate, real effective exchange rate and oil price index are forecast with 4-variable, 6-variable and 23-variable models. All the other series are forecast  with 4-variable, 7-variable and 23-variable models. For all models with dimension less than 8 we estimate both restricted and unrestricted VAR. We estimate only Bayesian VAR on a sample with 23 variables.
+
+Slide 10
+The estimation scheme looks like this. All models are estimated on 120 observations plus a pre-sample, whose length is equal to the number of lags. We find optimal overall tightness parameter on the training sample, that is first available sub-sample of 120 observations, and then overall tightness parameter is kept fixed for the entire evaluation period. The out-of sample forecasts are obtained with models estimated on rolling windows samples. Our forecasting horizons are 1, 3, 6, 9 and 12 months and we take all possible lags from 1 to 12. 
+
+Slide 11
+
+We visualize our results with this color table. A color of a cell corresponds to the model that appears to outperform the others in terms of forecasting accuracy for a certain variable and a certain forecasting horizon. It seems that most of cells are green (either light green or bright green). And it means that a BVAR model provides the most accurate forecast. 
+
+Slide 12
+It's even most evident on the following slide which corresponds to a prior with a different set of parameters. Some of cells are blue, it means that VAR models (either restricted or not) can not beat random walk in terms of forecast accuracy. Yellow and orange cells indicate the variables and forecasting horizons where unrestricted VAR provide the lowest forecasting error.      
+
+Slide 13
+How do we measure the accuracy of forecasts? We do it in terms of mean squared forecast error calculated as usual. And we report relative MSFE, it means the ratio of MSFE of the model in question to the MSFE of a benchmark which is random walk  with drift in our case. 
+
+Slide 14-15.
+The numbers less than unity indicate that a VAR model provides a better forecast than random walk and less the number is the more accurate the forecasts are relative to random walk.  Please, be careful, the figures are not comparable between different forecasting horizons. We see that in most cases we have at least one model that provides a forecast much better than the benchmark. 
+
+Slide 16.
+ 
+For robustness check of our results we use Model confidence set method of Hansen, Lunde and Nason  published in Econometrica in 2011. The method allows comparison of different models in terms of forecasting accuracy. The result of applying MCS procedure is confidence set containing only models whose forecasting performance is not significantly different. In the slide you can see the number of models of different types that a model confidence set contains for a set of variables. b2 is a 6-variable BVAR, b3 is a 23-variable BVAR, v1 is a 
+ 3 or 4 variable VAR and v3 is a 6 variable VAR. A maximum possible number of models that survive is 12. We can see here that normally two first columns are higher than the third and forth ones. It means that usually a forecasting error of BVAR models is significantly lower than that of frequentist VARS.  
+ 
+ Slide 23.
+ 
+  
+Our interpretation of our results is as follows. First of all, for many variables and forecasting horizons in interest, BVAR outperforms random walk and unrestricted VAR. Secondly, though BVAR in data-rich environment is the best option for some cases, it is often beaten by a BVAR model with relatively low now number of variables (6 or 7). Thirdly, for some variables and some forecasting horizons VARs (either restricted or not) cannot beat RW, for example, nominal exchange rate (long-lasting consensus in economics) and finally, which is our biggest surprise here,  the oil price index can be forecast by BVAR much better than by RW and the result is robust for different prior settings.
+
+Slide 24.
+
+Now it is time to conclude. In the paper, we estimate BVAR models of different size and compare their forecasting performance with RW with drift and unrestricted VAR models for 23 variables and 5 different forecast horizons. We show that for a majority of variables of interest BVAR  outperforms the competing models in terms of forecasting accuracy. However, we cannot confirm a conclusion drawn in other studies where bayesian methods were applied to data from developed countries that high-dimensional BVARs forecast better than low-dimensional models. For many variables in our sample and forecasting horizons a 6- or 7-variable BVAR can beat a 23-variable BVAR in terms of forecasting accuracy.
+
+Slide 24.
+
+Thank you for your attention and I'll be happy to answer your questions now. 
+
+... Thank you for your questions and please, feel free to contact me or my co-author directly at these e-mails if you have any questions or suggestions after the end of the conference. 
+ 
+
+\end{document}
