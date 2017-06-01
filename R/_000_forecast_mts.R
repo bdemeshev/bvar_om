@@ -341,9 +341,6 @@ autoplot(one_ts_forecast)
 jsonedit(one_ts_forecast)
 
 
-library(vars)
-model_VAR <- VAR(y_subset, p = 1)
-fors_var <- forecast(model_VAR, h = 3)
-jsonedit(fors_var)
+
 
 
