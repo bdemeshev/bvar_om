@@ -1,0 +1,173 @@
+\documentclass{beamer} % Класс презентации
+% \documentclass[t]{beamer}  % выровнять текст на слайдах по верхнему краю
+%  \documentclass[handout]{beamer} % Раздаточный материал
+%\documentclass[aspectratio=169]{beamer} % Соотношение сторон
+
+%\usetheme{Berkeley} % Тема оформления
+%\usetheme{Bergen}
+%\usetheme{Szeged}
+\usetheme{Warsaw}
+%\usetheme[numbers]{Statmod}
+
+\usecolortheme{seahorse} %Цветовая схема
+%\useinnertheme{circles}
+%\useinnertheme{rectangles}
+
+\usepackage{mathtext}          % русские буквы в формулах
+\usepackage[T2A]{fontenc}            % внутренняя кодировка  TeX
+\usepackage[utf8]{inputenc}         % кодировка исходного текста
+%\usepackage{cmap}          % русский поиск в pdf
+%\usepackage[english]% локализация и переносы
+\usepackage{amsmath} % Математические окружения AMS
+\usepackage{amsfonts} % Шрифты AMS
+ \usepackage{amssymb} % Символы AMS
+  \usepackage{mathtext} % Русские буквы в фомулах
+  \usepackage{graphicx} % Вставить pdf- или png-файлы
+
+  \usepackage{euscript} % Красивый шрифт
+\setbeamercolor{item}{fg=blue!30}
+
+  \usepackage{longtable}  % Длинные таблицы
+  \usepackage{multirow} % Слияние строк в таблице
+
+ \usepackage{indentfirst} % Отступ в первом абзаце.
+
+ \newcommand*{\hm}[1]{#1\nobreak\discretionary{}%
+            {\hbox{$\mathsurround=0pt #1$}}{}}
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+ \usepackage{verbatim}
+
+\usepackage{graphicx}  % Для вставки рисунков
+\usepackage[update,prepend]{epstopdf} % EPS-рисунки конвертируются в PDF
+\usepackage{wrapfig} % Обтекание рисунков текстом
+\usepackage{booktabs}
+\usepackage{changepage}
+
+
+\usepackage{hyperref} % Гиперссылки
+
+
+
+ \usepackage{etoolbox} % логические операторы
+
+%строки ниже для вставления нумерации слайдов
+
+\defbeamertemplate*{footline}{Warsaw} {%
+\leavevmode%
+\hbox{%
+\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
+\insertframenumber{}%
+\hfill\insertshortauthor
+\end{beamercolorbox}%
+\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{title in head/foot}%
+\usebeamerfont{title in head/foot}\insertshorttitle
+\end{beamercolorbox}
+}%
+\vskip0pt%
+}
+\usepackage[backend=biber, style=bwl-FU, citestyle=bwl-FU]{biblatex}
+\addbibresource{bibliobase2.bib}
+
+\DeclareMathOperator{\etr}{etr}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator*{\argmax}{arg\,max}
+%\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Var}{\mathbb{V}\mathrm{ar}}
+\DeclareMathOperator{\chol}{chol}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cIW}{\mathcal{IW}}
+\newcommand{\lag}{\EuScript{L}}
+
+\newcommand{\prior}{\underline}
+\newcommand{\post}{\overline}
+
+\let\vec\relax
+\DeclareMathOperator{\vec}{vec}
+
+
+
+
+\author[Discussion]{Manoel Bittencourt\and Matthew Clance \and Yoseph Getachew }
+\title[Trade openness and fertility rates]{Trade Openness and Fertility Rates in Africa: Panel-Data Evidence}
+
+%\subtitle{Наша первая презентация}
+%\date[Дата]{\today} % Если  \today, то можно просто не писать
+%\institute[National Research University Higher School of Economics]
+
+
+\date{Discussant: Oxana Malakhovskaya}
+
+\begin{document} % Конец преамбулы, начало текста.
+\begin{frame} %{1}
+
+\titlepage
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Motivation}
+
+\begin{itemize}
+\item The paper is motivated by the Unified growth theory.
+\item The aim of the paper is  to study the linkage between the trade openness and a fertility rate in Africa.
+\item Implicit idea is that trade openness is a characteristic of economic development. In the regression the trade explains a part of variation that is not explained by the variation of per capita income and some other variables.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Method and results}
+
+Method:
+\begin{itemize}
+\item Panel data analysis with fixed effects, some regressions take instruments into account.
+\end{itemize}
+
+Results: 
+\begin{itemize}
+\item Greater trade openness is associated with lower fertility rates contrary to results of Galor and Mountford(2008)
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Suggestions}
+
+Endogeneity
+
+\begin{itemize}
+\item it is written: 'our trade openness variable has a negative effect on fertility in Africa.' (page 3). I do not think we can talk about causation here. 
+\end{itemize}
+
+
+Possible negative causation
+
+\begin{itemize}
+\item it is written: 'we find that imports of manufactured goods have a significant negative effect on fertility.' (p. 3)
+\end{itemize}
+
+Another possible explanation: 
+greater fertility $\to$ less per capita GDP $\to$ less import, including import of manufactured goods 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Questions}
+\begin{itemize}
+\item Is it possible to take traditions (or religion or beliefs) into account? 
+\item Are regressors really not collinear?  It seems that mortality rate and education level may be linked with income per capita.
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}%22
+\begin{center}
+THANK YOU FOR YOUR ATTENTION!
+\vspace{1cm}
+\end{center}
+\end{frame}
+\end{document}
+

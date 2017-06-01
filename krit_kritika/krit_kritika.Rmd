@@ -1,0 +1,58 @@
+---
+title: "Trade Openness"
+author: "Winnie the Pooh"
+date: "5/25/2017"
+output: 
+  pdf_document: 
+    keep_tex: yes
+lang: en-EN
+---
+
+## Remarks:
+
+### 1. Use cloropleth maps with caution
+
+* One may easily manipulate color of a cloropleth map, see
+
+\url{http://faculty.maxwell.syr.edu/mon2ier/e_reprints/StatSci%20Aug2005%20(Lying%20with%20Maps).pdf}
+
+* Most cloropleth maps are just population maps
+
+\includegraphics[width=8cm]{heatmap_2x.png}
+
+### 2. The use of instrumental variables is not equal to a pure random experiment
+
+\includegraphics[width=8cm]{correlation.png}
+
+* Try to find measure of African openness exogenous to Africa? Maybe sharp tax reduction in Europe or US?
+
+### 3. Compare import/export structure with Europe and US or China
+
+### 4. Structural changes in fertility?
+
+* Plot your time series!
+
+* Use mvtsplot: \url{http://www.biostat.jhsph.edu/~rpeng/RR/mvtsplot/}
+
+### 5. Small remarks
+
+* Motivate why you omit Liberia
+
+* Less digits in table 1
+
+* Units of measure in Figure 2 and 3
+
+### 6. OLS and IV are just particular cases of GMM
+
+### 7. Other variables:
+
+* religion
+* education
+* dictatorship, see \url{https://www.theguardian.com/world/2008/nov/27/south-africa-aids-mbeki}
+* health, AIDS (probably reverse causality?)
+
+### 8. Present more graphs and less tables
+
+* Plot results of regression, Stata example, \url{http://www.stata.com/meeting/germany14/abstracts/materials/de14_jann.pdf}
+
+
