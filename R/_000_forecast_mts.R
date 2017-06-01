@@ -19,6 +19,11 @@ estimate_arima <- function(y, h = 1, ...) {
 }
 
 
+
+next_obs_time <- function(y) {
+  return(end(y)[1] + deltat(y) * (end(y)[2] + 1))
+}
+
 estimate_ets <- function(y, h = 1, ...) {
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
@@ -57,7 +62,7 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
 estimate_tvp_primiceri <- function(y, h = 1, p = 12, nrep = 1000, nburn = 1000, ...) {
   y_matrix <- as.matrix(y)
   
-  model <- bvar.sv.tvp(y_matrix, p = p, nrep = nrep, nburn = nburn, ...)
+  model <- bvarsv::bvar.sv.tvp(y_matrix, p = p, nrep = nrep, nburn = nburn, ...)
   return(model)
 }
 
@@ -106,8 +111,63 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, ...) {
 }
 
 
-primiceri_draws_to_1d_forecast <- function() {
+primiceri_draws_to_1d_forecast <- function(model, y_actual, series_no = 1, 
+                                           h = 1, level = c(80, 95)) {
+
   
+  
+create_interval_borders <- function(y_future, level, 
+                                    type = c("lower", "upper"),
+                                    fors_start, fors_freq) {
+  type <- match.arg(type)
+  
+  lower_probs <- (1 - level / 100) / 2
+  if (type == "lower") {
+    probs <- lower_probs
+  } else {
+    probs <- 1 - lower_probs
+  }
+  
+  y_future_border <- map(y_future, ~ quantile(.x, probs = lower_probs)) %>% as_tibble() %>% t()
+  y_future_border <- ts(y_future_border, start = fors_start, frequency = fors_freq)
+  colnames(y_future_border) <- paste0(level, "%")
+  
+  return(y_future_border)
+}  
+  
+  
+  one_ts_forecast <- list()
+  one_ts_forecast$method <- "TVP-BVAR_Primiceri"
+  one_ts_forecast$level <- level
+  one_ts_forecast$series <- colnames(y_actual)[series_no]
+  one_ts_forecast$x <- y_actual[, series_no]
+  
+  y_future <- list()
+  for (h_index in 1:h) {
+    y_future[[h_index]] <- bvarsv::predictive.draws(model, v = series_no, h = h_index)$y
+  }
+  names(y_future) <- paste0("h", 1:h)
+  y_future <- as_tibble(y_future)
+  
+  fors_freq <- frequency(y_actual[, series_no])
+  fors_start <- next_obs_time(y_actual[, series_no])
+  
+  y_future_mean <- map_dbl(y_future, mean)
+  y_future_mean <- ts(y_future_mean, start = fors_start, frequency = fors_freq)
+  
+  
+  one_ts_forecast$mean <- y_future_mean
+  one_ts_forecast$lower <- create_interval_borders(y_future, 
+                                                   level = level, type = "lower",
+                                                   fors_start = fors_start,
+                                                   fors_freq = fors_freq)
+  one_ts_forecast$upper <- create_interval_borders(y_future, 
+                                                   level = level, type = "upper",
+                                                   fors_start = fors_start,
+                                                   fors_freq = fors_freq)
+  
+  class(one_ts_forecast) <- "forecast"
+  return(one_ts_forecast)
 }
 
 
@@ -125,7 +185,8 @@ forecast_tvp_primiceri <- function(y, h = 1, model = NULL, ...) {
   mforecast$forecast <- list()
   
   for (i in 1:m) {
-    mforecast$forecast[[i]] <- primiceri_draws_to_1d_forecast(model, v = i, h = h, level = c(80, 95))
+    mforecast$forecast[[i]] <- primiceri_draws_to_1d_forecast(model, y_actual = y_matrix,
+                                                              series_no = i, h = h)
   }
 
   class(mforecast) <- "mforecast"
@@ -251,6 +312,8 @@ fors <- forecast_var_lasso(y_subset, h = 3)
 autoplot(fors)
 
 
+mods <- estimate_tvp_primiceri(y_subset, h = 3, p = 1)
+fors <- forecast_tvp_primiceri(y_subset, h = 3, model = mods)
 
 library(listviewer)
 one_ts_forecast <- fors$forecast[[1]]
