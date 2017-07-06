@@ -107,21 +107,65 @@ forecast_rw <- function(y, h = 1, ...) {
 
 
 # we return something like mforecast (!)
-forecast_var_lasso <- function(y, h = 1, model = NULL, ...) {
-  if (is.null(model)) {
-    model <- estimate_var_lasso(y, h, ...)
-  }
+forecast_var_lasso <- function(y, h = 1, model = NULL, 
+                               type = c("fast", "honest"), ...) {
+  # honest: one should redo cross-validation for each h
+  # h should be a vector
+  # model missing or a list of the same length as h (or one :))
+  # fast: do cross-validation for h
+  # and than predict for each h = 1, ..., h
+  type <- match.arg(type)
+
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
   
-  forecast_matrix <- matrix(0, nrow = h, ncol = m)
+  forecast_matrix <- matrix(0, nrow = max(h), ncol = m)    
   
-  for (i in 1:h) {
-    forecast_matrix[i, ] <- 
-      as.vector(predict(model, n.ahead = i))
-    # as.vector нужен так как predict для n.ahead = 1 возвращает строку
-    # а для n.ahead > 1 возвращает столбец
+  if (type == "fast") {
+    if (is.null(model)) {
+      model <- estimate_var_lasso(y, h = h, ...)
+    }
+
+    for (i in 1:h) {
+      forecast_matrix[i, ] <- 
+        as.vector(BigVAR::predict(model, n.ahead = i))
+      # as.vector нужен так как predict для n.ahead = 1 возвращает строку
+      # а для n.ahead > 1 возвращает столбец
+    }
   }
+  
+  if (type == "honest") {
+    if (!length(model) %in% c(0, 1, length(h))) {
+      stop("Argument 'model' should be NULL, one model for all 'h' or a list of models for each 'h'.\n
+           Length of 'model' is ", length(model), ", while lenght of 'h' is ", length(h),".")
+    }
+
+    if (length(model) == 1) {
+      # same model for all h
+      model_i <- model
+    }
+    
+    for (i in 1:max(h)) {
+      if (i %in% h) {
+        if (length(model) > 1) {
+          # separate model for each h
+          h_no <- which(i == h)
+          model_i <- model[[h_no]]
+        } else if (is.null(model)) {
+          # no model at all
+          model_i <- estimate_var_lasso(y, h = i) #, ...)
+        } 
+        forecast_matrix[i, ] <- 
+          as.vector(BigVAR::predict(model_i, n.ahead = i))
+        # as.vector нужен так как predict для n.ahead = 1 возвращает строку
+        # а для n.ahead > 1 возвращает столбец
+      } else {
+        forecast_matrix[i, ] <- rep(NA, times = m)
+      }
+    }
+  }
+  
+  
   
   colnames(forecast_matrix) <- colnames(y_matrix)
   mforecast <- matrix_to_mforecast(forecast_matrix, y_matrix, method = "BigVAR")
@@ -311,35 +355,44 @@ matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified
   return(mforecast)
 }
 
-# load data
-rus_macro <- readr::read_csv("../data/df_2015_final.csv")
-# head(rus_macro$time_y)
-rus_macro <- dplyr::select(rus_macro, -time_y)
-rus_macro <- ts(rus_macro, start = c(1995, 1), frequency = 12)
-head(rus_macro)
-str(rus_macro)
-# test block
 
+load_rus_data <- function() {
+  rus_macro <- readr::read_csv("../data/df_2015_final.csv")
+  rus_macro <- dplyr::select(rus_macro, -time_y)
+  rus_macro <- ts(rus_macro, start = c(1995, 1), frequency = 12)
+  return(rus_macro)
+}
 
-y <- scale_series(rus_macro)
-y_subset <- y[, 1:2]
-
-fors <- forecast_arima(y_subset, h = 3)
-fors <- forecast_ets(y_subset, h = 3)
-fors <- forecast_rw(y_subset, h = 3)
-fors <- forecast_var_lasso(y_subset, h = 3)
-fors <- forecast_tvp_primiceri(y_subset, h = 3, p = 1)
-fors <- forecast_var(y_subset, h = 3, p = 1)
-autoplot(fors)
-
-
-
-
-library(listviewer)
-one_ts_forecast <- fors$forecast[[1]]
-autoplot(one_ts_forecast)
-jsonedit(one_ts_forecast)
-
+# 
+# # load data
+# rus_macro <- readr::read_csv("../data/df_2015_final.csv")
+# # head(rus_macro$time_y)
+# rus_macro <- dplyr::select(rus_macro, -time_y)
+# rus_macro <- ts(rus_macro, start = c(1995, 1), frequency = 12)
+# head(rus_macro)
+# str(rus_macro)
+# # test block
+# 
+# 
+# y <- scale_series(rus_macro)
+# y_subset <- y[, 1:2]
+# 
+# fors <- forecast_arima(y_subset, h = 3)
+# fors <- forecast_ets(y_subset, h = 3)
+# fors <- forecast_rw(y_subset, h = 3)
+# fors <- forecast_var_lasso(y_subset, h = 3)
+# fors <- forecast_tvp_primiceri(y_subset, h = 3, p = 1)
+# fors <- forecast_var(y_subset, h = 3, p = 1)
+# autoplot(fors)
+# 
+# 
+# 
+# 
+# library(listviewer)
+# one_ts_forecast <- fors$forecast[[1]]
+# autoplot(one_ts_forecast)
+# jsonedit(one_ts_forecast)
+# 
 
 
 
