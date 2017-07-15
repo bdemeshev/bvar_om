@@ -1,3 +1,5 @@
+# this file contains functions used to estimate arima, ets, rw, var_lasso
+
 library(forecast)
 library(vars)
 library(tidyverse)
@@ -363,14 +365,10 @@ load_rus_data <- function() {
   return(rus_macro)
 }
 
+# just an example 
 # 
 # # load data
-# rus_macro <- readr::read_csv("../data/df_2015_final.csv")
-# # head(rus_macro$time_y)
-# rus_macro <- dplyr::select(rus_macro, -time_y)
-# rus_macro <- ts(rus_macro, start = c(1995, 1), frequency = 12)
-# head(rus_macro)
-# str(rus_macro)
+# rus_macro <- load_rus_data()
 # # test block
 # 
 # 

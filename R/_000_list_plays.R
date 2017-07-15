@@ -1,4 +1,4 @@
-# play with model/var_set/shifts lists
+# main cycle of estimation
 
 source("_000_forecast_mts.R")
 
