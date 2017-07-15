@@ -4,9 +4,25 @@ source("_000_forecast_mts.R")
 
 rus_macro <- load_rus_data()
 
-shifts <- tribble(~shift_name, ~T_start, ~win_type, ~win_start_length, ~n_shifts,
-                  "base", 1, "moving", 120, 10)
+# create all shifts (like moving/expanding...)
+shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length, ~n_shifts,
+                  "moving_120", 1, FALSE, 120, 10,
+                  "expanding_120", 1, TRUE, 120, 10)
 
+# create all models
+models <- tribble(~model_type, ~comment,
+                  "arima", "auto arima applied series wise",
+                  "ets", "auto ets applied series wise",
+                  "rw", "random walk applied series wise")
+fake_arg <- tibble(pars_id = "automatic")
+models$model_args <- rep(list(fake_arg), 3)
+models$h_required <- rep(FALSE, 3)
+var_lasso_pars <- tibble(pars_id = paste0("p", 1:12), p = 1:12)
+var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
+                            "var_lasso", var_lasso_pars, TRUE, "var lasso with cross validation for each h")
+models <- bind_rows(var_lasso_models, models)
+
+# create all variable sets
 create_var_set_info <- function() {
   add_A <- dplyr::tibble(var_set = "set_A", variable = c("ind_prod", "cpi", "ib_rate"))
   add_B <- dplyr::tibble(var_set = "set_B", variable = c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
@@ -16,12 +32,86 @@ create_var_set_info <- function() {
                                                              "agriculture", "retail", "gov_balance", "export", "import"))
   
   var_set_info <- dplyr::bind_rows(add_A, add_B, add_C)
-  var_set_info <- dplyr::mutate(var_set_info, pre_transform = "none", post_transfomr = "none")
+  var_set_info <- dplyr::mutate(var_set_info, pre_transform = "none", post_transform = "none")
   
   return(var_set_info)
 }
 
-vars_sets <- create_var_set_info()
+var_sets <- create_var_set_info()
 
+
+# create all horizons
+horizons <- tibble(h = c(1, 3, 6, 12))
+
+
+
+# GO!
+shifts_to_samples <- function(shifts) {
+  line_no <- rep(1:nrow(shifts), times = shifts$n_shifts)
+  samples <- shifts[line_no, ]
+  samples <- samples %>% group_by(shift_name) %>% mutate(shift_no = row_number())
+  samples <- samples %>% ungroup() %>% 
+    mutate(T_end = shift_T_start + win_start_length + shift_no - 2,
+           T_start = T_end - win_start_length - win_expanding * (shift_no - 1) + 1,
+           sample_name = paste0(shift_name, "_", shift_no))
+  return(samples)
+}
+
+samples <- shifts_to_samples(shifts)
+
+models_long <- unnest(models) # do we need it?
+
+
+fits <- crossing(samples, models, var_set = var_sets$var_set, horizons)
+fits_long <- unnest(fits) 
+
+is_not_h <- function(col_names) {
+  return(setdiff(col_names, c("h", "fit_id", "model_filename")))
+}
+
+
+# the function sets maximal h for h-agnostic models 
+# (models that do not require h during estimation phase)
+set_agnostic_max_h <- function(fits_long) {
+  fits_h_gnostic <- filter(fits_long, h_required == TRUE)
+  fits_h_agnostic <- filter(fits_long, h_required == FALSE)
+  group_by_vars <- is_not_h(colnames(fits_long))
+  fits_h_agnostic <- fits_h_agnostic %>% 
+    group_by_at(.vars = group_by_vars) %>% 
+    filter(h == max(h)) %>% ungroup()
+  fits_long <- bind_rows(fits_h_gnostic, fits_h_agnostic)
+  return(fits_long)
+}
+
+fits_long <- set_agnostic_max_h(fits_long)
+
+
+# add id just before cycle
+fits_long <- fits_long %>% mutate(fit_id = paste0("fit_", row_number()),
+                                  model_filename = "")
+
+
+
+non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id"), c("model_args"))
+
+fit_no <- 42 # for testing. remove later!!!!!
+
+forecast_one_fit <- function(fits_long, fit_no) {
+  fit_row <- fits_long[fit_no, ]
+  parameter_colnames <- setdiff(colnames(fit_row), non_parameter_colnames)
+  estimate_fun_name <- paste0("estimate", "_", fit_row$model_type)
+  forecast_fun_name <- paste0("forecast", "_", fit_row$model_type)
+  
+  vars <- var_sets %>% filter(var_set == fit_row$var_set) %>% .$variable
+  y <- rus_macro[fit_row$T_start:fit_row$T_end, vars]
+  
+  
+  ...
+}
+
+# forecasting
+for (fit_no in 1:nrow(fits_long)) {
+  res <- forecast_one_fit(fits_long, fit_no)
+}
 
 
