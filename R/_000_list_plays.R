@@ -9,7 +9,7 @@ shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length
                   "moving_120", 1, FALSE, 120, 10,
                   "expanding_120", 1, TRUE, 120, 10)
 
-# create all models
+# describe non lasso models (automatic)
 models <- tribble(~model_type, ~comment,
                   "arima", "auto arima applied series wise",
                   "ets", "auto ets applied series wise",
@@ -17,7 +17,20 @@ models <- tribble(~model_type, ~comment,
 fake_arg <- tibble(pars_id = "automatic")
 models$model_args <- rep(list(fake_arg), 3)
 models$h_required <- rep(FALSE, 3)
-var_lasso_pars <- tibble(pars_id = paste0("p", 1:12), p = 1:12)
+
+# lasso params:
+var_lasso_pars <- crossing(p = 1:12, struct = c("SparseLag", "OwnOther", "SparseOO"))
+# three top players according to 
+# https://arxiv.org/pdf/1508.07497.pdf page 23
+# "SparseLag" (Lag Sparse Group VARX-L)
+# "OwnOther" (Own/Other Group VARX-L)
+# "SparseOO" (Own/Other Sparse Group VARX-L)
+var_lasso_pars$granularity <- rep(list(c(25, 10)), nrow(var_lasso_pars))
+# we have grid of 10 points from lambda_max/25 to lambda_max
+# 25 and 10 suggested by BigVAR user's guide, 
+# http://www.wbnicholson.com/BigVAR.pdf, page 9
+
+
 var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
                             "var_lasso", var_lasso_pars, TRUE, "var lasso with cross validation for each h")
 models <- bind_rows(var_lasso_models, models)
