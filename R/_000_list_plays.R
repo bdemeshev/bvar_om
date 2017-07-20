@@ -114,7 +114,7 @@ fits_long <- fits_long %>% mutate(fit_id = paste0("fit_", row_number()),
 
 
 
-non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id"), c("model_args"))
+non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "fit_id"), c("model_args"))
 
 fit_no <- 42 # for testing. remove later!!!!!
 
@@ -139,28 +139,32 @@ forecast_one_fit <- function(fits_long, fit_no) {
   
   vars <- var_sets %>% filter(var_set == fit_row$var_set) %>% .$variable
   y <- rus_macro[fit_row$T_start:fit_row$T_end, vars]
+  parameters$y <- list(y)
   
   attempt <- try(do.call(forecast_fun, parameters))
+  
   if ("try-error" %in% class(attempt)) {
     result <- as.character(attempt) 
   } else {
     # write file
-    readr::write_rds(attempt, path = fits_folder)
+    readr::write_rds(attempt, path = paste0(fits_folder, fit_row$model_filename))
     result <- "OK"
   }
   return(result)
 }
 
-readr::write_rds(fits_long, path = bvar_alt_folder)
+readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+forecast_one_fit(fits_long, 1)
+
 
 # forecasting
 for (fit_no in 1:nrow(fits_long)) {
   fits_long$result <- forecast_one_fit(fits_long, fit_no)
   if (fit_no %% save_fits_long_every == 0) {
-    readr::write_rds(fits_long, path = bvar_alt_folder)
+    readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
   }
 }
 
-readr::write_rds(fits_long, path = bvar_alt_folder)
+readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 
 
