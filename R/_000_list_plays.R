@@ -119,8 +119,9 @@ non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id",
 fit_no <- 42 # for testing. remove later!!!!!
 
 granulatiry_to_vector <- function(df) {
-  df$gran <- list(c(df$gran_1, df$gran_2))
-  df <- dplyr::select(df, -gran_1, -gran_2)
+  df$gran <- c(df$gran_1, df$gran_2)
+  df$gran_1 <- NULL
+  df$gran_2 <- NULL
   return(df)
 }
 
@@ -131,7 +132,7 @@ forecast_one_fit <- function(fits_long, fit_no) {
   parameter_colnames <- setdiff(colnames(fit_row), non_parameter_colnames)
   parameters <- fit_row[, parameter_colnames]
   # remove NA parameters that are not required for actual fit:
-  parameters <- parameters[, as.vector(!is.na(parameters[1, ]))]
+  parameters <- as.list(parameters[, as.vector(!is.na(parameters[1, ]))])
   parameters <- granulatiry_to_vector(parameters)
   
   forecast_fun_name <- paste0("forecast", "_", fit_row$model_type)
@@ -139,7 +140,7 @@ forecast_one_fit <- function(fits_long, fit_no) {
   
   vars <- var_sets %>% filter(var_set == fit_row$var_set) %>% .$variable
   y <- rus_macro[fit_row$T_start:fit_row$T_end, vars]
-  parameters$y <- list(y)
+  parameters$y <- y
   
   attempt <- try(do.call(forecast_fun, parameters))
   
@@ -154,6 +155,7 @@ forecast_one_fit <- function(fits_long, fit_no) {
 }
 
 readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+# testing:
 forecast_one_fit(fits_long, 1)
 
 

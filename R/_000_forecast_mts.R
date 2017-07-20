@@ -60,7 +60,7 @@ estimate_ets <- function(y, h = 1, ...) {
 
 estimate_var_lasso <- function(y, h = 1, p = 12,
                                struct = "OwnOther",
-                               gran = c(10000, 3),
+                               gran = c(25, 10),
                                T1 = floor(nrow(as.matrix(y)) / 3),
                                T2 = floor(2 * nrow(as.matrix(y)) / 3)) {
   y_matrix <- as.matrix(y)
@@ -109,7 +109,8 @@ forecast_rw <- function(y, h = 1, ...) {
 
 
 # we return something like mforecast (!)
-forecast_var_lasso <- function(y, h = 1, model = NULL, 
+forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1, 
+                               struct = "OwnOther", gran = c(25, 10),
                                type = c("fast", "honest"), ...) {
   # honest: one should redo cross-validation for each h
   # h should be a vector
@@ -117,6 +118,14 @@ forecast_var_lasso <- function(y, h = 1, model = NULL,
   # fast: do cross-validation for h
   # and than predict for each h = 1, ..., h
   type <- match.arg(type)
+  
+  message("p = ", p, " class_p = ", class(p), "\n")
+  message("h = ", h, " class_h = ", class(h), "\n")
+  message("struct = ", struct, " class_struct = ", class(struct), "\n")
+  message("h = ", h, " class_h = ", class(h), "\n")
+  message("gran = ", gran, " class_gran = ", class(gran), "\n")
+  
+  
 
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
@@ -125,7 +134,7 @@ forecast_var_lasso <- function(y, h = 1, model = NULL,
   
   if (type == "fast") {
     if (is.null(model)) {
-      model <- estimate_var_lasso(y, h = h, ...)
+      model <- estimate_var_lasso(y, h = h, p = p, struct = struct, gran = gran, ...)
     }
 
     for (i in 1:h) {
