@@ -1,6 +1,9 @@
 # main cycle of estimation
 
 source("_000_forecast_mts.R")
+fits_folder <- "../estimation/bvar_alternatives/fits/"
+bvar_alt_folder <- "../estimation/bvar_alternatives/"
+save_fits_long_every <- 10 # after every 10 moves update fits_long
 
 rus_macro <- load_rus_data()
 
@@ -25,10 +28,16 @@ var_lasso_pars <- crossing(p = 1:12, struct = c("SparseLag", "OwnOther", "Sparse
 # "SparseLag" (Lag Sparse Group VARX-L)
 # "OwnOther" (Own/Other Group VARX-L)
 # "SparseOO" (Own/Other Sparse Group VARX-L)
-var_lasso_pars$granularity <- rep(list(c(25, 10)), nrow(var_lasso_pars))
+
 # we have grid of 10 points from lambda_max/25 to lambda_max
 # 25 and 10 suggested by BigVAR user's guide, 
 # http://www.wbnicholson.com/BigVAR.pdf, page 9
+# ideally we would like to do this:
+# var_lasso_pars$granularity <- rep(list(c(25, 10)), nrow(var_lasso_pars))
+# but group_by does not work with ugly variables 
+# so we introduce gran_1 and gran_2 and unite them after group_by
+var_lasso_pars$gran_1 <- 25
+var_lasso_pars$gran_2 <- 10
 
 
 var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
@@ -101,7 +110,7 @@ fits_long <- set_agnostic_max_h(fits_long)
 
 # add id just before cycle
 fits_long <- fits_long %>% mutate(fit_id = paste0("fit_", row_number()),
-                                  model_filename = "")
+                model_filename = paste0("fit_", row_number(), ".Rds"))
 
 
 
@@ -109,22 +118,49 @@ non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id")
 
 fit_no <- 42 # for testing. remove later!!!!!
 
+granulatiry_to_vector <- function(df) {
+  df$gran <- list(c(df$gran_1, df$gran_2))
+  df <- dplyr::select(df, -gran_1, -gran_2)
+  return(df)
+}
+
+
 forecast_one_fit <- function(fits_long, fit_no) {
   fit_row <- fits_long[fit_no, ]
+  
   parameter_colnames <- setdiff(colnames(fit_row), non_parameter_colnames)
-  estimate_fun_name <- paste0("estimate", "_", fit_row$model_type)
+  parameters <- fit_row[, parameter_colnames]
+  # remove NA parameters that are not required for actual fit:
+  parameters <- parameters[, as.vector(!is.na(parameters[1, ]))]
+  parameters <- granulatiry_to_vector(parameters)
+  
   forecast_fun_name <- paste0("forecast", "_", fit_row$model_type)
+  forecast_fun <- eval(parse(text = forecast_fun_name))
   
   vars <- var_sets %>% filter(var_set == fit_row$var_set) %>% .$variable
   y <- rus_macro[fit_row$T_start:fit_row$T_end, vars]
   
-  
-  ...
+  attempt <- try(do.call(forecast_fun, parameters))
+  if ("try-error" %in% class(attempt)) {
+    result <- as.character(attempt) 
+  } else {
+    # write file
+    readr::write_rds(attempt, path = fits_folder)
+    result <- "OK"
+  }
+  return(result)
 }
+
+readr::write_rds(fits_long, path = bvar_alt_folder)
 
 # forecasting
 for (fit_no in 1:nrow(fits_long)) {
-  res <- forecast_one_fit(fits_long, fit_no)
+  fits_long$result <- forecast_one_fit(fits_long, fit_no)
+  if (fit_no %% save_fits_long_every == 0) {
+    readr::write_rds(fits_long, path = bvar_alt_folder)
+  }
 }
+
+readr::write_rds(fits_long, path = bvar_alt_folder)
 
 
