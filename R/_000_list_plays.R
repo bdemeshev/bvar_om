@@ -1,9 +1,28 @@
 # main cycle of estimation
 
 source("_000_forecast_mts.R")
+
+# here are separated files for each fit:
 fits_folder <- "../estimation/bvar_alternatives/fits/"
+# here lies the list of all fits:
 bvar_alt_folder <- "../estimation/bvar_alternatives/"
-save_fits_long_every <- 10 # after every 10 moves update fits_long
+# here lie all generated files
+estimation_folder <- "../estimation/"
+# after every ... moves update fits_long:
+save_fits_long_every <- 1 
+
+# create folders if they do not exist
+if (!dir.exists(estimation_folder)) {
+  dir.create(estimation_folder)
+}
+
+if (!dir.exists(bvar_alt_folder)) {
+  dir.create(bvar_alt_folder)
+}
+
+if (!dir.exists(fits_folder)) {
+  dir.create(fits_folder)
+}
 
 rus_macro <- load_rus_data()
 
@@ -66,7 +85,6 @@ var_sets <- create_var_set_info()
 horizons <- tibble(h = c(1, 3, 6, 12))
 
 
-
 # GO!
 shifts_to_samples <- function(shifts) {
   line_no <- rep(1:nrow(shifts), times = shifts$n_shifts)
@@ -81,7 +99,9 @@ shifts_to_samples <- function(shifts) {
 
 samples <- shifts_to_samples(shifts)
 
-models_long <- unnest(models) # do we need it?
+
+models_long <- unnest(models) # not used for computations but maybe useful for user
+readr::write_rds(models_long, path = paste0(bvar_alt_folder, "models_long.Rds"))
 
 
 fits <- crossing(samples, models, var_set = var_sets$var_set, horizons)
@@ -108,15 +128,14 @@ set_agnostic_max_h <- function(fits_long) {
 fits_long <- set_agnostic_max_h(fits_long)
 
 
-# add id just before cycle
-fits_long <- fits_long %>% mutate(fit_id = paste0("fit_", row_number()),
+# add model_filename (used as id) just before cycle
+fits_long <- fits_long %>% mutate(result = "Non-estimated",
                 model_filename = paste0("fit_", row_number(), ".Rds"))
 
 
 
-non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "fit_id"), c("model_args"))
+non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "fit_id", "result"), c("model_args"))
 
-fit_no <- 42 # for testing. remove later!!!!!
 
 granulatiry_to_vector <- function(df) {
   df$gran <- c(df$gran_1, df$gran_2)
@@ -133,7 +152,13 @@ forecast_one_fit <- function(fits_long, fit_no) {
   parameters <- fit_row[, parameter_colnames]
   # remove NA parameters that are not required for actual fit:
   parameters <- as.list(parameters[, as.vector(!is.na(parameters[1, ]))])
-  parameters <- granulatiry_to_vector(parameters)
+  # concatenate two granularity parameters in one vector:
+  if (fit_row$model_type == "var_lasso")  {
+    parameters <- granulatiry_to_vector(parameters)
+  }
+  if (fit_row$h_required) {
+    parameters$h <- fit_row$h
+  }
   
   forecast_fun_name <- paste0("forecast", "_", fit_row$model_type)
   forecast_fun <- eval(parse(text = forecast_fun_name))
@@ -156,12 +181,14 @@ forecast_one_fit <- function(fits_long, fit_no) {
 
 readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 # testing:
-forecast_one_fit(fits_long, 1)
+# forecast_one_fit(fits_long, 1)
 
 
 # forecasting
 for (fit_no in 1:nrow(fits_long)) {
+  cat("Forecasting for fit no ", fit_no, " out of ", nrow(fits_long), "...\n")
   fits_long$result <- forecast_one_fit(fits_long, fit_no)
+  cat("Forecasting for fit no ", fit_no, " out of ", nrow(fits_long), "done.\n")
   if (fit_no %% save_fits_long_every == 0) {
     readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
   }

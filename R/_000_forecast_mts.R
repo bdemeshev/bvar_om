@@ -70,12 +70,14 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
     y_matrix <- coredata(y_matrix)
   }
   
+  cat("Estimation of bvar lasso started...\n")
   model_spec <- BigVAR::constructModel(y_matrix, p = p, struct = struct, 
                            T1 = T1, T2 = T2, 
                            gran = gran, h = h, 
                            verbose = TRUE, VARX = list())
   
   model <- BigVAR::cv.BigVAR(model_spec)
+  cat("Estimation of bvar lasso done.\n")
   return(model)
 }
 
@@ -119,14 +121,6 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1,
   # and than predict for each h = 1, ..., h
   type <- match.arg(type)
   
-  message("p = ", p, " class_p = ", class(p), "\n")
-  message("h = ", h, " class_h = ", class(h), "\n")
-  message("struct = ", struct, " class_struct = ", class(struct), "\n")
-  message("h = ", h, " class_h = ", class(h), "\n")
-  message("gran = ", gran, " class_gran = ", class(gran), "\n")
-  
-  
-
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
   
@@ -138,10 +132,12 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1,
     }
 
     for (i in 1:h) {
+      cat("  forecast for h = ", i, " started...\n")
       forecast_matrix[i, ] <- 
         as.vector(BigVAR::predict(model, n.ahead = i))
       # as.vector нужен так как predict для n.ahead = 1 возвращает строку
       # а для n.ahead > 1 возвращает столбец
+      cat(" forecast for h = ", i, " done.\n")
     }
   }
   
@@ -166,10 +162,12 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1,
           # no model at all
           model_i <- estimate_var_lasso(y, h = i) #, ...)
         } 
+        cat("  forecast for h = ", i, " started...\n")
         forecast_matrix[i, ] <- 
           as.vector(BigVAR::predict(model_i, n.ahead = i))
         # as.vector нужен так как predict для n.ahead = 1 возвращает строку
         # а для n.ahead > 1 возвращает столбец
+        cat("  forecast for h = ", i, " done.\n")
       } else {
         forecast_matrix[i, ] <- rep(NA, times = m)
       }
