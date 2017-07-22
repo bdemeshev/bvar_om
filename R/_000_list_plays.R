@@ -8,8 +8,6 @@ fits_folder <- "../estimation/bvar_alternatives/fits/"
 bvar_alt_folder <- "../estimation/bvar_alternatives/"
 # here lie all generated files
 estimation_folder <- "../estimation/"
-# after every ... moves update fits_long:
-save_fits_long_every <- 1 
 
 # create folders if they do not exist
 if (!dir.exists(estimation_folder)) {
@@ -32,35 +30,41 @@ shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length
                   "expanding_120", 1, TRUE, 120, 10)
 
 # describe non lasso models (automatic)
-models <- tribble(~model_type, ~comment,
-                  "arima", "auto arima applied series wise",
-                  "ets", "auto ets applied series wise",
-                  "rw", "random walk applied series wise")
-fake_arg <- tibble(pars_id = "automatic")
-models$model_args <- rep(list(fake_arg), 3)
-models$h_required <- rep(FALSE, 3)
+fake_args <- tibble(pars_id = "automatic")
+models <- tribble(~model_type, ~comment, ~h_required, ~model_args, 
+                  "arima", "auto arima applied series wise", FALSE, fake_args,
+                  "ets", "auto ets applied series wise", FALSE, fake_args,
+                  "rw", "random walk applied series wise", FALSE, fake_args)
+
 
 # lasso params:
-var_lasso_pars <- crossing(p = 1:12, struct = c("SparseLag", "OwnOther", "SparseOO"))
+var_lasso_args <- crossing(p = 1:12, 
+                           struct = c("OwnOther"), 
+                           gran_1 = 25, gran_2 = 10, 
+                           pars_id = paste0(struct, "_", p))
+# lasso type:
 # three top players according to 
 # https://arxiv.org/pdf/1508.07497.pdf page 23
 # "SparseLag" (Lag Sparse Group VARX-L)
 # "OwnOther" (Own/Other Group VARX-L)
 # "SparseOO" (Own/Other Sparse Group VARX-L)
+# but:
+# "SparseLag" hangs indefinetely
+# "SparseOO" probably hangs indefinetely
 
+# granularity:
 # we have grid of 10 points from lambda_max/25 to lambda_max
 # 25 and 10 suggested by BigVAR user's guide, 
 # http://www.wbnicholson.com/BigVAR.pdf, page 9
 # ideally we would like to do this:
-# var_lasso_pars$granularity <- rep(list(c(25, 10)), nrow(var_lasso_pars))
+# var_lasso_args$granularity <- rep(list(c(25, 10)), nrow(var_lasso_pars))
 # but group_by does not work with ugly variables 
 # so we introduce gran_1 and gran_2 and unite them after group_by
-var_lasso_pars$gran_1 <- 25
-var_lasso_pars$gran_2 <- 10
+
 
 
 var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
-                            "var_lasso", var_lasso_pars, TRUE, "var lasso with cross validation for each h")
+                            "var_lasso", var_lasso_args, TRUE, "var lasso with cross validation for each h")
 models <- bind_rows(var_lasso_models, models)
 
 # create all variable sets
@@ -107,9 +111,6 @@ readr::write_rds(models_long, path = paste0(bvar_alt_folder, "models_long.Rds"))
 fits <- crossing(samples, models, var_set = var_sets$var_set, horizons)
 fits_long <- unnest(fits) 
 
-is_not_h <- function(col_names) {
-  return(setdiff(col_names, c("h", "fit_id", "model_filename")))
-}
 
 
 # the function sets maximal h for h-agnostic models 
@@ -117,10 +118,13 @@ is_not_h <- function(col_names) {
 set_agnostic_max_h <- function(fits_long) {
   fits_h_gnostic <- filter(fits_long, h_required == TRUE)
   fits_h_agnostic <- filter(fits_long, h_required == FALSE)
-  group_by_vars <- is_not_h(colnames(fits_long))
+
+  group_by_vars <- setdiff(colnames(fits_long), c("h", "model_filename"))
+  
   fits_h_agnostic <- fits_h_agnostic %>% 
     group_by_at(.vars = group_by_vars) %>% 
     filter(h == max(h)) %>% ungroup()
+  
   fits_long <- bind_rows(fits_h_gnostic, fits_h_agnostic)
   return(fits_long)
 }
@@ -134,7 +138,7 @@ fits_long <- fits_long %>% mutate(result = "Non-estimated",
 
 
 
-non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "fit_id", "result"), c("model_args"))
+non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "result"), c("model_args"))
 
 
 granulatiry_to_vector <- function(df) {
@@ -186,13 +190,15 @@ readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 
 # forecasting
 for (fit_no in 1:nrow(fits_long)) {
-  cat("Forecasting for fit no ", fit_no, " out of ", nrow(fits_long), "...\n")
+  cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
+  
   fits_long$result <- forecast_one_fit(fits_long, fit_no)
-  cat("Forecasting for fit no ", fit_no, " out of ", nrow(fits_long), "done.\n")
-  if (fit_no %% save_fits_long_every == 0) {
-    readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
-  }
+
+  readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+  
+  cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
 }
+
 
 readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 

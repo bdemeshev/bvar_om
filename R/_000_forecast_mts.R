@@ -70,14 +70,14 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
     y_matrix <- coredata(y_matrix)
   }
   
-  cat("Estimation of bvar lasso started...\n")
+  cat("Estimation of var lasso ", struct, " started...\n")
   model_spec <- BigVAR::constructModel(y_matrix, p = p, struct = struct, 
                            T1 = T1, T2 = T2, 
                            gran = gran, h = h, 
                            verbose = TRUE, VARX = list())
   
   model <- BigVAR::cv.BigVAR(model_spec)
-  cat("Estimation of bvar lasso done.\n")
+  cat("Estimation of var lasso ", struct, " done.\n")
   return(model)
 }
 
