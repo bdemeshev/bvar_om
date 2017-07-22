@@ -10,17 +10,10 @@ bvar_alt_folder <- "../estimation/bvar_alternatives/"
 estimation_folder <- "../estimation/"
 
 # create folders if they do not exist
-if (!dir.exists(estimation_folder)) {
-  dir.create(estimation_folder)
-}
-
-if (!dir.exists(bvar_alt_folder)) {
-  dir.create(bvar_alt_folder)
-}
-
-if (!dir.exists(fits_folder)) {
-  dir.create(fits_folder)
-}
+# warning is thrown if they exist
+dir.create(estimation_folder)
+dir.create(bvar_alt_folder)
+dir.create(fits_folder)
 
 rus_macro <- load_rus_data()
 
