@@ -17,10 +17,10 @@ dir.create(fits_folder)
 
 rus_macro <- load_rus_data()
 
+
 # create all shifts (like moving/expanding...)
 shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length, ~n_shifts,
-                  "moving_120", 1, FALSE, 120, 10,
-                  "expanding_120", 1, TRUE, 120, 10)
+                  "moving_120", 1, FALSE, 120, 111)
 
 # describe non lasso models (automatic)
 fake_args <- tibble(pars_id = "automatic")
