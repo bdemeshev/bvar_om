@@ -10,6 +10,7 @@ bvar_alt_folder <- "../estimation/bvar_alternatives/"
 estimation_folder <- "../estimation/"
 
 log_file <- "../estimation/bvar_alternatives/estim_log.txt"
+n_clusters <- 4 # for non-parallel version
 
 # create folders if they do not exist
 # warning is thrown if they exist
@@ -199,24 +200,29 @@ export_packages <- c("readr", "forecast", "BigVAR", "dplyr")
 
 writeLines("", log_file)
 
-cluster <- makeCluster(4, outfile = log_file)
-registerDoParallel(cluster)
-
-# replace %dopar% by %do% for non-parallel version
-foreach(fit_no = 1:nrow(fits_long), 
-        .export = export_functions, 
-        .packages = export_packages) %dopar% {
-          cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
-          
-          fits_long$result <- forecast_one_fit(fits_long, fit_no)
-          
-          readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
-          
-          cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
-        }
-
-stopCluster(cluster)  
-
+if (n_clusters > 1) {
+  cluster <- makeCluster(n_clusters, outfile = log_file)
+  registerDoParallel(cluster)
+  
+  # replace %dopar% by %do% for non-parallel version
+  foreach(fit_no = 1:nrow(fits_long), 
+          .export = export_functions, 
+          .packages = export_packages) %dopar% {
+            cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
+            fits_long$result <- forecast_one_fit(fits_long, fit_no)
+            readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+            cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
+          }
+  
+  stopCluster(cluster)  
+} else {
+  for (fit_no in 1:nrow(fits_long)) {
+    cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
+    fits_long$result <- forecast_one_fit(fits_long, fit_no)
+    readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+    cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
+  }
+}
 
 readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 
