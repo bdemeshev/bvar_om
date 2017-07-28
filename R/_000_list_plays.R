@@ -9,6 +9,8 @@ bvar_alt_folder <- "../estimation/bvar_alternatives/"
 # here lie all generated files
 estimation_folder <- "../estimation/"
 
+log_file <- "../estimation/bvar_alternatives/estim_log.txt"
+
 # create folders if they do not exist
 # warning is thrown if they exist
 dir.create(estimation_folder)
@@ -181,16 +183,39 @@ readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
 # forecast_one_fit(fits_long, 1)
 
 
-# forecasting
-for (fit_no in 1:nrow(fits_long)) {
-  cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
-  
-  fits_long$result <- forecast_one_fit(fits_long, fit_no)
 
-  readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
-  
-  cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
-}
+
+# forecasting
+library(doParallel)  
+
+export_functions <- c("fits_long", "rus_macro", "forecast_var_lasso", 
+                      "forecast_rw", "forecast_arima", "forecast_ets",
+                      "estimate_var_lasso", "estimate_rw", "estimate_arima",
+                      "estimate_ets", "var_sets", "matrix_to_mforecast",
+                      "next_obs_time")
+export_packages <- c("readr", "forecast", "BigVAR", "dplyr")
+
+
+
+writeLines("", log_file)
+
+cluster <- makeCluster(4, outfile = log_file)
+registerDoParallel(cluster)
+
+# replace %dopar% by %do% for non-parallel version
+foreach(fit_no = 1:nrow(fits_long), 
+        .export = export_functions, 
+        .packages = export_packages) %dopar% {
+          cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "...\n")
+          
+          fits_long$result <- forecast_one_fit(fits_long, fit_no)
+          
+          readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))
+          
+          cat("Processing fit no ", fit_no, " out of ", nrow(fits_long), ", ", fits_long$model_type[fit_no], "done.\n")
+        }
+
+stopCluster(cluster)  
 
 
 readr::write_rds(fits_long, path = paste0(bvar_alt_folder, "fits_long.Rds"))

@@ -8,7 +8,7 @@ library(doParallel)
 export_functions <- c("my_fun")
 export_packages <- c("ggplot2", "forecast", "BigVAR")
 
-cluster <- makeCluster(4)
+cluster <- makeCluster(4, outfile = "log.txt")
 registerDoParallel(cluster)
 
 foreach(i = 1:10000, 
