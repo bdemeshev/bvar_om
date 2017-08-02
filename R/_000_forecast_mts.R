@@ -113,22 +113,23 @@ forecast_rw <- function(y, h = 1, ...) {
 # we return something like mforecast (!)
 forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1, 
                                struct = "OwnOther", gran = c(25, 10),
-                               type = c("fast", "honest"), ...) {
+                               type = c("fast", "honest"), h_cv = 1, ...) {
   # honest: one should redo cross-validation for each h
   # h should be a vector
-  # model missing or a list of the same length as h (or one :))
-  # fast: do cross-validation for h
+  # model should be missing or a list of the same length as h (or one :))
+  # fast: do cross-validation for h_cv
   # and than predict for each h = 1, ..., h
   type <- match.arg(type)
   
+  # var_lasso fails! for time series!
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
   
-  forecast_matrix <- matrix(0, nrow = max(h), ncol = m)    
+  forecast_matrix <- matrix(NA, nrow = max(h), ncol = m)    
   
   if (type == "fast") {
     if (is.null(model)) {
-      model <- estimate_var_lasso(y, h = h, p = p, struct = struct, gran = gran, ...)
+      model <- estimate_var_lasso(y, h = h_cv, p = p, struct = struct, gran = gran, ...)
     }
 
     for (i in 1:h) {
@@ -147,37 +148,42 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1,
            Length of 'model' is ", length(model), ", while lenght of 'h' is ", length(h),".")
     }
 
-    if (length(model) == 1) {
-      # same model for all h
-      model_i <- model
-    }
-    
-    for (i in 1:max(h)) {
-      if (i %in% h) {
-        if (length(model) > 1) {
-          # separate model for each h
-          h_no <- which(i == h)
-          model_i <- model[[h_no]]
-        } else if (is.null(model)) {
-          # no model at all
-          model_i <- estimate_var_lasso(y, h = i) #, ...)
-        } 
-        cat("  forecast for h = ", i, " started...\n")
-        forecast_matrix[i, ] <- 
-          as.vector(BigVAR::predict(model_i, n.ahead = i))
-        # as.vector нужен так как predict для n.ahead = 1 возвращает строку
-        # а для n.ahead > 1 возвращает столбец
-        cat("  forecast for h = ", i, " done.\n")
+    # estimate if no models are estimated
+    if (length(model) == 0) {
+      if (length(h) == 1) {
+        model <- estimate_var_lasso(y, h = h, p = p, struct = struct, gran = gran, ...)
       } else {
-        forecast_matrix[i, ] <- rep(NA, times = m)
+        model <- list()
+        for (i in 1:length(h)) {
+          model[[i]] <- estimate_var_lasso(y, h = h[i], p = p, struct = struct, gran = gran, ...)
+        }
       }
     }
+    
+    # forecast 
+    for (i in 1:length(h)) {
+      cat("  forecast for h = ", h[i], " started...\n")
+      
+      if (length(model) > 1) {
+        # separate model for each h
+        model_i <- model[[i]]
+      } else {
+        # same model for each h
+        model_i <- model
+      }
+      forecast_matrix[h[i], ] <- 
+        as.vector(BigVAR::predict(model_i, n.ahead = h[i]))
+      # as.vector нужен так как predict для n.ahead = 1 возвращает строку
+      # а для n.ahead > 1 возвращает столбец
+      cat("  forecast for h = ", h[i], " done.\n")
+    }
+    
   }
   
   
   
   colnames(forecast_matrix) <- colnames(y_matrix)
-  mforecast <- matrix_to_mforecast(forecast_matrix, y_matrix, method = "BigVAR")
+  mforecast <- matrix_to_mforecast(forecast_matrix, y, method = "BigVAR")
   mforecast$model <- model
   return(mforecast)
 }
@@ -247,7 +253,7 @@ forecast_tvp_primiceri <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_tvp_primiceri(y, h = h, ...)
   }
-  y_matrix <- as.matrix(y)
+  y_matrix <- y # y_matrix <- as.matrix(y)
   m <- ncol(y_matrix) # number of series
   
   mforecast <- list()
@@ -272,7 +278,7 @@ forecast_arima <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_arima(y, h, ...)
   }
-  y_matrix <- as.matrix(y)
+  y_matrix <- y # y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
   
   forecast_data <- list()
@@ -376,20 +382,24 @@ load_rus_data <- function() {
 # just an example 
 # 
 # # load data
-# rus_macro <- load_rus_data()
+rus_macro <- load_rus_data()
 # # test block
 # 
 # 
-# y <- scale_series(rus_macro)
-# y_subset <- y[, 1:2]
+y <- scale_series(rus_macro)
+y_subset <- y[, 1:2]
 # 
 # fors <- forecast_arima(y_subset, h = 3)
 # fors <- forecast_ets(y_subset, h = 3)
 # fors <- forecast_rw(y_subset, h = 3)
 # fors <- forecast_var_lasso(y_subset, h = 3)
+fors <- forecast_var_lasso(y_subset, h = 1, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
+fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "fast")
+fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
 # fors <- forecast_tvp_primiceri(y_subset, h = 3, p = 1)
 # fors <- forecast_var(y_subset, h = 3, p = 1)
-# autoplot(fors)
+autoplot(fors)
+plot(fors$model)
 # 
 # 
 # 
