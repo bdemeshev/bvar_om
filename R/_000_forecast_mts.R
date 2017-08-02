@@ -357,10 +357,16 @@ matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified
     fors_start <- next_obs_time(y_before[, i])    
         
     mforecast$forecast[[i]]$method <- method # method name
-    mforecast$forecast[[i]]$x <- ts(y_before[, i], frequency = fors_freq) # actual y before forecast period
+    mforecast$forecast[[i]]$x <- y_before[, i] # actual y before forecast period
 
     # forecasts with correct frequency and start:
-    mforecast$forecast[[i]]$mean <- ts(forecast_matrix[, i], start = fors_start, frequency = fors_freq)
+    future_ts <- ts(forecast_matrix[, i], start = fors_start, frequency = fors_freq)
+    try_na_remove <- try(na.omit(future_ts))
+    if (class(try_na_remove) == "try-error") {
+      mforecast$forecast[[i]]$mean <- future_ts
+    } else {
+      mforecast$forecast[[i]]$mean <- try_na_remove
+    }
 
     mforecast$forecast[[i]]$series <- colnames(forecast_matrix)[i] # names of series
     class(mforecast$forecast[[i]]) <- "forecast"
@@ -382,24 +388,24 @@ load_rus_data <- function() {
 # just an example 
 # 
 # # load data
-rus_macro <- load_rus_data()
+# rus_macro <- load_rus_data()
 # # test block
 # 
 # 
-y <- scale_series(rus_macro)
-y_subset <- y[, 1:2]
+# y <- scale_series(rus_macro)
+# y_subset <- y[, 1:2]
 # 
 # fors <- forecast_arima(y_subset, h = 3)
 # fors <- forecast_ets(y_subset, h = 3)
 # fors <- forecast_rw(y_subset, h = 3)
 # fors <- forecast_var_lasso(y_subset, h = 3)
-fors <- forecast_var_lasso(y_subset, h = 1, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
-fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "fast")
-fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
+# fors <- forecast_var_lasso(y_subset, h = 1, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
+# fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "fast")
+# fors <- forecast_var_lasso(y_subset, h = 12, p = 12, struct = "OwnOther", gran = c(25, 10), type = "honest")
 # fors <- forecast_tvp_primiceri(y_subset, h = 3, p = 1)
 # fors <- forecast_var(y_subset, h = 3, p = 1)
-autoplot(fors)
-plot(fors$model)
+# autoplot(fors)
+# plot(fors$model)
 # 
 # 
 # 

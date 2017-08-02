@@ -2,7 +2,6 @@
 
 # TODO: add p lags before estimation
 # TODO: scale/unscale time series
-# TODO: strange autoplot problem - separate point
 # TODO: test left border for cv in lasso!
 
 source("_000_forecast_mts.R")
