@@ -346,12 +346,13 @@ matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified
   
   for (i in 1:m) {
     mforecast$forecast[[i]] <- list()
-    
-    mforecast$forecast[[i]]$method <- method # method name
-    mforecast$forecast[[i]]$x <- y_before[, i] # actual y before forecast period
 
-    fors_freq <- frequency(y_before[, i])
-    fors_start <- next_obs_time(y_before[, i])
+    fors_freq <- frequency(y_before[, i]) # will get one for plain matrices
+    fors_start <- next_obs_time(y_before[, i])    
+        
+    mforecast$forecast[[i]]$method <- method # method name
+    mforecast$forecast[[i]]$x <- ts(y_before[, i], frequency = fors_freq) # actual y before forecast period
+
     # forecasts with correct frequency and start:
     mforecast$forecast[[i]]$mean <- ts(forecast_matrix[, i], start = fors_start, frequency = fors_freq)
 

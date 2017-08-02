@@ -10,7 +10,7 @@ bvar_alt_folder <- "../estimation/bvar_alternatives/"
 estimation_folder <- "../estimation/"
 
 log_file <- "../estimation/bvar_alternatives/estim_log.txt"
-n_clusters <- 4 # for non-parallel version
+n_clusters <- 1 # for non-parallel version
 
 # create folders if they do not exist
 # warning is thrown if they exist
@@ -23,7 +23,8 @@ rus_macro <- load_rus_data()
 
 # create all shifts (like moving/expanding...)
 shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length, ~n_shifts,
-                  "moving_120", 1, FALSE, 120, 111)
+                  "moving_120", 1, FALSE, 120, 1) 
+# n_shifts = 111
 
 # describe non lasso models (automatic)
 fake_args <- tibble(pars_id = "automatic")
@@ -34,10 +35,11 @@ models <- tribble(~model_type, ~comment, ~h_required, ~model_args,
 
 
 # lasso params:
-var_lasso_args <- crossing(p = 1:12, 
+# p = 1:12
+var_lasso_args <- crossing(p = c(1, 12), 
                            struct = c("OwnOther"), 
-                           gran_1 = 25, gran_2 = 10, 
-                           pars_id = paste0(struct, "_", p))
+                           gran_1 = 25, gran_2 = 10) %>%
+                  mutate(pars_id = paste0(struct, "_", p))
 # lasso type:
 # three top players according to 
 # https://arxiv.org/pdf/1508.07497.pdf page 23
@@ -60,7 +62,7 @@ var_lasso_args <- crossing(p = 1:12,
 
 
 var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
-                            "var_lasso", var_lasso_args, TRUE, "var lasso with cross validation for each h")
+                            "var_lasso", var_lasso_args, FALSE, "var lasso with cross validation for each h")
 models <- bind_rows(var_lasso_models, models)
 
 # create all variable sets
@@ -72,7 +74,7 @@ create_var_set_info <- function() {
                                                              "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                                              "agriculture", "retail", "gov_balance", "export", "import"))
   
-  var_set_info <- dplyr::bind_rows(add_A, add_B, add_C)
+  var_set_info <- dplyr::bind_rows(add_A) # , add_B, add_C) # 
   var_set_info <- dplyr::mutate(var_set_info, pre_transform = "none", post_transform = "none")
   
   return(var_set_info)
@@ -82,7 +84,7 @@ var_sets <- create_var_set_info()
 
 
 # create all horizons
-horizons <- tibble(h = c(1, 3, 6, 12))
+horizons <- tibble(h = c(1, 12))  # c(1, 3, 6, 12)
 
 
 # GO!
@@ -134,7 +136,7 @@ fits_long <- fits_long %>% mutate(result = "Non-estimated",
 
 
 
-non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "result"), c("model_args"))
+non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "result"), c("h", "model_args"))
 
 
 granulatiry_to_vector <- function(df) {
@@ -155,10 +157,9 @@ forecast_one_fit <- function(fits_long, fit_no) {
   # concatenate two granularity parameters in one vector:
   if (fit_row$model_type == "var_lasso")  {
     parameters <- granulatiry_to_vector(parameters)
+    parameters$type <- ifelse(fit_row$h_required, "honest", "fast")
   }
-  if (fit_row$h_required) {
-    parameters$h <- fit_row$h
-  }
+
   
   forecast_fun_name <- paste0("forecast", "_", fit_row$model_type)
   forecast_fun <- eval(parse(text = forecast_fun_name))
