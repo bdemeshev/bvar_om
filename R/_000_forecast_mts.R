@@ -315,15 +315,32 @@ forecast_ets <- function(y, h = 1, model = NULL, ...) {
   return(forecast_data)
 }
 
-scale_series <- function(y) {
-  if (is.ts(y)) {
-    y_freq <- frequency(y)
-    y_start <- start(y)
+# get mu and sd for each ts
+get_scales <- function(y) {
+  y_tibble <- as.tibble(y)
+  y_long <- reshape2::melt(y_tibble, id.vars = NULL, na.rm = TRUE)
+  y_sum <- y_long %>% group_by(variable) %>% 
+    summarise(mu = mean(value), sd = sd(value))
+  return(y_sum)
+}
+
+# scale time series to specific mu and sd (0 and 1 by default)
+scale_to <- function(y, mu_sd = NULL) {
+  y_tibble <- as.tibble(y) %>% mutate(.id = row_number())
+  
+  if (is.null(mu_sd)) {
+    mu_sd <- tibble(variable = colnames(y_tibble), mu = 0, sd = 1)
   }
-  y_matrix <- as.matrix(y)
-  y_scaled <- apply(y_matrix, 2, FUN = scale)
+  
+  y_long <- reshape2::melt(y_tibble, id.vars = ".id") %>% 
+    mutate(variable = as.character(variable))
+  y_long <- dplyr::left_join(y_long, mu_sd, by = "variable")
+  y_long <- group_by(y_long, variable) %>% dplyr::mutate(new_value = scale(value) * sd + mu)
+  y_scaled <- reshape2::dcast(y_long, .id ~ variable, value.var = "new_value") 
+  y_scaled <- y_scaled %>% dplyr::select(-.id)
+
   if (is.ts(y)) {
-    y_scaled <- ts(y_scaled, frequency = y_freq, start = y_start)
+    y_scaled <- ts(y_scaled, frequency = frequency(y), start = start(y))
   } else {
     y_scaled <- ts(y_scaled, frequency = 1, start = 1)
   }
