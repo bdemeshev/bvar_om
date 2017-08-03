@@ -1,6 +1,5 @@
 # main cycle of estimation
 
-# TODO: add p lags before estimation
 # TODO: scale/unscale time series
 # TODO: test left border for cv in lasso!
 
@@ -27,15 +26,18 @@ rus_macro <- load_rus_data()
 
 # create all shifts (like moving/expanding...)
 shifts <- tribble(~shift_name, ~shift_T_start, ~win_expanding, ~win_start_length, ~n_shifts,
-                  "moving_120", 1, FALSE, 120, 1) 
+                  "moving_120", 13, FALSE, 120, 2) 
 # n_shifts = 111
 
 # describe non lasso models (automatic)
-fake_args <- tibble(pars_id = "automatic")
+args_arima <- tibble(pars_id = "automatic", expand_window_by = 3)
+args_ets <- tibble(pars_id = "automatic", expand_window_by = 3)
+args_rw <- tibble(pars_id = "automatic", expand_window_by = 1)
+
 models <- tribble(~model_type, ~comment, ~h_required, ~model_args, 
-                  "arima", "auto arima applied series wise", FALSE, fake_args,
-                  "ets", "auto ets applied series wise", FALSE, fake_args,
-                  "rw", "random walk applied series wise", FALSE, fake_args)
+                  "arima", "auto arima applied series wise", FALSE, args_arima,
+                  "ets", "auto ets applied series wise", FALSE, args_ets,
+                  "rw", "random walk applied series wise", FALSE, args_rw)
 
 
 # lasso params:
@@ -43,7 +45,8 @@ models <- tribble(~model_type, ~comment, ~h_required, ~model_args,
 var_lasso_args <- crossing(p = c(1, 12), 
                            struct = c("OwnOther"), 
                            gran_1 = 25, gran_2 = 10) %>%
-                  mutate(pars_id = paste0(struct, "_", p))
+                  mutate(pars_id = paste0(struct, "_", p),
+                         expand_window_by = p)
 # lasso type:
 # three top players according to 
 # https://arxiv.org/pdf/1508.07497.pdf page 23
@@ -136,11 +139,14 @@ fits_long <- set_agnostic_max_h(fits_long)
 
 # add model_filename (used as id) just before cycle
 fits_long <- fits_long %>% mutate(result = "Non-estimated",
-                model_filename = paste0("fit_", row_number(), ".Rds"))
+                model_filename = paste0("fit_", row_number(), ".Rds"),
+                T_start_lower = T_start - expand_window_by)
 
 
 
-non_parameter_colnames <- setdiff(c(colnames(fits), "model_filename", "pars_id", "result"), c("h", "model_args"))
+non_parameter_colnames <- setdiff(
+  c(colnames(fits), "model_filename", "pars_id", "result", "expand_window_by", "T_start_lower"), 
+                                  c("h", "model_args"))
 
 
 granulatiry_to_vector <- function(df) {
@@ -169,7 +175,7 @@ forecast_one_fit <- function(fits_long, fit_no) {
   forecast_fun <- eval(parse(text = forecast_fun_name))
   
   vars <- var_sets %>% filter(var_set == fit_row$var_set) %>% .$variable
-  y <- rus_macro[fit_row$T_start:fit_row$T_end, vars]
+  y <- rus_macro[(fit_row$T_start_lower):fit_row$T_end, vars]
   parameters$y <- y
   
   attempt <- try(do.call(forecast_fun, parameters))
