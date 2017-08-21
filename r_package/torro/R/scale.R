@@ -11,6 +11,8 @@
 #' @examples 
 #' get_scales(cars)
 get_scales <- function(y) {
+  variable <- value <- NULL # black magic to remove NOTE in R CMD check
+  
   y_tibble <- tibble::as.tibble(y)
   y_long <- reshape2::melt(y_tibble, id.vars = NULL, na.rm = TRUE)
   y_long <- dplyr::mutate(y_long, variable = as.character(variable))
@@ -35,6 +37,9 @@ get_scales <- function(y) {
 #' data(rus_macro)
 #' scale_to(rus_macro)
 scale_to <- function(y, mu_sd = NULL) {
+  # black magic to remove NOTE in R CMD check
+  row_number <- variable <- value <- sd <- mu <- .id <-  NULL 
+  
   y_tibble <- dplyr::mutate(tibble::as.tibble(y), .id = row_number())
 
   if (is.null(mu_sd)) {

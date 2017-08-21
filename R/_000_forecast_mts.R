@@ -63,7 +63,7 @@ estimate_ets <- function(y, h = 1, ...) {
   return(model)
 }
 
-
+# in torro
 estimate_var_lasso <- function(y, h = 1, p = 12,
                                struct = "OwnOther",
                                gran = c(25, 10),
@@ -87,8 +87,8 @@ estimate_var_lasso <- function(y, h = 1, p = 12,
   return(model)
 }
 
-
-estimate_tvp_primiceri <- function(y, h = 1, p = 12, nrep = 1000, nburn = 1000, ...) {
+# in torro
+estimate_tvp_primiceri <- function(y, p = 12, nrep = 1000, nburn = 1000, ...) {
   y_matrix <- as.matrix(y)
   
   model <- bvarsv::bvar.sv.tvp(y_matrix, p = p, nrep = nrep, nburn = nburn, ...)
@@ -118,6 +118,7 @@ forecast_rw <- function(y, h = 1, ...) {
 
 
 # we return something like mforecast (!)
+# in torro
 forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1, 
                                struct = "OwnOther", gran = c(25, 10),
                                type = c("fast", "honest"), h_cv = 1, ...) {
@@ -195,10 +196,9 @@ forecast_var_lasso <- function(y, h = 1, model = NULL, p = 1,
   return(mforecast)
 }
 
-
-create_interval_borders <- function(y_future, level, 
-                                    type = c("lower", "upper"),
-                                    fors_start, fors_freq) {
+# in torro
+create_interval_borders <- function(y_future, level = c(80, 95), 
+                                    type = c("lower", "upper")) {
   type <- match.arg(type)
   
   lower_probs <- (1 - level / 100) / 2
@@ -208,15 +208,14 @@ create_interval_borders <- function(y_future, level,
     probs <- 1 - lower_probs
   }
   
-  y_future_border <- map(y_future, ~ quantile(.x, probs = probs)) %>% as_tibble() %>% t()
-  y_future_border <- ts(y_future_border, start = fors_start, frequency = fors_freq)
+  y_future_border <- purrr::map(y_future, ~ quantile(.x, probs = probs)) %>% as_tibble() %>% t()
   colnames(y_future_border) <- paste0(level, "%")
   
   return(y_future_border)
 }  
 
 
-
+# in torro
 primiceri_draws_to_1d_forecast <- function(model, y_actual, series_no = 1, 
                                            h = 1, level = c(80, 95)) {
   
@@ -238,17 +237,17 @@ primiceri_draws_to_1d_forecast <- function(model, y_actual, series_no = 1,
   
   y_future_mean <- map_dbl(y_future, mean)
   y_future_mean <- ts(y_future_mean, start = fors_start, frequency = fors_freq)
-  
-  
   one_ts_forecast$mean <- y_future_mean
-  one_ts_forecast$lower <- create_interval_borders(y_future, 
-                                                   level = level, type = "lower",
-                                                   fors_start = fors_start,
-                                                   fors_freq = fors_freq)
-  one_ts_forecast$upper <- create_interval_borders(y_future, 
-                                                   level = level, type = "upper",
-                                                   fors_start = fors_start,
-                                                   fors_freq = fors_freq)
+  
+  lower_border <- create_interval_borders(y_future, 
+                                          level = level, type = "lower")
+  lower_border <- ts(lower_border, start = fors_start, frequency = fors_freq)
+  one_ts_forecast$lower <- lower_border
+
+  upper_border <- create_interval_borders(y_future, 
+                                          level = level, type = "upper")
+  upper_border <- ts(upper_border, start = fors_start, frequency = fors_freq)
+  one_ts_forecast$upper <- upper_border
   
   class(one_ts_forecast) <- "forecast"
   return(one_ts_forecast)
@@ -256,9 +255,10 @@ primiceri_draws_to_1d_forecast <- function(model, y_actual, series_no = 1,
 
 
 # we return something like mforecast (!)
+# in torro
 forecast_tvp_primiceri <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
-    model <- estimate_tvp_primiceri(y, h = h, ...)
+    model <- estimate_tvp_primiceri(y, ...)
   }
   y_matrix <- y # y_matrix <- as.matrix(y)
   m <- ncol(y_matrix) # number of series
@@ -281,6 +281,7 @@ forecast_tvp_primiceri <- function(y, h = 1, model = NULL, ...) {
 
 
 # we return something like mforecast (!)
+# in torro
 forecast_arima <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_arima(y, h, ...)
@@ -302,6 +303,7 @@ forecast_arima <- function(y, h = 1, model = NULL, ...) {
   return(forecast_data)
 }
 
+# in torro
 forecast_ets <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_ets(y, h, ...)

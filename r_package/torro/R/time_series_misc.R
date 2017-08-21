@@ -61,7 +61,8 @@ mforecast_to_matrix <- function(mforecast) {
 #' y_forecast <- tail(y_small, 1) # trivial forecast 
 #' mfor <- matrix_to_mforecast(y_forecast, y_small, method = "Trivial")
 #' # ggplot2:::autoplot.mforecast(mfor) # TODO: does not work!!!
-matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified") {
+matrix_to_mforecast <- function(forecast_matrix, y_before, 
+                                method = "Unspecified") {
   
   mforecast <- list()
   mforecast$forecast <- list()
@@ -70,7 +71,8 @@ matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified
   for (i in 1:m) {
     mforecast$forecast[[i]] <- list()
     
-    fors_freq <- stats::frequency(y_before[, i]) # will get one for plain matrices
+    # frequency of plain matrices is equal to one
+    fors_freq <- stats::frequency(y_before[, i]) 
     fors_start <- next_obs_time(y_before[, i])    
     
     mforecast$forecast[[i]]$method <- method # method name
