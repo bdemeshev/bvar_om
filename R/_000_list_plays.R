@@ -73,21 +73,18 @@ var_lasso_models <- tribble(~model_type, ~model_args, ~h_required, ~comment,
 models <- bind_rows(var_lasso_models, models)
 
 # create all variable sets
-create_var_set_info <- function() {
-  add_A <- dplyr::tibble(var_set = "set_A", variable = c("ind_prod", "cpi", "ib_rate"))
-  add_B <- dplyr::tibble(var_set = "set_B", variable = c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
-  add_C <- dplyr::tibble(var_set = "set_C", variable = c("employment", "ind_prod", "cpi", 
+
+add_A <- dplyr::tibble(var_set = "set_A", variable = c("ind_prod", "cpi", "ib_rate"))
+add_B <- dplyr::tibble(var_set = "set_B", variable = c("ind_prod", "cpi", "ib_rate", "m2", "reer", "oil_price"))
+add_C <- dplyr::tibble(var_set = "set_C", variable = c("employment", "ind_prod", "cpi", 
                                                              "ib_rate", "lend_rate", "real_income", "unemp_rate", "oil_price", "ppi", "construction", 
                                                              "real_investment", "wage", "m2", "reer", "gas_price", "nfa_cb", "ner", "labor_request", 
                                                              "agriculture", "retail", "gov_balance", "export", "import"))
   
-  var_set_info <- dplyr::bind_rows(add_A) # , add_B, add_C) # 
-  var_set_info <- dplyr::mutate(var_set_info, pre_transform = "none", post_transform = "none")
+var_sets <- dplyr::bind_rows(add_A) # , add_B, add_C) # 
+var_sets <- dplyr::mutate(var_sets, pre_transform = "none", post_transform = "none")
   
-  return(var_set_info)
-}
 
-var_sets <- create_var_set_info()
 
 
 # create all horizons
@@ -95,6 +92,7 @@ horizons <- tibble(h = c(1, 12))  # c(1, 3, 6, 12)
 
 
 # GO!
+# in torro
 shifts_to_samples <- function(shifts) {
   line_no <- rep(1:nrow(shifts), times = shifts$n_shifts)
   samples <- shifts[line_no, ]
@@ -120,6 +118,7 @@ fits_long <- unnest(fits)
 
 # the function sets maximal h for h-agnostic models 
 # (models that do not require h during estimation phase)
+# in torro
 set_agnostic_max_h <- function(fits_long) {
   fits_h_gnostic <- filter(fits_long, h_required == TRUE)
   fits_h_agnostic <- filter(fits_long, h_required == FALSE)
@@ -148,8 +147,8 @@ non_parameter_colnames <- setdiff(
   c(colnames(fits), "model_filename", "pars_id", "result", "expand_window_by", "T_start_lower"), 
                                   c("h", "model_args"))
 
-
-granulatiry_to_vector <- function(df) {
+# in torro
+granularity_to_vector <- function(df) {
   df$gran <- c(df$gran_1, df$gran_2)
   df$gran_1 <- NULL
   df$gran_2 <- NULL
@@ -166,7 +165,7 @@ forecast_one_fit <- function(fits_long, fit_no) {
   parameters <- as.list(parameters[, as.vector(!is.na(parameters[1, ]))])
   # concatenate two granularity parameters in one vector:
   if (fit_row$model_type == "var_lasso")  {
-    parameters <- granulatiry_to_vector(parameters)
+    parameters <- granularity_to_vector(parameters)
     parameters$type <- ifelse(fit_row$h_required, "honest", "fast")
   }
 
