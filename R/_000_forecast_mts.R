@@ -4,10 +4,12 @@ library(forecast)
 library(vars)
 library(tidyverse)
 
+# in torro
 estimate_rw <- function(y, h = 1, ...) {
   return("RW model. Does not need estimation.")
 }
 
+# in torro
 estimate_arima <- function(y, h = 1, ...) {
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
@@ -21,12 +23,14 @@ estimate_arima <- function(y, h = 1, ...) {
 }
 
 # p — number of lags
+# in torro
 estimate_var <- function(y, h = 1, p = 1, ...) {
   y_matrix <- as.matrix(y)
-  model <- VAR(y_matrix, p = p, ...)
+  model <- vars::VAR(y_matrix, p = p, ...)
   return(model)
 }
 
+# in torro
 forecast_var <- function(y, h = 1, model = NULL, ...) {
   if (is.null(model)) {
     model <- estimate_var(y, h = h, ...)
@@ -40,11 +44,13 @@ forecast_var <- function(y, h = 1, model = NULL, ...) {
 
 # 2015y 1m ~ 2015.0
 # 2015y 2m ~ 2015.1
+# in torro
 next_obs_time <- function(y) {
   return(end(y)[1] + deltat(y) * end(y)[2])
   # don't need to add one (!!!)
 }
 
+# in torro
 estimate_ets <- function(y, h = 1, ...) {
   y_matrix <- as.matrix(y)
   m <- ncol(y_matrix)
@@ -91,6 +97,7 @@ estimate_tvp_primiceri <- function(y, h = 1, p = 12, nrep = 1000, nburn = 1000, 
 
 
 # we return something like mforecast (!)
+# in torro
 forecast_rw <- function(y, h = 1, ...) {
   # drift = TRUE/FALSE (FALSE by default)
   y_matrix <- as.matrix(y)
@@ -316,6 +323,7 @@ forecast_ets <- function(y, h = 1, model = NULL, ...) {
 }
 
 # get mu and sd for each ts
+# in torro
 get_scales <- function(y) {
   y_tibble <- as.tibble(y)
   y_long <- reshape2::melt(y_tibble, id.vars = NULL, na.rm = TRUE)
@@ -325,6 +333,7 @@ get_scales <- function(y) {
 }
 
 # scale time series to specific mu and sd (0 and 1 by default)
+# in torro
 scale_to <- function(y, mu_sd = NULL) {
   y_tibble <- as.tibble(y) %>% mutate(.id = row_number())
   
@@ -350,6 +359,7 @@ scale_to <- function(y, mu_sd = NULL) {
 
 # package forecast defines 
 # mforecast class for multivariate forecasts
+# in torro
 mforecast_to_matrix <- function(mforecast) {
   m <- length(mforecast$forecast)
   h <- length(mforecast$forecast[[1]]$mean)
@@ -361,6 +371,7 @@ mforecast_to_matrix <- function(mforecast) {
   return(forecast_matrix)
 }
 
+# in torro
 matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified") {
   
   mforecast <- list()
@@ -394,7 +405,8 @@ matrix_to_mforecast <- function(forecast_matrix, y_before, method = "Unspecified
   return(mforecast)
 }
 
-
+# in torro
+# data(rus_macro) works 
 load_rus_data <- function() {
   rus_macro <- readr::read_csv("../data/df_2015_final.csv")
   rus_macro <- dplyr::select(rus_macro, -time_y)
