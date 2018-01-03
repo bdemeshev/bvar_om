@@ -166,3 +166,5 @@ estimation/bvar_alternatives/
 articles/summer_course_korobilis/
 
 estim_log.txt
+estimation/refits/fits/
+estimation/refits/all_forecasts.Rds
