@@ -2,20 +2,19 @@
 
 # TODO: test left border for cv in lasso!
 
-# torro may be installed via devtools::install_github("bdemeshev/torro")
-
+# torro may be installed via 
+# devtools::install_github("bdemeshev/torro")
 
 library(torro)
 library(tidyverse)
 library(forecast)
 # library(stringr)
 
-
 missing <- c(3773L, 3774L, 3775L)
 
-
-
 basefolder <- "~/Documents/bvar_om/estimation/refits/"
+basefolder <- "D:\\Research\\Projects\\ProjectXIV\\Code_2018\\estimation\\refits"
+
 n_cores <- 1
 # 1 for non-parallel version
 # max is equal to parallel::detectCores()
