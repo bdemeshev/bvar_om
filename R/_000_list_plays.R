@@ -5,7 +5,10 @@
 # torro may be installed via 
 # devtools::install_github("bdemeshev/torro")
 
-library(torro)
+# this R script is available at
+# https://github.com/bdemeshev/bvar_om/blob/master/R/_000_list_plays.R
+
+library(torro) # estimation of multivariate models
 library(tidyverse)
 library(forecast)
 # library(stringr)
@@ -35,6 +38,7 @@ n_cores <- 1
 # glimpse(models)
 
 
+# create list containing all models fit requested
 fits_long <- create_fits_long(shifts, models, var_sets, horizons)
 # fits_long_toy <- create_fits_long(shifts_toy, models_toy, var_sets_toy, horizons_toy)
 
