@@ -171,3 +171,4 @@ estimation/refits/all_forecasts.Rds
 estimation/refits.zip
 estimation/refits/fits_long.Rds
 estimation/refits/unestimated.Rds
+estimation/refits_bad/fits_long.Rds
