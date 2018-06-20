@@ -11,6 +11,7 @@
 library(torro) # estimation of multivariate models
 library(tidyverse)
 library(forecast)
+library(reshape2)
 # library(stringr)
 
 missing <- c(3773L, 3774L, 3775L)
@@ -52,11 +53,11 @@ fits_long_2 <- forecast_all(fits_long_subset, var_sets, basefolder = basefolder,
 
 # save all forecasts to 1 file
 all_forecasts <- get_forecasts_from_fit_files(basefolder = basefolder)
-write_rds(all_forecasts, paste0(basefolder, "all_forecasts.Rds"))
+write_rds(all_forecasts, paste0(basefolder, "all_forecasts_new.Rds"))
 
 # go on
 fits_long <- create_fits_long(shifts, models, var_sets, horizons)
-all_forecasts <- read_rds(path = paste0(basefolder, "all_forecasts.Rds"))
+all_forecasts <- read_rds(path = paste0(basefolder, "all_forecasts_new.Rds"))
 
 all_f2 <- augment_forecasts(all_forecasts, fits_long, rus_macro)
 # row_number means forecasting horizon (sorry, bad name)
@@ -105,4 +106,41 @@ rel_rmse_subset <- rel_rmse_table %>% filter(
 rel_comparison2 <- reshape2::dcast(rel_rmse_subset, 
                                    variable ~ row_number + model_type, 
                                    value.var = "mse")
+
+
+write_rds(rel_rmse_table, 'rel_rms_table.Rds')
+
+# univariate leader  ------------------------------------------------------
+univariate <- rel_rmse_table %>% rename(h = row_number) %>%
+  filter(model_type %in% c('arima', 'ets', 'rw')) %>% select(-rmse, -mae) %>% filter(var_set == 'set_C') %>%
+  select(-var_set, -pars_id) %>% filter(h %in% c(1, 3, 6, 9, 12))
+
+uni_leader_long <- univariate %>% group_by(h, variable) %>% top_n(-1, mse) %>% ungroup() 
+
+
+uni_leader_long %>% dcast(variable ~ h, value.var = 'model_type')
+uni_leader_long %>% dcast(variable ~ h, value.var = 'mse')
+
+
+ggplot(data = uni_leader_long, aes(x = factor(h), y = variable)) +
+  geom_tile(aes(fill = model_type)) +
+  geom_text(aes(label = round(mse, 2))) +
+  theme_minimal() + labs(x = 'Forecasting horizon', 
+                         title = 'Univariate models MSE relative to random walk MSE',
+                         y = 'Variable', 
+                         fill = 'Model')
+
+
+
+
+# bad performance of var-lasso
+# var-lasso vs RW
+
+# var-lasso border problem
+
+
+# old leader vs new univariate models
+
+
+
 
