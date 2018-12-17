@@ -1,0 +1,6 @@
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.run.xml
+*.snm
